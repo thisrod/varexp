@@ -12,15 +12,14 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 Tasks
 ====
 
-1. Derive the bracket 〈n|Dψ〉.
+2. Find a low-order discretisation that is easy to code.
 
-2. Derive the bracket  〈n|H|ψ〉 for the quartic oscillator.
+2. Write down the three algorithms in detail.
 
 2. Derive the bracket  〈n|H|ψ〉 for the Morse oscillator.
 
 4. Code brackets in Python.
 
-2. Find a low-order discretisation that is easy to code.
 
 3. Choose time discretisations to compare.
 

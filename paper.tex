@@ -18,4 +18,14 @@ The initial state was the ground state of the Morse oscillator potential, given 
 
 I want to measure the numerical stability of the variational dynamics derived from Schrödinger's equation.  I can do that by measuring how the discretisation error converges as the timestep is reduced.  The second hypothesis is that the instability is due to stiffness, which can be tested by discretising time in ways with a variety of stability regions, and seeing whether the stability differs.
 
+To do this, we need some bracket matrices.  The representation used is
+$$|ψ(φ,α)〉=e^{φ+αa†}|0〉=e^{φ+½|α|²}|α〉,$$
+whence
+$$|Dψ(φ,α)〉=(1,a†)|ψ(φ,α)〉.$$
+The bracket with the number states is easily evaluated:
+$$〈n|Dψ(φ,α)〉=e^φ\pmatrix{{α^n\over \sqrt{n!}} &  α^{n-1}\sqrt{n\over (n-1)!}},$$
+as is the bracket of the quartic oscillator Hamiltonian $a^{2\dagger}a²$
+$$〈n|H|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
+
+
 \bye
