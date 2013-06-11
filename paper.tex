@@ -1,0 +1,21 @@
+\input a4
+\input xpmath
+\input respnotes
+
+\title{The instability of variational quantum mechanics with Gaussian approximants is (not) entirely due to the unstable least squares problem}
+
+Coherent states have been considered as an approximant for variational quantum mechanics since 197?.  Superpositions of them are an obvious way to extend the approximant, so that the variational dynamics converge to Hamiltonian evolution.  However, these dynamics are numerically unstable, and it has not been possible to increase the size of the superposition to see this convergence.  The coherent states are overcomplete, and it has often been suggested that this instability is due to the variational problem being underdetermined.
+
+A numerical experiment was carried out to test this hypothesis.  The dynamics of a Morse oscillator were computed by three different methods.  First, a harmonic potential was fit to the bottom of the Morse potential, the state and the Hamiltonian were expanded over its eigenstates, and Schrödinger's equation was integrated directly in Hilbert space.  Secondly, differential equations were derived for the variational parameters in the standard way, using the normal equations of the regularised variational problem, and these were solved in parameter space.  The third method was intermediate: Schrödinger's equation was solved in Hilbert space, but the state was approximated by a superposition of coherent states, updated by least squares at each timestep.  Finally, the eigenstates of this potential are known exactly, and the state was expanded over those.
+
+In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
+
+A few different ODE solving algorithms were used, with different tolerance for stiff ODEs.  Adaptive 4th/5th order Runge-Kutta was used.  This is the algorithm that everyone will try by default, and it would be useful to know if it performs much worse than other algorithms.  ? and ? were used for comparison.  These discretisations have very different regions of stability ...
+
+The solutions from method 3 provide a test of the stiffness of the ODEs defined in parameter space by the least squares problem.  The step in Hilbert space is very nearly the same from one time step to the next.  If the step in parameter space changes dramatically, this would suggest that the variational solution is very sensitive to the state, and thus to some of the parameters.  This would indicate that the ODEs are stiff.
+
+The initial state was the ground state of the Morse oscillator potential, given various momentum kicks.  The number of components in the superposition representing this was varied.  The initial superposition was found by the AMPL optimisation program, with the constraint that no component would have a weight less that ?.
+
+I want to measure the numerical stability of the variational dynamics derived from Schrödinger's equation.  I can do that by measuring how the discretisation error converges as the timestep is reduced.  The second hypothesis is that the instability is due to stiffness, which can be tested by discretising time in ways with a variety of stability regions, and seeing whether the stability differs.
+
+\bye
