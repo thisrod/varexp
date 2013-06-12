@@ -11,12 +11,13 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
-
-4. Code brackets in Python.
-
 5. Run experiment.
 
-3. Check that algorithms 2 and 3 actually differ.
+6. Experiment with speed of sparse diagonal matrices
+
+6. Experiment with speed of generators vs. matrix multiplication
+
+3. Check that Methods 2 and 3 actually differ.
 
 4. Think about the assymetry between state and time discretisations in Method 2.
 
@@ -44,5 +45,5 @@ Topics to write
 Chores
 =====
 
-4. Install AMPL.
+4. Install AMPL—use the [web version](http://www.ampl.com/TRYAMPL/startup.html)
 
