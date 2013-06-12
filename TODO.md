@@ -11,15 +11,16 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
-2. Derive the bracket  〈N|H|N〉 for the quartic oscillator.
+
+4. Code brackets in Python.
+
+5. Run experiment.
 
 3. Check that algorithms 2 and 3 actually differ.
 
 4. Think about the assymetry between state and time discretisations in Method 2.
 
 2. Derive the brackets 〈N|H|N〉 and 〈N|H|ψ〉 for the Morse oscillator.
-
-4. Code brackets in Python.
 
 3. Choose time discretisations to compare.
 

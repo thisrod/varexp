@@ -18,7 +18,9 @@ The initial state was the ground state of the Morse oscillator potential, given 
 
 I want to measure the numerical stability of the variational dynamics derived from Schrödinger's equation.  I can do that by measuring how the discretisation error converges as the timestep is reduced.  The second hypothesis is that the instability is due to stiffness, which can be tested by discretising time in ways with a variety of stability regions, and seeing whether the stability differs.
 
-The first attempt at this will compute the dynamics of a quartic oscillator, with Hamiltonian $$H=\hbar a^{2\dagger}a²$.  It will do so by the midpoint method, discretising the differential equation
+The first attempt at this will compute the dynamics of a quartic oscillator, with Hamiltonian 
+$$H=\hbar a^{2\dagger}a².$$
+It will do so by the midpoint method, discretising the differential equation
 $$Du(t)=f(t)$$
 to the difference equation
 $$v^{n+1}=v^{n-1}+2τfⁿ,$$
@@ -39,7 +41,7 @@ $$|ψ(z(t))〉=∑_{φ,α∈z(t)}e^{φ+αa†}|0〉=∑_{φ,α∈z(t)}e^{φ+½|�
 Time is discretised immediately, setting
 $$vⁿ=|ψ(zⁿ)〉\qquad{\rm and}\qquad fⁿ={H\over i\hbar}|ψ(zⁿ)〉,$$
 so that the midpoint formula becomes
-$$|ψ(z^{n+1})〉≈|ψ(z^{n-1})〉+{2τH\over i\hbar}|ψ(z^ⁿ)〉.$$
+$$|ψ(z^{n+1})〉≈|ψ(z^{n-1})〉+{2τH\over i\hbar}|ψ(zⁿ)〉.$$
 The approximation is due to basis truncation, as always in a least squares sense.  Writing the unknown $|ψ(z^{n+1})〉$ in terms of $|Dψ(zⁿ)〉$ and expanding over a Fock basis gives
 $$ 〈N|Dψ(zⁿ)〉\bigl(z^{n+1}-zⁿ\bigr)≈〈N|ψ(z^{n-1})〉-〈N|ψ(zⁿ)〉-2iτ〈N|H|ψ(zⁿ)〉.$$
 This matrix equation can be solved for $z^{n+1}-zⁿ$, which can be used to update $z$.  
@@ -52,10 +54,12 @@ Usually, this would be expanded over $〈Dψ(zⁿ)|$ to give a set of normal equ
 
 To do this, we need some bracket matrices.  We have
 $$|Dψ(φ,α)〉=(1,a†)|ψ(φ,α)〉.$$
-The bracket with the number states is easily evaluated:
+The brackets with the number states are
+$$〈m|H/\hbar|n〉=n(n-1)δ_{mn}$$
+and
 $$〈n|Dψ(φ,α)〉=e^φ\pmatrix{{α^n\over \sqrt{n!}} &  α^{n-1}\sqrt{n\over (n-1)!}},$$
 as is the bracket of the quartic oscillator Hamiltonian $a^{2\dagger}a²$
-$$〈n|H|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
+$$〈n|H/\hbar|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
 
 
 \bye
