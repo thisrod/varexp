@@ -7,17 +7,13 @@ The convention is that psi is a function of (psi0, psi1, ... psi_R, alpha0, alph
 These definitions will generally be copied rather than imported, because of the difficulties of passing around N.
 """
 
-from numpy import abs, arange, concatenate, diag, exp, hstack, matrix, max, newaxis, sqrt, sum, vander
-from scipy.misc import factorial
 
-_names = "N", "nhn", "nq", "ndqr", "nhq", "aop"
-for x in _names:
-	globals()[x] = None
+import numpy as _np, scipy.misc as _sp
 
 def evan(f, a):
-	expf = exp(f)[newaxis,:]
-	va = vander(a, N+1)[:,::-1].T
-	return matrix(expf*va)
+	expf = _np.exp(f)[_np.newaxis,:]
+	va = _np.vander(a, N+1)[:,::-1].T
+	return _np.matrix(expf*va)
 
 def init(N):
 	global nhn, nq, ndqr, nhq, aop
@@ -25,20 +21,20 @@ def init(N):
 	globals()["N"] = N
 
 	"""Diagonal brackets of the quartic oscillator Hamiltonian between number states."""
-	nhn = arange(N+1)*arange(-1,N)
+	nhn = _np.arange(N+1)*_np.arange(-1,N)
 
 	"""sum(nq*evan(f,a), axis=1) gives the bracket <N|psi>.
 	    hstack((nq*evan(f,a), ndqr*evan(f,a))) gives <N|Dpsi>
 	"""
-	nq = matrix(diag(1./sqrt(factorial(arange(N+1)))))
-	ndqr = matrix(diag(sqrt(arange(1,N+1)/factorial(arange(N))), -1))
+	nq = _np.matrix(_np.diag(1./_np.sqrt(_sp.factorial(_np.arange(N+1)))))
+	ndqr = _np.matrix(_np.diag(_np.sqrt(_np.arange(1,N+1)/_sp.factorial(_np.arange(N))), -1))
 
 	"""sum(nhq*evan(f,a), axis=1) gives the brackets of the Hamiltonian between number states and the superposition.
 	"""
-	nhq = matrix(diag(sqrt(concatenate(([0, 0], [m*(m-1)/factorial(m-2) for m in range(2,N+1)])))))
+	nhq = _np.matrix(_np.diag(_np.sqrt(_np.concatenate(([0, 0], [m*(m-1)/_sp.factorial(m-2) for m in range(2,N+1)])))))
 
 	"Lowering operator"
-	aop = matrix(diag(sqrt(range(1,N)), 1))
+	aop = _np.matrix(_np.diag(_np.sqrt(_np.arange(1,N+1)), 1))
 
 def _check(f, a):
 	"""Test routine.  Answers should be on the order of epsilon times the infinity norms of f and a."""

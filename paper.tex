@@ -18,13 +18,13 @@ The initial state was the ground state of the Morse oscillator potential, given 
 
 I want to measure the numerical stability of the variational dynamics derived from Schrödinger's equation.  I can do that by measuring how the discretisation error converges as the timestep is reduced.  The second hypothesis is that the instability is due to stiffness, which can be tested by discretising time in ways with a variety of stability regions, and seeing whether the stability differs.
 
-The first attempt at this will compute the dynamics of a quartic oscillator, with Hamiltonian 
+The first experiment computed the dynamics of a quartic oscillator, with Hamiltonian 
 $$H=\hbar a^{2\dagger}a².$$
-It will do so by the midpoint method, discretising the differential equation
+It used the explicit Euler formula, which discretises the differential equation
 $$Du(t)=f(t)$$
 to the difference equation
 $$v^{n+1}=v^{n-1}+2τfⁿ,$$
-where $tⁿ=nτ$, $vⁿ$ is meant to approximate $u(tⁿ)$, and $fⁿ=f(vⁿ)$.  The results will be compared for three difference choices of $v$ and $f$.
+where $tⁿ=nτ$, $vⁿ$ is meant to approximate $u(tⁿ)$, and $fⁿ=f(vⁿ)$.
 
 In the first choice, the quantum state at time $t$ is expanded over a truncated Fock basis $|N〉$, as 
 $$|ν(c(t))〉=|N〉c(t).$$
@@ -35,6 +35,8 @@ $$Dc(t)≈〈N|{H\over i\hbar}|N〉c(t).$$
 In this method, we set
 $$vⁿ=cⁿ\qquad{\rm and}\qquad fⁿ=-i〈N|{H\over\hbar}|N〉c(t),$$
 solving Schrödinger's equation quite conventionally.  Note that $|N〉$ diagonalises $H$, so this is especially simple.
+
+\centerline{\XeTeXpicfile dry.pdf width \hsize}
 
 In the second choice, the state is approximated as a superposition of coherent states,
 $$|ψ(z(t))〉=∑_{φ,α∈z(t)}e^{φ+αa†}|0〉=∑_{φ,α∈z(t)}e^{φ+½|α|²}|α〉.$$
