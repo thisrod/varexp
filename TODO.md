@@ -15,8 +15,6 @@ Tasks
 
 5. Run experiment.
 
-6. Find a good way to initialise the matrices.
-
 6. Experiment with speed of sparse diagonal matrices
 
 6. Experiment with speed of generators vs. matrix multiplication

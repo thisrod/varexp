@@ -1,4 +1,4 @@
-"""Calculate the required brackets for the quartic oscillator.
+"""Initialise the required brackets for the quartic oscillator.
 
 Throughout, the Fock basis comprises |0> through |N>.
 
@@ -10,34 +10,37 @@ These definitions will generally be copied rather than imported, because of the 
 from numpy import abs, arange, concatenate, diag, exp, hstack, matrix, max, newaxis, sqrt, sum, vander
 from scipy.misc import factorial
 
-def get_nhn(N): 
-	"""Diagonal brackets of the quartic oscillator Hamiltonian between number states."""
-	return arange(N+1)*arange(-1,N)
-
-def get_nq(N):
-	return matrix(diag(1./sqrt(factorial(arange(N+1)))))
-def get_ndqr(N):
-	return matrix(diag(sqrt(arange(1,N+1)/factorial(arange(N))), -1))
-"""sum(nq*evan(f,a), axis=1) gives the bracket <N|psi>.
-    hstack((nq*evan(f,a), ndqr*evan(f,a))) gives <N|Dpsi>
-"""
+_names = "N", "nhn", "nq", "ndqr", "nhq", "aop"
+for x in _names:
+	globals()[x] = None
 
 def evan(f, a):
 	expf = exp(f)[newaxis,:]
 	va = vander(a, N+1)[:,::-1].T
 	return matrix(expf*va)
 
-	
-def get_nhq(N):
-	return matrix(diag(sqrt(concatenate(([0, 0], [m*(m-1)/factorial(m-2) for m in range(2,N+1)])))))
-"""sum(nhq*evan(f,a), axis=1) gives the brackets of the Hamiltonian between number states and the superposition.
+def init(N):
+	global nhn, nq, ndqr, nhq, aop
+
+	globals()["N"] = N
+
+	"""Diagonal brackets of the quartic oscillator Hamiltonian between number states."""
+	nhn = arange(N+1)*arange(-1,N)
+
+	"""sum(nq*evan(f,a), axis=1) gives the bracket <N|psi>.
+	    hstack((nq*evan(f,a), ndqr*evan(f,a))) gives <N|Dpsi>
 	"""
+	nq = matrix(diag(1./sqrt(factorial(arange(N+1)))))
+	ndqr = matrix(diag(sqrt(arange(1,N+1)/factorial(arange(N))), -1))
 
-def get_aop(N):
+	"""sum(nhq*evan(f,a), axis=1) gives the brackets of the Hamiltonian between number states and the superposition.
+	"""
+	nhq = matrix(diag(sqrt(concatenate(([0, 0], [m*(m-1)/factorial(m-2) for m in range(2,N+1)])))))
+
 	"Lowering operator"
-	return matrix(diag(sqrt(range(1,N)), 1))
+	aop = matrix(diag(sqrt(range(1,N)), 1))
 
-def check(f, a):
+def _check(f, a):
 	"""Test routine.  Answers should be on the order of epsilon times the infinity norms of f and a."""
 	R = len(f)
 	x = hstack((nq*evan(f,a), ndqr*evan(f,a)))
