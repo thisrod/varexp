@@ -25,7 +25,7 @@ for dt in logspace(-4, 1, 20):
 
 plt.title("Stiffness of Schrodinger's equation with $H=\hbar a^{2\dagger}a^2$")
 plt.xlabel(r"Euler formula step $\tau$")
-plt.ylabel("Growth of Fock coefficients $c_n(4\pi)/c_n(0)$")
+plt.ylabel("Growth of Fock coefficients $|c_n(4\pi)|/c_n(0)$")
 plt.legend([lbl % n for n in sorted(mrk.keys())], loc="upper left")
 plt.savefig("dry.pdf")
 
