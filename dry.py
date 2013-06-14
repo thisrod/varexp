@@ -9,8 +9,8 @@ T = 4*pi
 a0 = 2
 c0 = array(nq*evan([-0.5*2**2], [2])).flatten()
 
-lbl = "$c_{%d}$"
 mrk = {2:"ok", 4:"pb", 7:"sg", N:"*r"}
+lbl = "$c_{%d}$"
 
 for dt in logspace(-4, 1, 20):
 
@@ -19,7 +19,8 @@ for dt in logspace(-4, 1, 20):
 	for m in range(ts.size):
 		c = c-1j*nhn*c*dt
 	
-	# FIXME: matplotlib mixes up legend unless orders match 
+	# sorted is a workaround for
+	# https://github.com/matplotlib/matplotlib/issues/2127
 	for n in sorted(mrk.keys()):
 		plt.loglog(dt, abs(c[n]/c0[n]), mrk[n], label=lbl % n)
 
