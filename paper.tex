@@ -19,24 +19,26 @@ The initial state was the ground state of the Morse oscillator potential, given 
 I want to measure the numerical stability of the variational dynamics derived from Schrödinger's equation.  I can do that by measuring how the discretisation error converges as the timestep is reduced.  The second hypothesis is that the instability is due to stiffness, which can be tested by discretising time in ways with a variety of stability regions, and seeing whether the stability differs.
 
 The first experiment computed the dynamics of a quartic oscillator, with Hamiltonian 
-$$H=\hbar a^{2\dagger}a².$$
-It used the explicit Euler formula, which discretises the differential equation
-$$Du(t)=f(t)$$
-to the difference equation
-$$v^{n+1}=v^{n-1}+2τfⁿ,$$
-where $tⁿ=nτ$, $vⁿ$ is meant to approximate $u(tⁿ)$, and $fⁿ=f(vⁿ)$.
-
-In the first choice, the quantum state at time $t$ is expanded over a truncated Fock basis $|N〉$, as 
+$$H=\hbar a^{2\dagger}a²,$$
+solving Schrödinger's equation quite conventionally.  The quantum state at time $t$ was expanded over a truncated Fock basis $|N〉=\pmatrix{|1\rangle & |2\rangle & ⋯ & |N\rangle}$, with a column vector of coefficients $c(t)$, as
 $$|ν(c(t))〉=|N〉c(t).$$
 Schrödinger's equation expands to
-$$|N〉Dc(t)=|D(ν\circ c)(t)〉≈{H\over i\hbar}|ν(c(t))〉≈|N〉〈N|{H\over i\hbar}|N〉c(t),$$
+$$|N〉Dc(t)=|D(ν\circ c)(t)〉={H\over i\hbar}|ν(c(t))〉=|N〉〈N|{H\over i\hbar}|N〉c(t),$$
 whence
-$$Dc(t)≈〈N|{H\over i\hbar}|N〉c(t).$$
-In this method, we set
-$$vⁿ=cⁿ\qquad{\rm and}\qquad fⁿ=-i〈N|{H\over\hbar}|N〉c(t),$$
-solving Schrödinger's equation quite conventionally.  Note that $|N〉$ diagonalises $H$, so this is especially simple.
+$$Dc(t)=-i〈N|{H\over \hbar}|N〉c(t).$$
+Usually, these expansions would be approximate due to basis truncation.  In this case, the Fock states diagonalise $H$, so they are exact.  However, in general the initial state can only be approximately expanded over $|N\rangle$.  Time was discretised with the explicit Euler formula, which replaces the differential equation
+$$Du(t)=f(u(t))$$
+with a difference equation
+$$v^{n+1}=vⁿ+τfⁿ,$$
+where $tⁿ=nτ$, $vⁿ$ is meant to approximate $u(tⁿ)$, and $fⁿ=f(vⁿ)$.  Let
+$$vⁿ=cⁿ\qquad{\rm and}\qquad fⁿ=-i〈N|{H\over\hbar}|N〉c(t).$$
+Since $〈N|H|N〉$ is diagonal, the matrix product can be performed sparely as a dot product.  The results are shown below.  The Fock states are eigenstates of the Hamiltonian, so their amplitudes should be constant: in the exact solution of Schrödinger's equation, all the ratios plotted are exactly 1.
 
-\centerline{\XeTeXpicfile dry.pdf width \hsize}
+%\centerline{\XeTeXpicfile dry.pdf width \hsize}
+
+These results are the textbook signs of stiffness.  As the time step is reduced from values on the order of 1, the discretised solutions diverge hugely, before converging at very small time steps.  In the standard theory of discrete approximations to $Du(t)=f(u(t))$, stability is determined by the eigenvalues of the linear transform $Df$.  In Schrödinger's equation, $f$ is the Hamiltonian, a linear transform, so in our expansion, $df=f=-i〈N|H/\hbar|N〉$, and the relevant eigenvalues are $-iEⁿ/\hbar=-in(n-1)$.  The stiffness of a differential equation is often measured by the ratio of the sizes of these eigenvalues.  For the quartic oscillator, some eigenvalues are zero, so this is not a sensible measure.  However, the largest eigenvalue, which often determines the timestep, increases quadratically with the size of the Fock basis as $N(N-1)$.
+
+The stability region of the explicit Euler formula is ?.  This means ?.
 
 In the second choice, the state is approximated as a superposition of coherent states,
 $$|ψ(z(t))〉=∑_{φ,α∈z(t)}e^{φ+αa†}|0〉=∑_{φ,α∈z(t)}e^{φ+½|α|²}|α〉.$$
