@@ -38,7 +38,20 @@ Since $〈N|H|N〉$ is diagonal, the matrix product can be performed sparely as 
 
 These results are the textbook signs of stiffness.  As the time step is reduced from values on the order of 1, the discretised solutions diverge hugely, before converging at very small time steps.  In the standard theory of discrete approximations to $Du(t)=f(u(t))$, stability is determined by the eigenvalues of the linear transform $Df$.  In Schrödinger's equation, $f$ is the Hamiltonian, a linear transform, so in our expansion, $df=f=-i〈N|H/\hbar|N〉$, and the relevant eigenvalues are $-iEⁿ/\hbar=-in(n-1)$.  The stiffness of a differential equation is often measured by the ratio of the sizes of these eigenvalues.  For the quartic oscillator, some eigenvalues are zero, so this is not a sensible measure.  However, the largest eigenvalue, which often determines the timestep, increases quadratically with the size of the Fock basis as $N(N-1)$.
 
-The stability region of the explicit Euler formula is ?.  This means ?.
+The stability region of the explicit Euler formula is the disk $|\bar k-(-1)|≤1|$.  So it is unstable for any Jacobian with complex eigenvalues, which is certainly the case for a Hamiltonian.  The implicit Euler formula, 
+$$v^{n+1}=vⁿ+τf^{n+1},$$
+has the opposite stability region.  For the oscillator, this becomes
+$$c^{n+1}=cⁿ-iτ〈N|{H\over\hbar}|N〉c^{n+1},$$
+so $c^{n+1}$ satisfies the linear equation
+$$(1+iτ〈N|{H\over\hbar}|N〉)c^{n+1}=cⁿ.$$
+This is still diagonal for the quartic oscillator.  To order $τ$, the implicitn formula is the same as the explicit one.  Obviously the higher powers of $τ$ make the difference when $τ$ is finite.
+
+The results of the backward Euler formula are the opposite of the Euler formula.  Instead of increasing, the amplitudes of the larger number states decrease nearly to zero.  This distorts the trajectory of $〈a(t)〉$, as show below.
+
+A third method is the semi-implicit one, with the formulae
+$$v^{\prime n}=vⁿ+½τf^{\prime n}\qquad v^{n+1}=vⁿ+τf^{\prime n}.$$
+With the Hamiltonian, this becomes
+$$c^{n+1}=cⁿ-iτH\biggl(1+{iτ\over 2}H\biggr)^{-1}cⁿ.$$
 
 In the second choice, the state is approximated as a superposition of coherent states,
 $$|ψ(z(t))〉=∑_{φ,α∈z(t)}e^{φ+αa†}|0〉=∑_{φ,α∈z(t)}e^{φ+½|α|²}|α〉.$$
