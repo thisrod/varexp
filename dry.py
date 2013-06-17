@@ -40,13 +40,12 @@ for dt in dts:
 	
 	plt.figure(1)
 	for n in mrk.keys():
-		plt.loglog(dt, abs(b[n]/c0[n]), mrk[n]+"b")
+		plt.loglog(dt, abs(b[n]/c0[n]), "+b")
 		plt.loglog(dt, abs(c[n]/c0[n]), mrk[n]+"r")
 		sym[n], = plt.loglog(dt, abs(d[n]/c0[n]), mrk[n]+"k")
 		
 	plt.figure(2)
 	plt.subplot(4,5,20-splt)
-	splt = splt + 1
 	plt.axis('off')
 	plt.axis('equal')
 	plt.plot(exact_ars.real, exact_ars.imag, 'k-', ars.real, ars.imag, 'r-', brs.real, brs.imag, 'b-')
@@ -54,6 +53,7 @@ for dt in dts:
 		plt.title(r"$\tau=%.4f$" % dt)
 	else:
 		plt.title("$%.4f$" % dt)
+	splt = splt + 1
 
 
 plt.figure(1)
