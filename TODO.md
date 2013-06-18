@@ -11,9 +11,7 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
-1. Fix the instability of large number states.
-
-5. Run experiment.
+1. Find out how people usually handle stiffness in the method of lines.
 
 6. Experiment with speed of sparse diagonal matrices
 
