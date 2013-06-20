@@ -5,6 +5,7 @@ function [z, rsdl] = cohfit(cs, z0)
 options = optimset('Display','iter','Algorithm','active-set');
 [z, rsdl] = fmincon(@(z)cost(z),z0,...
                     [],[],[],[],[],[],@constraint,options);
+z = z.';
                 
                 
 function y = cost(z)
