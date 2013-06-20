@@ -11,6 +11,18 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
+1. Factor out propagation to a second-order function.
+
+1. Extend cohfit to sample the amplitudes from Glauber's distribution.
+
+2. Vary the singular-value truncation threshold
+
+2. Test if chasing the exact solution converges when more components are added.
+
+3. Tidy up dry.py
+
+0. Derive details of backward Euler and semi-implicit method 2.
+
 1. Find out how people usually handle stiffness in the method of lines.
 
 6. Experiment with speed of sparse diagonal matrices

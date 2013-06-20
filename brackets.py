@@ -15,6 +15,7 @@ def evan(f, a):
 	va = _np.vander(a, N+1)[:,::-1].T
 	return _np.matrix(expf*va)
 
+
 def init(N):
 	global nhn, nq, ndqr, nhq, aop
 
@@ -36,18 +37,19 @@ def init(N):
 	"Lowering operator"
 	aop = _np.matrix(_np.diag(_np.sqrt(_np.arange(1,N+1)), 1))
 
+
 def _check(f, a):
 	"""Test routine.  Answers should be on the order of epsilon times the infinity norms of f and a."""
 	R = len(f)
-	x = hstack((nq*evan(f,a), ndqr*evan(f,a)))
+	x = _np.hstack((nq*evan(f,a), ndqr*evan(f,a)))
 	for m in range(N+1):
 		for i in range(R):
-			x[m,i] = x[m,i] - exp(f[i])*a[i]**m/sqrt(factorial(m))
+			x[m,i] = x[m,i] - _np.exp(f[i])*a[i]**m/_np.sqrt(_sp.factorial(m))
 	for m in range(1,N+1):
 		for i in range(R):
-			x[m,i+R] = x[m,i+R] - exp(f[i])*a[i]**(m-1)*sqrt(m/factorial(m-1))
+			x[m,i+R] = x[m,i+R] - _np.exp(f[i])*a[i]**(m-1)*_np.sqrt(m/_sp.factorial(m-1))
 	y = nhq*evan(f,a)
 	for m in range(2,N+1):
 		for i in range(R):
-			y[m,i] = y[m,i] - exp(f[i])*a[i]**m*sqrt(m*(m-1)/factorial(m-2))
-	return max(abs(x)), max(abs(y))
+			y[m,i] = y[m,i] - _np.exp(f[i])*a[i]**m*_np.sqrt(m*(m-1)/_sp.factorial(m-2))
+	return _np.max(_np.abs(x)), _np.max(_np.abs(y))
