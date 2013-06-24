@@ -11,7 +11,9 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
-1. Factor out propagation to a second-order function.
+0. Track the states and condition number gradients in follow.
+
+0. Play with optimisation options to speed it up, or give up earlier.
 
 1. Extend cohfit to sample the amplitudes from Glauber's distribution.
 

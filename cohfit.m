@@ -1,8 +1,8 @@
-function [z, rsdl] = cohfit(cs, z0)
+function [z, rsdl] = cohfit(cs, z0, ~)
 % fit a superposition of coherent states to the fock expansion cs,
 % starting from z.
 
-options = optimset('Display','iter','Algorithm','active-set');
+options = optimset('Display','off','Algorithm','active-set');
 [z, rsdl] = fmincon(@(z)cost(z),z0,...
                     [],[],[],[],[],[],@constraint,options);
 z = z.';

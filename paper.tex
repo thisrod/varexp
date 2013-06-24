@@ -10,6 +10,27 @@ A numerical experiment was carried out to test this hypothesis.  The dynamics of
 
 In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis such as the Fock states would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
 
+Expanding the quartic oscillator over Fock states allows it to be solved very stably, and as precisely as desired by rotating the phases of the expansion coefficients.  Also, it is easy to find the expansion over Fock states of a superpositon of coherent states.  This means that the stability of time discretisation can be removed from the problem entirely.  The state can be propagated exactly, and the coherent states adjusted to fit.  The most direct way to do so is by nonlinear optimisation at every timestep; Matlab provides the necessary routines in a convenient package.  Unfortunately, this is not at all stable.  
+
+\centerline{\XeTeXpicfile flwc0n10.pdf width \hsize}
+
+\centerline{\XeTeXpicfile flwc0n5.pdf width \hsize}
+
+The above plots show my first attempt at this.  The initial state was coherent, with real amplitude 2.  A superposition of 5 coherent states was initialised with amplitudes normally distributed around 2, the norm of the superposition being 1, and the components having equal norms.  This superposition was fit to the coherent state by minimising their distance in Hilbert space; for stability, the weights were constrained so that no component had a norm less than 0.1.  This was done by the Matlab routine {\tt fmincon}.  The initial state was truncated to Fock states $|0〉$ to $|10〉$, and propagated exactly in a Hamiltonian $\hbar a^{2\dagger}a²$ with timestep 0.03.  After each step, the fitting of the superposition to the exact state was repeated.
+
+The results are shown in the first Figure.  The left hand plot shows the complex amplitude of the exact solution in black, and the fitted solution in blue.  The right hand plot shows the residual of the fit as a solid line, and the condition number of $|Dψ(z)〉$ at the fitted $z$ as a dotted line.  The program stopped after a short time, when the fitted amplitudes caused overflow when expanded over Fock coefficients.  
+
+The second Figure shows the same simulation, with the states expanded over Fock states $|0〉$ to $|5〉$.  This has a significant effect on the truncated exact solution, adding an extra loop to the amplitude.  The fitting works a bit longer, but still fails at a very short time.
+
+\centerline{\XeTeXpicfile flwc2n10.pdf width \hsize}
+
+\centerline{\XeTeXpicfile flwc2n5.pdf width \hsize}
+
+The next two plots show a different fitting strategy.  Instead of constraining the weights, a cost term was added in quadrature to the Hilbert space distance, proportional to the logarithm of the condition number of $|Dψ(z)〉$ for the fitted $z$.  The constant of proportionality was $10^{-5}$; this was adjusted until a good fit was obtained.  The most apparent thing is that the fit is much more stable: this is being done with timestep 0.1 instead of 0.3, but the fit stays stable for the whole period.  (I had to redraw the initial amplitudes a few times before that happened.)  It isn't a very good fit through the middle of the period: the residual increases to order 1.  The really interesting thing is what happened when, by accident, I truncated the Fock basis at $N=5$.  As before, this perturbs the trajectory in Hilbert space.  However, the perturbed trajectory can be fit very well: the residual is between $10^{-2}$ and $10^{-5}$, and this is done with quite well conditioned superpositions.
+
+So even without stiffness in a discrete time propagation, there is something in the high energy components of $H|ψ〉$ that makes fitting the state with coherent states unstable.  This isn't too surprising: these high energy components are rapidly oscillating, and will by magnified when the inverse problem is solved with fairly smooth, low amplitude coherent states.  To fit the oscillating components, we need coherent states with large amplitudes, and low weights.  But the low weights will increase the condition number of $|Dψ〉$, so the regularisation scheme will avoid these, unless there are many components in the superposition and all their weights are low.  Let's investigate what happens as the number of components and the Fock truncation are varied together.
+
+
 I used three discretisation formulae for ODE, with different regions of stability.  As a first step, the Hamiltonian and a coherent state with real amplitude 2 was expanded over Fock states $|0〉$ through $|10〉$, and the resulting equations for the components solved directly.  The Hamiltonian is
 $$H=\hbar a^{2\dagger}a²,$$
 so the Fock states are eigenstates, although the spacing of their energies is uneven.  The quantum state at time $t$ was expanded over a truncated Fock basis $|N〉=\pmatrix{|1\rangle & |2\rangle & ⋯ & |N\rangle}$, with a column vector of coefficients $c(t)$, as
@@ -78,6 +99,36 @@ and
 $$〈n|Dψ(φ,α)〉=e^φ\pmatrix{{α^n\over \sqrt{n!}} &  α^{n-1}\sqrt{n\over (n-1)!}},$$
 as is the bracket of the quartic oscillator Hamiltonian $a^{2\dagger}a²$
 $$〈n|H/\hbar|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
+
+The instability in the dynamics is caused by the near-singularity of $|Dψ〉$.  If a singular value decomposition $|Dψ〉=|U〉SV†$ is taken, the singularity is indicated by small singular values on the diagonal of $S$.  It is often measured by the condition number of $|Dψ〉$, the ratio of the largest to the smallest singular value.  Let $C(z)$ be the condition number of $|Dψ(z)〉$.  As part of the regularisation process, it would be useful to avoid changing $z$ in directions that increase $C(z)$.  For example, if two coherent states had real amplitudes, and the real part of the expected amplitude needed to increase, it would be done by shifting the right hand one away from the left hand one, not the left hand one closer to the right hand.  Is there a way to make a computer do that?
+
+The least squares problem can be solved using the singular value decomposition: to approximate a state $|h〉≈|Dψ(z)〉dz$, we set $dz=VS^{-1}〈U|h〉$.  The first problem is that some of the $σ_i$ on the diagonal of $S$ will be small, because the $|u_i〉$ that correspond to them change different components of the superposition $|ψ(z)〉$ in ways that nearly cancel out.  So a error in the discrete representation of $|h〉$ in the direction $|u_i〉$ will cause a very large error in the least squares $dz$ in the direction $v_i$.   The way to avoid such large errors is to shift the small singular values of $S$ up to a lower bound $ε$, and thus reduce the large singular values of $S^{-1}$ below an upper bound $ε^{-1}$.  There are many and varied ways of doing that. 
+
+To solving our differential equation, we need to solve an iterated least squares problem.  We need to do so in a way that preserves the condition of $|Dψ〉$.  When we shift $z$ in the direction $v_i$ as $dz=λv_i$, how does this condition number change?  Without loss of generality, it suffices to consider the effect on the smallest and largest singular values, that determine $C(z)$.  Note that $v_1$ and $v_R$ are eigenvectors of the matrix ${\cal V}(z)=〈Dψ(z)|Dψ(z)〉$, belonging to the eigenvalues $σ₁²$ and $σ_R²$; this is a familiar problem in pertubation theory.  Assume for now that we have found $D{\cal V}(z)$—this won't be analytic, so we will need to use real and imaginary parts, or Wirtinger calculus.  The change in $\cal V$ is of the form $d{\cal V}=∂_i{\cal V}(z)λ+∂*_i{\cal V}(z)λ*$, where the partial derivatives are taken in the directions $v_i$.
+
+As is well known in pertubation theory, the change in the eigenvalue $σ₁²$ corresponding to a small change $d{\cal V}$ is $v₁†d{\cal V}v₁$, and similarly for $σ_R²$.  Therefore the change in $C(z)²$ is 
+$$σ_R²v₁†d{\cal V}v₁-σ₁²v_R†d{\cal V}v_R \over σ_R².$$
+Given a proposed change $dz$, we can find the effect on the condition number.
+
+The question is how to apply this to condition the process of finding $dz$.  Given $z$, we can find out which directions of $dz$ correspond to large changes in the condition number.  However,  until we know $dz$, we don't know if these changes help or hurt.  The process might run like this: first, truncate the singular values.  Next, find the components $〈U_i|h〉$, and the corresponding components $v_iσ_i〈U_i|h〉$ of $dz$, given the truncation.  Then, truncate the components that will cause $C(z)$ to increase to values that limits the increase to an acceptable amount.
+
+Coding this will be quite involved, and the result might not be very efficient.  However, if it allows physically chosen bases to be used in  variational simulations, it is likely to be worthwhile.
+
+\centerline{\XeTeXpicfile j1.pdf width \hsize}
+
+To test this idea, a five component superposition was fit to an amplitude 2 coherent state.  The Hilbert space residual was $1.3×10^{-3}$.  The amplitudes and norms of the components are shown above; the fitting routine constrained the norm of each component to be at least 0.1.  Note that components 1 and 3 ended up with very similar amplitudes.
+
+Below is a plot of the condition number of $|Dψ(z)〉$ for this superposition, as the value of $z$ varies by $0.1$ in every direction.  The top line shows the effects of changing $φ$, the bottom line $α$, components are shown left to right.  Changes to real parts are black, imaginary parts red.  There are a few things to note.  The condition is very bad, with number $1.4×10^{11}$.  This is entirely due to the similar amplitudes of components 1 and 3: those graphs are on a different scale to the others, and it's logarithmic.  As they move closer and become identical, the condition number increases $10^{14}$.  No doubt it would go higher if we sampled the graphs more finely, but this is huge—reciprocal floating point epsilon is $5×10^{15}$.  If the separation between these components is doubled, the condition number improves by an order of magnitude.
+
+\centerline{\XeTeXpicfile j2.pdf width \hsize}
+
+The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
+
+The experiment with following the exact solution by nonlinear optimisation was repeated.  Instead of constraining the weights of the components, the logarithm of the condition number of the derivative was added in quadrature to the residual of the fit to give a cost.  This worked much better, getting stably to $t=0.4$ instead of under 0.1.  At that point, the residuals increased to order 1, and the superposition stopped following the exact solution.  This cold mean that 5 components weren't enough to represent those states, except that the same thing happened with 10 components.
+
+Note that the optimisation is a nonlinear least squares problem, and special solvers exist for this case.
+
+Some furt
 
 
 \bye
