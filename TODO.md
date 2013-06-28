@@ -11,7 +11,9 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
-1. Extend cohfit to sample the amplitudes from Glauber's distribution, and use this to fit the exactly propagated coherent state.
+1. Find a way to automatically set the weight of the condition number
+
+2. Test large superpositions propagated step to step, not randomly drawn
 
 2. Test how the condition number of the jacobian varies for states near those fitted to the exact oscillator states.
 
