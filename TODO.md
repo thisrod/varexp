@@ -11,11 +11,19 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
+1. Extend cohfit to sample the amplitudes from Glauber's distribution, and use this to fit the exactly propagated coherent state.
+
+2. Test how the condition number of the jacobian varies for states near those fitted to the exact oscillator states.
+
+2. Test the Picard condition for H|ψ(z)〉=|Dψ(z)〉dz, for states fitted to the exact oscillator states.
+
+1. Average particle number of singular vectors vs singular value
+
+2. Why does truncating the Fock space make things better, while ignoring the distance components along those axes makes things worse?
+
 0. Track the states and condition number gradients in follow.
 
 0. Play with optimisation options to speed it up, or give up earlier.
-
-1. Extend cohfit to sample the amplitudes from Glauber's distribution.
 
 2. Vary the singular-value truncation threshold
 

@@ -10,6 +10,39 @@ A numerical experiment was carried out to test this hypothesis.  The dynamics of
 
 In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis such as the Fock states would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
 
+The variational methods are based on the phase space mapping $G$ from square-integrable functions to Fock space, where
+$$Gf=∫f(α*)|α〉\,d²α.$$
+This is different from Glauber's use: my $f$ is his $fe^{-½|α|²}$.  (Check the half.)
+
+Hypothesis: The singular values of $G$ are 0 and $\sqrt π$, and the space belonging to $\sqrt π$ comprises the functions $f$ for which $fe^{½|α|²}$ is analytic.
+
+There are two ways one could set about proving this.  Firstly, one could show that any function orthogonal to the Gaussian analytics annihilates $G$.  Otherwise, one could show that the norms of all Gaussian analytics are scaled by the same factor going to F
+ock space, and that they are a pre-image of Fock space.  The second approach sounds simpler.
+
+This won't be a rigourous argument: it could turn out that there's another class of expansions with half the norm, and the entire functions have components belonging to the 0 singular value.  My numerical experiment suggests otherwise; let's ignore that possibility for now.
+
+Let $g$ be a normalised entire function, in Glauber's sense.  Our expansion function is 
+$$f(α) = {1\over π}g(α)e^{-½|α|²}.$$
+If $g$ has the Taylor expansion
+$$g(z)=∑_n c_n{zⁿ\over(n!)^½},$$
+then 
+$$Gf = ∑_n c_n|n〉.$$
+The functions $zⁿ$ for $n≥0$ span the entire functions (or their span is a dense subset, or something like that), so let's find the norm of 
+$$f(α)={1\over π}e^{-½|α|²}{αⁿ\over(n!)^½}.$$
+We have 
+$$|f(α)|²={1\over π²n!}e^{-|α|²}|α|^{2n},$$
+so the squared norm is
+$$\|f\|²={1\over π²n!}∫₀^∞2πr^{2n+1}e^{-r²}\,dr={2\over πn!}∫₀^∞r^{2n+1}e^{-r²}\,dr.$$
+According to Wolfram, this is 
+$$\|f\|²={1\over π},$$
+whence
+$$\|f\|=π^{-½}.$$
+
+Note that the gaussian entire functions are a vector subspace of the square integrable functions.
+
+Assuming that there is no way to expand a state with a smaller norm than a Gaussian entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
+
+
 Expanding the quartic oscillator over Fock states allows it to be solved very stably, and as precisely as desired by rotating the phases of the expansion coefficients.  Also, it is easy to find the expansion over Fock states of a superpositon of coherent states.  This means that the stability of time discretisation can be removed from the problem entirely.  The state can be propagated exactly, and the coherent states adjusted to fit.  The most direct way to do so is by nonlinear optimisation at every timestep; Matlab provides the necessary routines in a convenient package.  Unfortunately, this is not at all stable.  
 
 \centerline{\XeTeXpicfile flwc0n10.pdf width \hsize}
@@ -29,6 +62,21 @@ The second Figure shows the same simulation, with the states expanded over Fock 
 The next two plots show a different fitting strategy.  Instead of constraining the weights, a cost term was added in quadrature to the Hilbert space distance, proportional to the logarithm of the condition number of $|Dψ(z)〉$ for the fitted $z$.  The constant of proportionality was $10^{-5}$; this was adjusted until a good fit was obtained.  The most apparent thing is that the fit is much more stable: this is being done with timestep 0.1 instead of 0.3, but the fit stays stable for the whole period.  (I had to redraw the initial amplitudes a few times before that happened.)  It isn't a very good fit through the middle of the period: the residual increases to order 1.  The really interesting thing is what happened when, by accident, I truncated the Fock basis at $N=5$.  As before, this perturbs the trajectory in Hilbert space.  However, the perturbed trajectory can be fit very well: the residual is between $10^{-2}$ and $10^{-5}$, and this is done with quite well conditioned superpositions.
 
 So even without stiffness in a discrete time propagation, there is something in the high energy components of $H|ψ〉$ that makes fitting the state with coherent states unstable.  This isn't too surprising: these high energy components are rapidly oscillating, and will by magnified when the inverse problem is solved with fairly smooth, low amplitude coherent states.  To fit the oscillating components, we need coherent states with large amplitudes, and low weights.  But the low weights will increase the condition number of $|Dψ〉$, so the regularisation scheme will avoid these, unless there are many components in the superposition and all their weights are low.  Let's investigate what happens as the number of components and the Fock truncation are varied together.
+
+The things I've noticed so far are:
+\item{1.} When a superposition is iteratively fitted to the exactly propagated state, adding a term to the cost proportional to the Jacobian $|Dψ〉$ keeps the fit stable for an entire cycle.  It isn't accurate, though.
+
+\item{2.} Measuring state differences in a truncated fock space makes the fit stable and accurate.  Of course, the truncated state is different from the original one, so the original state is not fit precisely.  When this was done, the least squares problem involved 6 fock coefficients, and the amplitude vector has 10 elements.  So almost all the truncated problems were underdetermined: some singular values of the Jacobian are exactly zero.  Matlab claims that backslash solves underdetermined problems by giving a solution with as many zero elements as possible.  The documentation doesn't say how it chooses which elements to make zero.  That's different from the other regularisation methods we've tried.  Of course, the problems are being solved inside Matlab's optimisation routine, and I don't know what it's doing.
+
+Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
+
+Truncating Fock space has a similar effect to truncating the singular values, assuming the singular directions belonging to small values have large particle numbers.  (And they do: when I plotted their overlaps with coherent states, they formed rings without support at the origin.)  And indeed, the trajectories for the average amplitude change in similar ways due to truncation: they pick up an extra loop in the complex plane.
+
+As the Fock space expands with $N»2R$, there are still only $2R$ singular directions.  Presumably these converge to limits as $N$ increases.  There might be a norm on the matrices $〈N|Dψ〉$, where the truncated elements replaced by zero, that measures this.
+
+\item{3.} The difference between the truncated state and the original one fails to satisfy the Picard condition when with respect to $|Dψ〉$.  What about $H|ψ〉$?
+
+\item{4.} When the least squares problem is solved with a different distance function, which sets distances along the large $N$ directions to zero, the fit fails on the first step.  Note that this isn't really a distance.  Also, I did it by solving $P|h〉=P|Dψ〉dz$; when $P$ truncates the Fock space, the operator $P|Dψ〉$ is singular.  Doing a weighted least squares fit, with the many particle directions having low weights, would be near-singular.
 
 
 I used three discretisation formulae for ODE, with different regions of stability.  As a first step, the Hamiltonian and a coherent state with real amplitude 2 was expanded over Fock states $|0〉$ through $|10〉$, and the resulting equations for the components solved directly.  The Hamiltonian is
