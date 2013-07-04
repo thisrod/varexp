@@ -11,6 +11,14 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
+1. Investigate the conditioning of the variational problem as a phase space grid shrinks smaller than the Fock space.
+
+2. Do variational dynamics, using the large 〈u_i|H|ψ〉 directions to solve the problem, and the small ones to improve the condition of |Dψ〉 and the angle between H|ψ〉 and the span of |Dψ〉.
+
+2. Prove hypothesised SVE of G.  Note that polynomials in z and z* span functions of a complex variable: could show that the non-constant z* ones annihilate G.
+
+0. Try evolving the α to reduce the condition number of the current ensemble, then solve the least squares problem by adjusting the φ.
+
 1. Find a way to automatically set the weight of the condition number
 
 2. Test large superpositions propagated step to step, not randomly drawn

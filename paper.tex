@@ -6,50 +6,114 @@
 
 When physicists began to study quantum mechanics, they could hardly have avoided discovering coherent states.  When they grasped that observables were inherently uncertain and considered laws of probability, the normal distribution sprung to mind at once.  Once they understood the dynamics of the free particle, and looked for a more interesting system to study, the obvious choice was the harmonic oscillator.  The first question was its ground state; the second was why, in the classical limit, it oscillated.  Coherent states were the answer to both.
 
-Variational mechanics was another obvious idea.  The quantum equations of motion were hard to solve exactly, except for some very simple systems.  It was known from very early on that the solutions were extema of certain properties: ground states had the lowest possible energy, trajectories the least possible action.  So it was natural to consider a class of possible solutions that could be treated exactly, and find out which of them had the extreme value over the class.
+Variational mechanics was another obvious idea.  The quantum equations of motion were hard to solve exactly, except for some very simple systems.  It was known from very early on that the solutions were extema of certain properties: ground states had the lowest possible energy, trajectories the least possible action.  So it was natural to consider a class of approximants that could be treated exactly, and find out which of them had the extreme value over the class.
 
-In the 1970s, Heller put the two ideas together, and proposed 
+In the 1970s, Heller put the two ideas together, and proposed simulating quantum dynamics variationally, using coherent states as the approximant.  He eventually discovered that related methods had been used to find the dynamics of lasers, starting with Glauber's work in the 19?0s on expansions over coherent states, and continuing when ? derived the dynamics of these expansions, and solved for the quantum dyanmics of the laser.
 
-Coherent states have been considered as an approximant for variational quantum mechanics since 197?.  Superpositions of them are an obvious way to extend the approximant, so that the variational dynamics converge to Hamiltonian evolution.  However, these dynamics are numerically unstable, and it has not been possible to increase the size of the superposition to see this convergence.  The coherent states are overcomplete, and it has often been suggested that this instability is due to the variational problem being underdetermined.
+When used on computers, the variational methods expand quantum states over finitely many coherent states.  This is a discretisation of the expansion introduced by Glauber, a mapping $G$ from square-integrable functions to Fock space, where
+$$Gf={1\over π}∫g(α*)|α〉\,d²α.\eqno{(1)}$$
+This is different from Glauber's use: he uses $f=ge^{½|α|²}$.  Is it easier to work Glauber's way, with the $e^{-½|α|²}$ in the mapping, so that the singular vectors are entire functions?  You'd have to use a Bargmann inner product to normalise them; the theory of that is well developed.
 
-A numerical experiment was carried out to test this hypothesis.  The dynamics of a quartic oscillator were computed by three different methods.  First, a harmonic potential was fit to the bottom of the Morse potential, the state and the Hamiltonian were expanded over its eigenstates, and Schrödinger's equation was integrated directly in Hilbert space.  Secondly, differential equations were derived for the variational parameters in the standard way, using the normal equations of the regularised variational problem, and these were solved in parameter space.  The third method was intermediate: Schrödinger's equation was solved in Hilbert space, but the state was approximated by a superposition of coherent states, updated by least squares at each timestep.  Finally, the eigenstates of this potential are known exactly: the state was expanded over them, and the exact dynamics calculated for comparison.
+Variational dynamics seeks an expansion $g$ to approximate a quantum state $|ψ〉≈Gg$.  Given the form of Equation~1, this requires solving a Fredholm integral equation of the first kind.  That is the canonical example of an ill-posed problem: rounding and discretisation errors in $|ψ〉$ are magnified enormously in the solution $g$.  To solve these problems, it helps to understand the singular values and vectors of the operator $G$.
 
-In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis such as the Fock states would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
+The singular value expansion of the linear operator $G$ has the form
+$$Gf = ∑_{j=1}^∞ |g_j〉σ_j〈v_j,f〉,$$
+where the left singular vectors $|g_j〉$ are orthonormal kets, the singular values $σ_j$ are positive real numbers, the right singular vectors $v_j$ are normalised entire functions, and presumably $〈,〉$ is the Bargmann inner product.  This can be written
+$$G = |G〉SV†,$$
+where $|G〉$ is a row vector of the left singular kets, $S$ is a matrix with the singular values along the diagonal, and $V$ maps complex coefficients to linear combinations of the functions $v_j$.
 
-The variational methods are based on the phase space mapping $G$ from square-integrable functions to Fock space, where
-$$Gf=∫f(α*)|α〉\,d²α.$$
-This is different from Glauber's use: my $f$ is his $fe^{-½|α|²}$.  (Check the half.)
+Because the expansions are underdetermined, the set $|g_j〉$ will be complete, but the set $v_j$ will not be.  Alternatively, some of the $v_j$ have zero singular values and no corresponding left singular vector.  One can write a full SVE, where $V†$ is a full expansion, but $S$ truncates the vector of coefficients.
+
+The singular value expansion is useful for two reasons.  Firstly, the discrete version, the singular value decomposition, is the most stable way to solve badly-posed least squares problems.  Secondly, the sizes of the singular values, and the components of $H|ψ〉$ along the singular directions, determine whether the problem can be solved at all.
+
+The most important issue is the Picard condition.  This restates a very basic observation: for the problem $G\dot f=H|ψ〉$ to have a solution $\dot f$, the expansion of $f$ over an orthonormal basis must have a finite norm.  If the basis is chosen as the right singular vectors $v_j$, this means that the sum of the squared moduli of the components must be finite.  For $\dot f$ to satisfy the equation, the component of $v_j$ is $〈g_j|H|ψ〉/σ_j$.  So the Picard condition is that, for the equation to have a solution, the series
+$$∑_{j=1}^∞{\bigl|〈g_j|H|ψ〉\bigr|²\over σ_j²}$$
+must converge.  The singular values reduce with $j$, by definition; this requires that the components of the left singular vectors reduce somewhat faster.
 
 Hypothesis: The singular values of $G$ are 0 and $\sqrt π$, and the space belonging to $\sqrt π$ comprises the functions $f$ for which $fe^{½|α|²}$ is analytic.
 
-There are two ways one could set about proving this.  Firstly, one could show that any function orthogonal to the Gaussian analytics annihilates $G$.  Otherwise, one could show that the norms of all Gaussian analytics are scaled by the same factor going to F
+This claims that $G$ is a projection: if the inner product is normalised properly, $G$ keeps the component of $f$ in the space of entire functions, and discards the orthogonal component.  In that case, we'd have a simple underdetermined problem, which could be regularised very easily by discarding the small singular values.  But that isn't what I see with discrete versions: they seem to have a steady decay of singular values, not a sudden drop to zero.  Is that an artefact of how I'm discretising?
+
+The theorems on how quickly singular values of convolution operators decay don't apply here.  They apply to convolutions of real functions, which can only oscillate at a fixed rate.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy; considered as wavefunctions, the coherent states do: the wavenumber is proportional to the imaginary part of $α$.
+
+If the Hypothesis is right, the Picard condition is very obviously satisfied.  The operator $G$ is a projection.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm.  Functions in the null space of $G$ don't correspond to left singular vectors, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
+
+There are two ways one could set about proving the Hypothesis.  Firstly, one could show that any function orthogonal to the Gaussian analytics annihilates $G$.  Otherwise, one could show that the norms of all Gaussian analytics are scaled by the same factor going to F
 ock space, and that they are a pre-image of Fock space.  The second approach sounds simpler.
 
 This won't be a rigourous argument: it could turn out that there's another class of expansions with half the norm, and the entire functions have components belonging to the 0 singular value.  My numerical experiment suggests otherwise; let's ignore that possibility for now.
 
-Let $g$ be a normalised entire function, in Glauber's sense.  Our expansion function is 
-$$f(α) = {1\over π}g(α)e^{-½|α|²}.$$
-If $g$ has the Taylor expansion
-$$g(z)=∑_n c_n{zⁿ\over(n!)^½},$$
+Let $f$ be a normalised entire function, in Glauber's sense.  I.e., 
+$$f(z)=∑c_n{zⁿ\over (n!)^½},$$
+for some normalised vector $c$.
+
+  Our expansion function is 
+$$g(α)=f(α)e^{-½|α|²}.$$
+If $f$ has the Taylor expansion
+$$f(z)=∑_n c_n{zⁿ\over(n!)^½},$$
 then 
-$$Gf = ∑_n c_n|n〉.$$
+$$Gg = ∑_n c_n|n〉.$$
 The functions $zⁿ$ for $n≥0$ span the entire functions (or their span is a dense subset, or something like that), so let's find the norm of 
-$$f(α)={1\over π}e^{-½|α|²}{αⁿ\over(n!)^½}.$$
-We have 
-$$|f(α)|²={1\over π²n!}e^{-|α|²}|α|^{2n},$$
+$$g(α)=e^{-½|α|²}{αⁿ\over(n!)^½},$$
+the Glauber preimage of $|n〉$.  We have 
+$$|g(α)|²={1\over n!}e^{-|α|²}|α|^{2n},$$
 so the squared norm is
-$$\|f\|²={1\over π²n!}∫₀^∞2πr^{2n+1}e^{-r²}\,dr={2\over πn!}∫₀^∞r^{2n+1}e^{-r²}\,dr.$$
-According to Wolfram, this is 
-$$\|f\|²={1\over π},$$
-whence
-$$\|f\|=π^{-½}.$$
+$$\|g\|²={1\over n!}∫₀^∞2πr^{2n+1}e^{-r²}\,dr={2π\over n!}∫₀^∞r^{2n+1}e^{-r²}\,dr.$$
+According to Wolfram,
+$$∫₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
+so
+$$\|g\|=π^½.$$
+
+The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.  Numerical experiments in the script {\tt sve.m} support this.  The operator $G$ was discretised on a grid in phase space, with spacing $h=0.3$, and various extents shown in the graphs.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|10〉$.  The graph below shows the singular values of the discretised operator converging to $π^{-½}$, as the extent of the grid passes through $|α|²=10$.
+
+\centerline{\XeTeXpicfile svgrid.pdf width \hsize}
+
+The following three figures show the right singular vectors, sampled versions of phase space functions.  The brightness of the plots indicates $|v_n(α)|$, the colors indicate phase.  These look very much like number states; that is an artefact of the way ket space was truncated and and phase space was discretised.  In the continuous limit there is only one singular value, and the vectors are degenerate.  For the $4×4$ grid, number states 5-10 don't fit, and the error in their singular values is of order 0.1 or more.  As the grid expands, the pre-images of higher number states fit in it, and more singular values have converged.
+
+\centerline{\XeTeXpicfile rsv2.pdf width 0.5\hsize
+\XeTeXpicfile rsv3.pdf width 0.5\hsize}
+\centerline{\XeTeXpicfile rsv4.pdf width 0.5\hsize}
 
 Note that the gaussian entire functions are a vector subspace of the square integrable functions.
 
 Assuming that there is no way to expand a state with a smaller norm than a Gaussian entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
 
+To sum up, this analysis shows that $G$ is a projector.  Therefore, if the amplitudes of the coherent states are held constant, and the discretised problem is solved by adjusting their weights, the solutions that come from an SVD should be very stable indeed.  This might depend somewhat on how evenly the amplitudes are spaced: I could start with a regular grid, and add Gaussian noise to see what changed.
+
+There are two types of ill-posed problems, rank-deficient and discrete.  They are distingished by how the singular values decay to zero.  In a rank-deficient problem, there is a sharp cut between large and small singular values.  The large ones are large enough that components in their singular directions do not contribute excessively to the solution, the small ones would contribute huge components, but they are small enough to round to zero, and ignore the component along that singular direction.  In discrete problems, the singular values decay continuously.  The size of the components of the solution varies continuously: there is no point where they become huge, but a continuous minimum and a gradual rise as the singular values get smaller.
+
+I've been assuming that the variational problem is discrete, because it comes from a discretisation of an integral equation.  However, the integral equation is a complex convolution, and for some values of the complex amplitude, the kernel oscillates arbitrarily sharply.  This is the same sort of integral equation as the Fourier transform, where we know $f(t)$, and want to find $F(ω)$ such that
+$$f(t)=∫F(ω)e^{iωt}\,dω.$$
+This also has a kernel that oscillates at a rate proportional to $ω$, and it also has very stable solutions.  (What is the SVD of the DFT matrix?)
+
+The variational problem seems to be pretty well-posed: if the initial superposition is the phase space function sampled on a grid, then the state that comes from a variational change in the amplitudes matches $H|ψ〉$ very closely.  I was working in a truncated Fock space; I wonder what happens as the truncation increases, while the grid stays a constant size?  Or alternately, if the grid shrinks while the Fock space stays constant.
+
+I'm getting a picture of how the final algorithm will look.  At each timestep, the directions belonging to large singular values of $|Dψ〉$ will be used for variational dynamics.  This can be done by solving at Tychonov conditioned problem, for example.  At the same time, the directions with small singular values will be used to keep the discretisation stable.  I think this requires two things: that $|Dψ〉$ is reasonably well conditioned, and that the angle between $H|ψ〉$ and the span of $|Dψ〉$ is small.  This raises a question: are there singular directions that have little effect on $|ψ〉$, but a large effect on $|Dψ〉$?  This seems likely; for example, shuffling the amplitudes to move two components further apart in phase space, then adjusting the weights so that $|ψ〉$ stays the same.  This could be done by a kind of Tychonov anti-regularisation: we improve the stability as much as we can, while constraining the change in $|ψ〉$.  I might need to constrain the norm of $dz$ too, so that linear approximations hold.
+
+I've already figured out how to find the change in the condition number by pertubation theory.  That does require knowing the largest and smallest singular directions of $|Dψ〉$; perhaps there is a way to approximate them without finding an SVD.  How do I find the angle between $H|ψ〉$ and the space $|ψ〉$ can move in?  This seems to require shifting $z$ along each singular direction, solving the shifted least-squares problem, and comparing the residuals.  Is there a better way?
+
+The final algorithm would propagate $|ψ〉$ in Hilbert space by a semi-implicit method, solving a variational problem to represent each state.  This is a slight generalisation, because you need to project $H|ψ_{n+½}〉$ in to the span of $|Dψ_n〉$, and the ensembles at the two times are slightly different.  It might help to propagate from $n$ to $n+½$ by changing only weights, leaving the same ensemble.  On the other hand, the change is only that the $α*$ become $β*$, so it should be managable.
+
+There shouldn't be an need for fancy methods to fit the initial state: one can take a guess $z₀$, and variationally solve the equation $|Dψ(z)〉dz=|ψ₀〉-|ψ(z)〉$.  One could even change the conditioning rules as the state propagates, so that $|Dψ〉$ is aligned with $|ψ₀〉-|ψ(z)〉$ to start with, then with $H|ψ(z)〉$ later on.  That way, you start the actual simulation with a well conditioned approximant.
 
 Expanding the quartic oscillator over Fock states allows it to be solved very stably, and as precisely as desired by rotating the phases of the expansion coefficients.  Also, it is easy to find the expansion over Fock states of a superpositon of coherent states.  This means that the stability of time discretisation can be removed from the problem entirely.  The state can be propagated exactly, and the coherent states adjusted to fit.  The most direct way to do so is by nonlinear optimisation at every timestep; Matlab provides the necessary routines in a convenient package.  Unfortunately, this is not at all stable.  
+
+In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis such as the Fock states would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
+
+The following graphs show a coherent state, with real amplitude 2, propagating in a quartic oscillator potential.  The propagation was done exactly, in a Fock space truncated at $|19〉$; at times $π/10, π/5, 3π/10,\ldots,π$, a 10 component superposition was fit to the state by the routine {\tt cohfit5}.  The SVD of $|Dψ〉$ was computed for each of these superpositions, and the Picard condition investigated.  It appears that this discretisation is inherently ill-posed.
+
+\centerline{\XeTeXpicfile spsns.pdf width \hsize}
+Amplitudes of components
+
+\centerline{\XeTeXpicfile traj.pdf width \hsize}
+Left: expectation value $〈a〉$ at sampled times.  Right: residual of fit by superposition (solid) and condition number of Jacobian of fitted superposition (dotted)
+
+\centerline{\XeTeXpicfile picard.pdf width \hsize}
+Picard plots at fitted times.  Circles are singular values, crosses components of LSVs, red stars components of RSVs.  The discrete Picard condition is clearly not satisfied.
+
+\centerline{\XeTeXpicfile svnum.pdf width \hsize}
+Expected particle number for left singular vectors.  The svs with small sws have large particle number.  When $H$ is quartic, these have large components in $H|ψ〉$.  In order for the svs to be orthogonal, the points are likely to lie around the line ${\rm sv}=n$.
+
 
 \centerline{\XeTeXpicfile flwc0n10.pdf width \hsize}
 
