@@ -11,6 +11,8 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
+0. Look at the conditioning of G and |Dψ〉 sampled on random grids.
+
 1. Investigate the conditioning of the variational problem as a phase space grid shrinks smaller than the Fock space.
 
 2. Do variational dynamics, using the large 〈u_i|H|ψ〉 directions to solve the problem, and the small ones to improve the condition of |Dψ〉 and the angle between H|ψ〉 and the span of |Dψ〉.
