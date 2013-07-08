@@ -13,6 +13,10 @@ Tasks
 ====
 0. Look at the conditioning of G and |Dψ〉 sampled on random grids.
 
+1. Look at the difference between large singular directions of the expansion and variational problems.  (Say, operator distances between low-rank approximations.)
+
+2. Check that first-order pertubation theory approximates the derivative of condition number.
+
 1. Try to solve the H=0 problem, while improving the condition of Dψ
 
 1. Investigate the conditioning of the variational problem as a phase space grid shrinks smaller than the Fock space.

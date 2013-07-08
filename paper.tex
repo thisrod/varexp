@@ -5,14 +5,16 @@
 
 \title{Stability of variational quantum dynamics with Gaussian approximants}
 
-When physicists began to study quantum mechanics, they could hardly have avoided discovering coherent states.  When they grasped that observables were inherently uncertain and considered laws of probability, the normal distribution sprung to mind at once.  Once they understood the dynamics of the free particle, and looked for a more interesting system to study, the obvious choice was the harmonic oscillator.  The first question was its ground state; the second was why, in the classical limit, it oscillated.  Coherent states were the answer to both.
+When the first quantum physicists understood that measurements are essentially uncertain, they naturally wondered what conditions would produce the normal law of probability, and discovered gaussian wave packets.  Once they got sick of the free particle and turned to the harmonic oscillator, they would have know to look for its ground state, and how it oscillated in the classical limit.  Gaussian wave packets were the answer to both questions.  Now, with their width fixed so that the action of a cycle was $\hbar$, they became coherent states.
 
-Variational mechanics was another obvious idea.  The quantum equations of motion were hard to solve exactly, except for some very simple systems.  It was known from very early on that the solutions were extema of certain properties: ground states had the lowest possible energy, trajectories the least possible action.  So it was natural to consider a class of approximants that could be treated exactly, and find out which of them had the extreme value over the class.
+When quantum mechanics was applied to more complicated systems, the equations of motion could not be solved in closed form.  Several approaches were used to approximate them: one of the most versatile was the variational method, in which a class of approximants was specified that could be treated exactly, and it was determined which of them most nearly solved the problem.  The most obvious application was in finding ground states, where the best solution was the one with the lowest energy.  Variational methods were also applied to quantum dynamics, by seeking approximants for which the difference between the two sides of Schrödinger's equation had the least norm in Hilbert space.  Gaussian wavepackets were an obvious choice for the class of approximants.  They are distinguished by their central position and momentum, and their scale: useful things to know about the solution to any problem.  Also, the gaussian packets and their derivatives are easy to manipulate algebraically.
 
-In the 1970s, Heller put the two ideas together, and proposed simulating quantum dynamics variationally, using coherent states as the approximant.  He eventually discovered that related methods had been used to find the dynamics of lasers, starting with Glauber's work in the 19?0s on expansions over coherent states, and continuing when ? derived the dynamics of these expansions, and solved for the quantum dyanmics of the laser.
+The laser was invented, and physicists needed a quantum theory of intense radiation.  This obeyed simple laws of dynamics, very similar to harmonic oscillators.  However, It involved up to $10^{18}$ photons, spread across thousands of modes, so the difficulty of the quantum problem came from its sheer size.  This was made managable by the work of Glauber, who showed that any quantum state could be written as a superposition of coherent states.  For optical systems, close to harmonic oscillators, this was a very efficient way to represent states.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  These have solved many problems, but are now limited by intractable convergence problems.
+
+In the 1970s, Heller put the two ideas together, and proposed simulating quantum dynamics variationally, using superpositions of coherent states as the approximant.  This is an appealing approach.  Every quantum state can be represented arbitrarily well as the number of components in the superposition becomes large.  The experience of quantum optics shows that many systems can be approximated by a reasonable number of components, and variational dynamics should not have the covergence problems the Monte-Carlo methods do.  There have been several attempts to apply this numerically.  In all cases, numerical instability has prevented the superposition being expanded to the point of convergence.
 
 When used on computers, the variational methods expand quantum states over finitely many coherent states.  This is a discretisation of the expansion introduced by Glauber, a mapping $G$ from square-integrable functions to Fock space, where
-$$Gf={1\over π}∫g(α*)|α〉\,d²α.\eqno{(1)}$$
+$$Gf={1\over π}\int g(α*)|α〉\,d²α.\eqno{(1)}$$
 This is different from Glauber's use: he uses $f=ge^{½|α|²}$.  Is it easier to work Glauber's way, with the $e^{-½|α|²}$ in the mapping, so that the singular vectors are entire functions?  You'd have to use a Bargmann inner product to normalise them; the theory of that is well developed.
 
 Variational dynamics seeks an expansion $g$ to approximate a quantum state $|ψ〉≈Gg$.  Given the form of Equation~1, this requires solving a Fredholm integral equation of the first kind.  That is the canonical example of an ill-posed problem: rounding and discretisation errors in $|ψ〉$ are magnified enormously in the solution $g$.  To solve these problems, it helps to understand the singular values and vectors of the operator $G$.
@@ -74,9 +76,9 @@ $$g(α)=e^{-½|α|²}{αⁿ\over(n!)^½},$$
 the Glauber preimage of $|n〉$.  We have 
 $$|g(α)|²={1\over n!}e^{-|α|²}|α|^{2n},$$
 so the squared norm is
-$$\|g\|²={1\over n!}∫₀^∞2πr^{2n+1}e^{-r²}\,dr={2π\over n!}∫₀^∞r^{2n+1}e^{-r²}\,dr.$$
+$$\|g\|²={1\over n!}\int ₀^∞2πr^{2n+1}e^{-r²}\,dr={2π\over n!}\int ₀^∞r^{2n+1}e^{-r²}\,dr.$$
 According to Wolfram,
-$$∫₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
+$$\int ₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
 so
 $$\|g\|=π^½.$$
 
@@ -99,14 +101,21 @@ To sum up, this analysis shows that $G$ is a projector.  Therefore, if the ampli
 There are two types of ill-posed problems, rank-deficient and discrete.  They are distingished by how the singular values decay to zero.  In a rank-deficient problem, there is a sharp cut between large and small singular values.  The large ones are large enough that components in their singular directions do not contribute excessively to the solution, the small ones would contribute huge components, but they are small enough to round to zero, and ignore the component along that singular direction.  In discrete problems, the singular values decay continuously.  The size of the components of the solution varies continuously: there is no point where they become huge, but a continuous minimum and a gradual rise as the singular values get smaller.
 
 I've been assuming that the variational problem is discrete, because it comes from a discretisation of an integral equation.  However, the integral equation is a complex convolution, and for some values of the complex amplitude, the kernel oscillates arbitrarily sharply.  This is the same sort of integral equation as the Fourier transform, where we know $f(t)$, and want to find $F(ω)$ such that
-$$f(t)=∫F(ω)e^{iωt}\,dω.$$
-This also has a kernel that oscillates at a rate proportional to $ω$, and it also has very stable solutions.  (What is the SVD of the DFT matrix?)
+$$f(t)=\int F(ω)e^{iωt}\,dω.$$
+This also has a kernel that oscillates at a rate proportional to $ω$, and it also has very stable solutions.  (What is the SVD of the DFT matrix?  It's ${\rm anything}×1×{\rm FT anything}$: Rayleigh theorem.)
 
 The variational problem seems to be pretty well-posed: if the initial superposition is the phase space function sampled on a grid, then the state that comes from a variational change in the amplitudes matches $H|ψ〉$ very closely.  I was working in a truncated Fock space; I wonder what happens as the truncation increases, while the grid stays a constant size?  Or alternately, if the grid shrinks while the Fock space stays constant.
 
 I'm getting a picture of how the final algorithm will look.  At each timestep, the directions belonging to large singular values of $|Dψ〉$ will be used for variational dynamics.  This can be done by solving at Tychonov conditioned problem, for example.  At the same time, the directions with small singular values will be used to keep the discretisation stable.  I think this requires two things: that $|Dψ〉$ is reasonably well conditioned, and that the angle between $H|ψ〉$ and the span of $|Dψ〉$ is small.  This raises a question: are there singular directions that have little effect on $|ψ〉$, but a large effect on $|Dψ〉$?  This seems likely; for example, shuffling the amplitudes to move two components further apart in phase space, then adjusting the weights so that $|ψ〉$ stays the same.  This could be done by a kind of Tychonov anti-regularisation: we improve the stability as much as we can, while constraining the change in $|ψ〉$.  I might need to constrain the norm of $dz$ too, so that linear approximations hold.
 
 I've already figured out how to find the change in the condition number by pertubation theory.  That does require knowing the largest and smallest singular directions of $|Dψ〉$; perhaps there is a way to approximate them without finding an SVD.  How do I find the angle between $H|ψ〉$ and the space $|ψ〉$ can move in?  This seems to require shifting $z$ along each singular direction, solving the shifted least-squares problem, and comparing the residuals.  Is there a better way?
+
+The accuracy of the pertubation method is shown below.
+
+\centerline{\XeTeXpicfile psfa.pdf width \hsize}
+
+\centerline{\XeTeXpicfile psv.pdf width \hsize}
+
 
 The final algorithm would propagate $|ψ〉$ in Hilbert space by a semi-implicit method, solving a variational problem to represent each state.  This is a slight generalisation, because you need to project $H|ψ_{n+½}〉$ in to the span of $|Dψ_n〉$, and the ensembles at the two times are slightly different.  It might help to propagate from $n$ to $n+½$ by changing only weights, leaving the same ensemble.  On the other hand, the change is only that the $α*$ become $β*$, so it should be managable.
 
