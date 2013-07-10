@@ -181,7 +181,7 @@ The accuracy of the pertubation method is shown below.  The state is coherent, w
 The lower plot shows how the smallest singular value of the discrete $G$ changes, as the sample points are shifted.  The black lines show changes in the real parts of the amplitudes, the red lines in the imaginary parts.  The dotted black line shows the derivatives for the real parts calculated by pertubation theory, as follows.  The derivatives of the matrix $〈N|G|A〉$  with respect to each real part were computed by symmetric difference, with $h=0.01$.  Here, $|Α〉=(|α₁〉 |α₂〉 \cdots |α_R〉)$.  A matrix 
 $$M=\pmatrix{0 & 〈N|G|A〉\cr 〈A|G|N〉 & 0}$$
 was constructed; by substituting $〈N|G|A〉=USV†$, it is clear that the vector
-$$x={1\over √2}\pmatrix{u_R \cr v_R}$$
+$$x={1\over \sqrt2}\pmatrix{u_R \cr v_R}$$
 is an eigenvector, with eigenvalue $σ_R$, and norm 1.  (Provided $N+1>R$.)  From first-order pertubation theory, the derivative of this eigenvalue with respect to amplitude $i$ is
 $$∂_i σ_i=x†∂_iMx.$$
 As shown in the plots, lines of this slope fit the singular value very well.
@@ -189,6 +189,8 @@ As shown in the plots, lines of this slope fit the singular value very well.
 \centerline{\XeTeXpicfile psfa.pdf width \hsize}
 
 \centerline{\XeTeXpicfile psv.pdf width \hsize}
+
+Given the gradient $Dσ_R$, we wish to find a direction where $σ_R$ increases most rapidly for a given change in $|ψ〉$.  Given a small change $|dψ〉$ lying in the tangent plane, the corresponding change in $z$ is given by $dz=〈Dψ^{+}|dψ〉$, where $〈Dψ^{+}|$ is the pseudoinverse of $|Dψ〉$.  The change in $σ_R$ is $dσ_R=Dσ_Rdz=Dσ_R〈Dψ^{+}|dψ〉$.  So the gradient direction in Hilbert space is $|Dψ^{+}〉Dσ_R†$; the corresponding direction in $z$ space is $〈Dψ^{+}|Dψ^{+}〉Dσ_R†$.  In terms of the SVD $|Dψ〉=|U〉SV†$, this is $〈U|S^{-2}|U〉Dσ_R†$.  Here, $|ψ〉$ is considered a function of $4R$ real variables instead of $2R$ complex ones.
 
 Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as the value of $z$ varies by $0.1$ in every direction.  The top line shows the effects of changing $φ$, the bottom line $α$, components are shown left to right.  Changes to real parts are black, imaginary parts red.  There are a few things to note.  The condition is very bad, with number $1.4×10^{11}$.  This is entirely due to the similar amplitudes of components 1 and 3: those graphs are on a different scale to the others, and it's logarithmic.  As they move closer and become identical, the condition number increases $10^{14}$.  No doubt it would go higher if we sampled the graphs more finely, but this is huge—reciprocal floating point epsilon is $5×10^{15}$.  If the separation between these components is doubled, the condition number improves by an order of magnitude.
 
