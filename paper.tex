@@ -5,56 +5,31 @@
 
 \title{Stability of variational quantum dynamics with Gaussian approximants}
 
-When the first quantum physicists understood that measurements are essentially uncertain, they naturally wondered what conditions would produce the normal law of probability, and discovered gaussian wave packets.  Once they got sick of the free particle and turned to the harmonic oscillator, they would have know to look for its ground state, and how it oscillated in the classical limit.  Gaussian wave packets were the answer to both questions.  Now, with their width fixed so that the action of a cycle was $\hbar$, they became coherent states.
+%% Background
 
-When quantum mechanics was applied to more complicated systems, the equations of motion could not be solved in closed form.  Several approaches were used to approximate them: one of the most versatile was the variational method, in which a class of approximants was specified that could be treated exactly, and it was determined which of them most nearly solved the problem.  The most obvious application was in finding ground states, where the best solution was the one with the lowest energy.  Variational methods were also applied to quantum dynamics, by seeking approximants for which the difference between the two sides of Schrödinger's equation had the least norm in Hilbert space.  Gaussian wavepackets were an obvious choice for the class of approximants.  They are distinguished by their central position and momentum, and their scale: useful things to know about the solution to any problem.  Also, the gaussian packets and their derivatives are easy to manipulate algebraically.
+When the first quantum physicists realised that the position of a particle is essentially uncertain, they were destined to seek the conditions that cause it to follow a normal law of error, and discover the gaussian wave packet.  They soon understood the free particle and turned to the harmonic oscillator, investigating its ground state and how its excited states generate sinusoidal motion in the classical limit.  These problems were also solved by the gaussian wave packet.  With its width fixed by equipartition of energy and the uncertainty principle, it became the coherent state.
+
+The simplest mechanical systems allow Schrödinger's law of motion to be solved in closed form, but this luck doesn't last.  Most quantum problems must be solved approximately.  This can be done variationally, specifying a class of approximants that can be manipulated exactly, then finding one of them that most nearly solves the problem.  To test how well a putative solution approximates the dynamics of a system, it can be substituted into each side of Schrödinger's equation, and the difference between them evaluated by the usual norm in Hilbert space.  It remains to choose a class of approximants, and the gaussian wave packets are an common choice.  They differ in their scale and their central position and momentum, useful properties to determine for any quantum state.
 
 The laser was invented, and physicists needed a quantum theory of intense radiation.  This obeyed simple laws of dynamics, very similar to harmonic oscillators.  However, It involved up to $10^{18}$ photons, spread across thousands of modes, so the difficulty of the quantum problem came from its sheer size.  This was made managable by the work of Glauber, who showed that any quantum state could be written as a superposition of coherent states.  For optical systems, close to harmonic oscillators, this was a very efficient way to represent states.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  These have solved many problems, but are now limited by intractable convergence problems.
 
-In the 1970s, Heller put the two ideas together, and proposed simulating quantum dynamics variationally, using superpositions of coherent states as the approximant.  This is an appealing approach.  Every quantum state can be represented arbitrarily well as the number of components in the superposition becomes large.  The experience of quantum optics shows that many systems can be approximated by a reasonable number of components, and variational dynamics should not have the covergence problems the Monte-Carlo methods do.  There have been several attempts to apply this numerically.  In all cases, numerical instability has prevented the superposition being expanded to the point of convergence.
+In the 1970s, Heller put the two ideas together, and proposed simulating quantum dynamics variationally, using superpositions of coherent states as the approximant.  This is an appealing approach.  Every quantum state can be approximated arbitrarily well as the number of components in the superposition becomes large.  The experience of quantum optics shows that many systems can be approximated by a reasonable number of components, and variational dynamics should not have the covergence problems the Monte-Carlo methods do.
+
+%% Problem
+
+Since Heller suggested it, there have been several attempts to apply this numerically.  In all cases, numerical instability has prevented the superposition being expanded to the point of convergence.
+%% Consequence
+These attempts have aimed to solve chemistry problems, involving dozens of atoms, where the lack of convergence limited the precision that could be obtained, but superpositions with a few components, and ad-hoc methods to improve the stability, still gave useful results.  The kind of problems that people approach with phase space methods come from atom optics or condensed matter; they involve thousands or millions of atoms, and the convergence problems would prevent any useful information being obtained.  A systematic approach to regularisation is required in order to approach these problems variationally.  The prospective rewards are great: these problems include high temperature superconductivity and the dynamics of the early universe, topics on which today's physicists expend massive efforts.
 
 When used on computers, the variational methods expand quantum states over finitely many coherent states.  This is a discretisation of the expansion introduced by Glauber, a mapping $G$ from square-integrable functions to Fock space, where
 $$Gf={1\over π}\int g(α*)|α〉\,d²α.\eqno{(1)}$$
 This is different from Glauber's use: he uses $f=ge^{½|α|²}$.  Is it easier to work Glauber's way, with the $e^{-½|α|²}$ in the mapping, so that the singular vectors are entire functions?  You'd have to use a Bargmann inner product to normalise them; the theory of that is well developed.
 
-Variational dynamics seeks an expansion $g$ to approximate a quantum state $|ψ〉≈Gg$.  Given the form of Equation~1, this requires solving a Fredholm integral equation of the first kind.  That is the canonical example of an ill-posed problem: rounding and discretisation errors in $|ψ〉$ are magnified enormously in the solution $g$.  To solve these problems, it helps to understand the singular values and vectors of the operator $G$.
+%% Phase space expansion as a linear operator
 
-The singular value expansion of the linear operator $G$ has the form
-$$Gf = ∑_{j=1}^∞ |g_j〉σ_j〈v_j,f〉,$$
-where the left singular vectors $|g_j〉$ are orthonormal kets, the singular values $σ_j$ are positive real numbers, the right singular vectors $v_j$ are normalised entire functions, and presumably $〈,〉$ is the Bargmann inner product.  This can be written
-$$G = |G〉SV†,$$
-where $|G〉$ is a row vector of the left singular kets, $S$ is a matrix with the singular values along the diagonal, and $V$ maps complex coefficients to linear combinations of the functions $v_j$.
-
-Because the expansions are underdetermined, the set $|g_j〉$ will be complete, but the set $v_j$ will not be.  Alternatively, some of the $v_j$ have zero singular values and no corresponding left singular vector.  One can write a full SVE, where $V†$ is a full expansion, but $S$ truncates the vector of coefficients.
-
-The singular value expansion is useful for two reasons.  Firstly, the discrete version, the singular value decomposition, is the most stable way to solve badly-posed least squares problems.  Secondly, the sizes of the singular values, and the components of $H|ψ〉$ along the singular directions, determine whether the problem can be solved at all.
-
-The most important issue is the Picard condition.  This restates a very basic observation: for the problem $G\dot f=H|ψ〉$ to have a solution $\dot f$, the expansion of $f$ over an orthonormal basis must have a finite norm.  If the basis is chosen as the right singular vectors $v_j$, this means that the sum of the squared moduli of the components must be finite.  For $\dot f$ to satisfy the equation, the component of $v_j$ is $〈g_j|H|ψ〉/σ_j$.  So the Picard condition is that, for the equation to have a solution, the series
-$$∑_{j=1}^∞{\bigl|〈g_j|H|ψ〉\bigr|²\over σ_j²}$$
-must converge.  The singular values reduce with $j$, by definition; this requires that the components of the left singular vectors reduce somewhat faster.
+%% SVE lemma
 
 Hypothesis: The singular values of $G$ are 0 and $\sqrt π$, and the space belonging to $\sqrt π$ comprises the functions $f$ for which $fe^{½|α|²}$ is analytic.
-
-So $G$ is a projection: if the inner product is normalised properly, $G$ keeps the component of $f$ in the space of entire functions, and discards the orthogonal component.  The continuous problem is simply underdetermined, and the inverse problem can be regularised very easily by excluding components with zero singular values from the solution.  That isn't what I see with discrete versions: they seem to have a steady decay of singular values, not a sudden drop to zero.  This must be entirely an artefact of the discretisation.
-
-This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ\rangle$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j\rangle$ approximates $|ψ\rangle$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ\rangle$ which we want to perturb to represent $|ψ\rangle+|dψ\rangle$, is no harder.  Because $G$ is linear, we can expand $|dψ\rangle$, and add it to the expansion of $|ψ\rangle$.
-
-The second problem, the variational one, is a generalisation.  As well as the grid $α_j$, we have a set of weights $f_j$ representing some wavefunction, presumably not $|ψ\rangle$.  Instead of expanding $|ψ\rangle$ over phase space, we want to expand it over the columns of $|Dψ(f,α)\rangle$, the set of all changes we can make by slightly adjusting the original expansion, and the grid.  Obviously, we can solve this problem simply by setting the coefficients of $|∂fψ(f,a)\rangle$ to the solution of the inverse problem, and those of $|∂fψ(f,a)\rangle$ to zero.  Is this the smallest norm solution?  Probably not: if a coherent state was moving in an oscillator, it might be easier to just rotate the $α_j$.
-
-Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ\rangle$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ\rangle$ in the future.
-
-So what are the critera for adjusting the grid?  I think there are two obvious ones: firstly, that the inverse problem stays well-posed.  Otherwise, we're wasting grid points.  Secondly, when we're expanding a derivative over the tangent space $|Dψ\rangle$, we want to tilt the tangent space closer to the derivative.  That's a second order effect, and won't come naturally from a least squares adjustment of $f$ and $α$.  The first criterion seems redundant: if we could better represent the goal by shifting two sample points apart, the second criterion will do that automatically.  However, if we only care about the tangent space and not the derivative map, we might need very large adjustments of the amplitudes and weights to get to the point in the tangent space that we want.  So a condition number criterion seems sensible.  There might be other criteria that I've overlooked.
-
-I still haven't thought in detail about the results with truncated Fock spaces.  Obviously, when we restrict the domain of $G$ to the lowest $N$ energy levels, the restricted operator has at most $N$ singular directions.  Since the low energy levels are the ones a restricted grid tends to represent, those singular directions will have relatively large singular values.  So when we do this, we get a well-posed problem, but we lose the ability to add components with small singular values, in order to expand the states we'll get in the future.  And in fact, by solving the inverse problem, we can always get a nice solution in any case.  Numerical experiments suggest that the variational problem is quite well posed for a single step, too.
-
-
-The theorems on how quickly singular values of convolution operators decay don't apply here.  They apply to convolutions of real functions, which can only oscillate at a fixed rate.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy; considered as wavefunctions, the coherent states do: the wavenumber is proportional to the imaginary part of $α$.
-
-It turns out that complex convolutions are not like real convolutions: the imaginary part of $t-t'$ can control the rate at which the kernel oscillates.  Each line of constant imaginary part in the convolution is determined by a limited range of frequencies from the function, but that frequency range can vary with the imaginary part, so that all frequency components of the function contribute to the convolution somewhere.  Is the Fourier transform a complex convolution?
-
-Not a
-
-If the Hypothesis is right, the Picard condition is very obviously satisfied.  The operator $G$ is a projection.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm.  Functions in the null space of $G$ don't correspond to left singular vectors, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
 
 There are two ways one could set about proving the Hypothesis.  Firstly, one could show that any function orthogonal to the Gaussian analytics annihilates $G$.  Otherwise, one could show that the norms of all Gaussian analytics are scaled by the same factor going to F
 ock space, and that they are a pre-image of Fock space.  The second approach sounds simpler.
@@ -82,6 +57,44 @@ $$\int ₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
 so
 $$\|g\|=π^½.$$
 
+The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.
+
+Assuming that there is no way to expand a state with a smaller norm than a Gaussian entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
+
+%% Consequences of lemma
+
+To sum up, this analysis shows that $G$ is a projector.  Therefore, if the amplitudes of the coherent states are held constant, and the discretised problem is solved by adjusting their weights, the solutions that come from an SVD should be very stable indeed.  This might depend somewhat on how evenly the amplitudes are spaced: I could start with a regular grid, and add Gaussian noise to see what changed.
+
+So $G$ is a projection: if the inner product is normalised properly, $G$ keeps the component of $f$ in the space of entire functions, and discards the orthogonal component.  The continuous problem is simply underdetermined, and the inverse problem can be regularised very easily by excluding components with zero singular values from the solution.  That isn't what I see with discrete versions: they seem to have a steady decay of singular values, not a sudden drop to zero.  This must be entirely an artefact of the discretisation.
+
+The theorems on how quickly singular values of convolution operators decay don't apply here.  They apply to convolutions of real functions, which can only oscillate at a fixed rate.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy; considered as wavefunctions, the coherent states do: the wavenumber is proportional to the imaginary part of $α$.
+
+It turns out that complex convolutions are not like real convolutions: the imaginary part of $t-t'$ can control the rate at which the kernel oscillates.  Each line of constant imaginary part in the convolution is determined by a limited range of frequencies from the function, but that frequency range can vary with the imaginary part, so that all frequency components of the function contribute to the convolution somewhere.  Is the Fourier transform a complex convolution?
+
+If the Hypothesis is right, the Picard condition is very obviously satisfied.  The operator $G$ is a projection.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm.  Functions in the null space of $G$ don't correspond to left singular vectors, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
+
+%% Discrete phase space
+
+The obvious discrete version of the problem, where the state is approximated by a finite linear combination of coherent states, doesn't relate to the continuous problem in an obvious way.  The weights of the components don't simple sample $f(α)$: they also adjust for how close the sample points are, and how much the $|α_i〉$ overlap.  The operator $G$ is probably being disceretised by some kind of Galerkin formula; I don't know what the basis functions are in phase space and Hilbert space.
+
+It would be useful to find a quadrature rule, with weights $w_i$, such that 
+$$∑_i w_if(α_i)|α_i〉≈\int f(α)|α〉d²α.$$
+Suppose we aim to be exactly right, in the case that $f(α)$ is the normalised entire function representing the left hand side, i.e.,
+$$f(β)=∑_i w_if(α_i)〈β|α_i〉.$$
+(I'm assuming we put the factor $1/π$ in $G$.)  This doesn't have a solution for general superpositions of coherent states.  Surely there's some quadrature rule for a sampled phase-space function?
+
+Using the Galerkin criterion, there doesn't seem to be one where the coefficient of $|α_i〉$ only depends on $f(α_i)$.  However, the Galerkin formula $〈A|A〉f=〈A|ψ〉$, where $〈α_i|ψ〉=f(α_i)$, seems like a good candidate for a more general rule.
+
+There are two types of ill-posed problems, rank-deficient and discrete.  They are distingished by how the singular values decay to zero.  In a rank-deficient problem, there is a sharp cut between large and small singular values.  The large ones are large enough that components in their singular directions do not contribute excessively to the solution, the small ones would contribute huge components, but they are small enough to round to zero, and ignore the component along that singular direction.  In discrete problems, the singular values decay continuously.  The size of the components of the solution varies continuously: there is no point where they become huge, but a continuous minimum and a gradual rise as the singular values get smaller.
+
+I've been assuming that the variational problem is discrete, because it comes from a discretisation of an integral equation.  However, the integral equation is a complex convolution, and for some values of the complex amplitude, the kernel oscillates arbitrarily sharply.  This is the same sort of integral equation as the Fourier transform, where we know $f(t)$, and want to find $F(ω)$ such that
+$$f(t)=\int F(ω)e^{iωt}\,dω.$$
+This also has a kernel that oscillates at a rate proportional to $ω$, and it also has very stable solutions.  (What is the SVD of the DFT matrix?  It's ${\rm anything}×1×{\rm FT anything}$: Rayleigh theorem.)
+
+%% Truncated Hilbert space
+
+I still haven't thought in detail about the results with truncated Fock spaces.  Obviously, when we restrict the domain of $G$ to the lowest $N$ energy levels, the restricted operator has at most $N$ singular directions.  Since the low energy levels are the ones a restricted grid tends to represent, those singular directions will have relatively large singular values.  So when we do this, we get a well-posed problem, but we lose the ability to add components with small singular values, in order to expand the states we'll get in the future.  And in fact, by solving the inverse problem, we can always get a nice solution in any case.  Numerical experiments suggest that the variational problem is quite well posed for a single step, too.
+
 The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.  Numerical experiments in the script {\tt sve.m} support this.  The operator $G$ was discretised on a grid in phase space, with spacing $h=0.3$, and various extents shown in the graphs.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|10〉$.  The graph below shows the singular values of the discretised operator converging to $π^{-½}$, as the extent of the grid passes through $|α|²=10$.
 
 \centerline{\XeTeXpicfile svgrid.pdf width \hsize}
@@ -92,87 +105,106 @@ The following three figures show the right singular vectors, sampled versions of
 \XeTeXpicfile rsv3.pdf width 0.5\hsize}
 \centerline{\XeTeXpicfile rsv4.pdf width 0.5\hsize}
 
-Note that the gaussian entire functions are a vector subspace of the square integrable functions.
-
-Assuming that there is no way to expand a state with a smaller norm than a Gaussian entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
-
-To sum up, this analysis shows that $G$ is a projector.  Therefore, if the amplitudes of the coherent states are held constant, and the discretised problem is solved by adjusting their weights, the solutions that come from an SVD should be very stable indeed.  This might depend somewhat on how evenly the amplitudes are spaced: I could start with a regular grid, and add Gaussian noise to see what changed.
-
-There are two types of ill-posed problems, rank-deficient and discrete.  They are distingished by how the singular values decay to zero.  In a rank-deficient problem, there is a sharp cut between large and small singular values.  The large ones are large enough that components in their singular directions do not contribute excessively to the solution, the small ones would contribute huge components, but they are small enough to round to zero, and ignore the component along that singular direction.  In discrete problems, the singular values decay continuously.  The size of the components of the solution varies continuously: there is no point where they become huge, but a continuous minimum and a gradual rise as the singular values get smaller.
-
-I've been assuming that the variational problem is discrete, because it comes from a discretisation of an integral equation.  However, the integral equation is a complex convolution, and for some values of the complex amplitude, the kernel oscillates arbitrarily sharply.  This is the same sort of integral equation as the Fourier transform, where we know $f(t)$, and want to find $F(ω)$ such that
-$$f(t)=\int F(ω)e^{iωt}\,dω.$$
-This also has a kernel that oscillates at a rate proportional to $ω$, and it also has very stable solutions.  (What is the SVD of the DFT matrix?  It's ${\rm anything}×1×{\rm FT anything}$: Rayleigh theorem.)
-
-The variational problem seems to be pretty well-posed: if the initial superposition is the phase space function sampled on a grid, then the state that comes from a variational change in the amplitudes matches $H|ψ〉$ very closely.  I was working in a truncated Fock space; I wonder what happens as the truncation increases, while the grid stays a constant size?  Or alternately, if the grid shrinks while the Fock space stays constant.
-
-I'm getting a picture of how the final algorithm will look.  At each timestep, the directions belonging to large singular values of $|Dψ〉$ will be used for variational dynamics.  This can be done by solving at Tychonov conditioned problem, for example.  At the same time, the directions with small singular values will be used to keep the discretisation stable.  I think this requires two things: that $|Dψ〉$ is reasonably well conditioned, and that the angle between $H|ψ〉$ and the span of $|Dψ〉$ is small.  This raises a question: are there singular directions that have little effect on $|ψ〉$, but a large effect on $|Dψ〉$?  This seems likely; for example, shuffling the amplitudes to move two components further apart in phase space, then adjusting the weights so that $|ψ〉$ stays the same.  This could be done by a kind of Tychonov anti-regularisation: we improve the stability as much as we can, while constraining the change in $|ψ〉$.  I might need to constrain the norm of $dz$ too, so that linear approximations hold.
-
-I've already figured out how to find the change in the condition number by pertubation theory.  That does require knowing the largest and smallest singular directions of $|Dψ〉$; perhaps there is a way to approximate them without finding an SVD.  How do I find the angle between $H|ψ〉$ and the space $|ψ〉$ can move in?  This seems to require shifting $z$ along each singular direction, solving the shifted least-squares problem, and comparing the residuals.  Is there a better way?
-
-The accuracy of the pertubation method is shown below.
-
-\centerline{\XeTeXpicfile psfa.pdf width \hsize}
-
-\centerline{\XeTeXpicfile psv.pdf width \hsize}
-
-
-The final algorithm would propagate $|ψ〉$ in Hilbert space by a semi-implicit method, solving a variational problem to represent each state.  This is a slight generalisation, because you need to project $H|ψ_{n+½}〉$ in to the span of $|Dψ_n〉$, and the ensembles at the two times are slightly different.  It might help to propagate from $n$ to $n+½$ by changing only weights, leaving the same ensemble.  On the other hand, the change is only that the $α*$ become $β*$, so it should be managable.
-
-There shouldn't be an need for fancy methods to fit the initial state: one can take a guess $z₀$, and variationally solve the equation $|Dψ(z)〉dz=|ψ₀〉-|ψ(z)〉$.  One could even change the conditioning rules as the state propagates, so that $|Dψ〉$ is aligned with $|ψ₀〉-|ψ(z)〉$ to start with, then with $H|ψ(z)〉$ later on.  That way, you start the actual simulation with a well conditioned approximant.
-
-Expanding the quartic oscillator over Fock states allows it to be solved very stably, and as precisely as desired by rotating the phases of the expansion coefficients.  Also, it is easy to find the expansion over Fock states of a superpositon of coherent states.  This means that the stability of time discretisation can be removed from the problem entirely.  The state can be propagated exactly, and the coherent states adjusted to fit.  The most direct way to do so is by nonlinear optimisation at every timestep; Matlab provides the necessary routines in a convenient package.  Unfortunately, this is not at all stable.  
-
-In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis such as the Fock states would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
-
-The following graphs show a coherent state, with real amplitude 2, propagating in a quartic oscillator potential.  The propagation was done exactly, in a Fock space truncated at $|19〉$; at times $π/10, π/5, 3π/10,\ldots,π$, a 10 component superposition was fit to the state by the routine {\tt cohfit5}.  The SVD of $|Dψ〉$ was computed for each of these superpositions, and the Picard condition investigated.  It appears that this discretisation is inherently ill-posed.
-
-\centerline{\XeTeXpicfile spsns.pdf width \hsize}
-Amplitudes of components
-
-\centerline{\XeTeXpicfile traj.pdf width \hsize}
-Left: expectation value $〈a〉$ at sampled times.  Right: residual of fit by superposition (solid) and condition number of Jacobian of fitted superposition (dotted)
-
-\centerline{\XeTeXpicfile picard.pdf width \hsize}
-Picard plots at fitted times.  Circles are singular values, crosses components of LSVs, red stars components of RSVs.  The discrete Picard condition is clearly not satisfied.
-
-\centerline{\XeTeXpicfile svnum.pdf width \hsize}
-Expected particle number for left singular vectors.  The svs with small sws have large particle number.  When $H$ is quartic, these have large components in $H|ψ〉$.  In order for the svs to be orthogonal, the points are likely to lie around the line ${\rm sv}=n$.
-
-
-\centerline{\XeTeXpicfile flwc0n10.pdf width \hsize}
-
-\centerline{\XeTeXpicfile flwc0n5.pdf width \hsize}
-
-The above plots show my first attempt at this.  The initial state was coherent, with real amplitude 2.  A superposition of 5 coherent states was initialised with amplitudes normally distributed around 2, the norm of the superposition being 1, and the components having equal norms.  This superposition was fit to the coherent state by minimising their distance in Hilbert space; for stability, the weights were constrained so that no component had a norm less than 0.1.  This was done by the Matlab routine {\tt fmincon}.  The initial state was truncated to Fock states $|0〉$ to $|10〉$, and propagated exactly in a Hamiltonian $\hbar a^{2\dagger}a²$ with timestep 0.03.  After each step, the fitting of the superposition to the exact state was repeated.
-
-The results are shown in the first Figure.  The left hand plot shows the complex amplitude of the exact solution in black, and the fitted solution in blue.  The right hand plot shows the residual of the fit as a solid line, and the condition number of $|Dψ(z)〉$ at the fitted $z$ as a dotted line.  The program stopped after a short time, when the fitted amplitudes caused overflow when expanded over Fock coefficients.  
-
-The second Figure shows the same simulation, with the states expanded over Fock states $|0〉$ to $|5〉$.  This has a significant effect on the truncated exact solution, adding an extra loop to the amplitude.  The fitting works a bit longer, but still fails at a very short time.
-
-\centerline{\XeTeXpicfile flwc2n10.pdf width \hsize}
-
-\centerline{\XeTeXpicfile flwc2n5.pdf width \hsize}
-
-The next two plots show a different fitting strategy.  Instead of constraining the weights, a cost term was added in quadrature to the Hilbert space distance, proportional to the logarithm of the condition number of $|Dψ(z)〉$ for the fitted $z$.  The constant of proportionality was $10^{-5}$; this was adjusted until a good fit was obtained.  The most apparent thing is that the fit is much more stable: this is being done with timestep 0.1 instead of 0.3, but the fit stays stable for the whole period.  (I had to redraw the initial amplitudes a few times before that happened.)  It isn't a very good fit through the middle of the period: the residual increases to order 1.  The really interesting thing is what happened when, by accident, I truncated the Fock basis at $N=5$.  As before, this perturbs the trajectory in Hilbert space.  However, the perturbed trajectory can be fit very well: the residual is between $10^{-2}$ and $10^{-5}$, and this is done with quite well conditioned superpositions.
-
-So even without stiffness in a discrete time propagation, there is something in the high energy components of $H|ψ〉$ that makes fitting the state with coherent states unstable.  This isn't too surprising: these high energy components are rapidly oscillating, and will by magnified when the inverse problem is solved with fairly smooth, low amplitude coherent states.  To fit the oscillating components, we need coherent states with large amplitudes, and low weights.  But the low weights will increase the condition number of $|Dψ〉$, so the regularisation scheme will avoid these, unless there are many components in the superposition and all their weights are low.  Let's investigate what happens as the number of components and the Fock truncation are varied together.
-
-The things I've noticed so far are:
-\item{1.} When a superposition is iteratively fitted to the exactly propagated state, adding a term to the cost proportional to the Jacobian $|Dψ〉$ keeps the fit stable for an entire cycle.  It isn't accurate, though.
-
-\item{2.} Measuring state differences in a truncated fock space makes the fit stable and accurate.  Of course, the truncated state is different from the original one, so the original state is not fit precisely.  When this was done, the least squares problem involved 6 fock coefficients, and the amplitude vector has 10 elements.  So almost all the truncated problems were underdetermined: some singular values of the Jacobian are exactly zero.  Matlab claims that backslash solves underdetermined problems by giving a solution with as many zero elements as possible.  The documentation doesn't say how it chooses which elements to make zero.  That's different from the other regularisation methods we've tried.  Of course, the problems are being solved inside Matlab's optimisation routine, and I don't know what it's doing.
-
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
 Truncating Fock space has a similar effect to truncating the singular values, assuming the singular directions belonging to small values have large particle numbers.  (And they do: when I plotted their overlaps with coherent states, they formed rings without support at the origin.)  And indeed, the trajectories for the average amplitude change in similar ways due to truncation: they pick up an extra loop in the complex plane.
 
 As the Fock space expands with $N»2R$, there are still only $2R$ singular directions.  Presumably these converge to limits as $N$ increases.  There might be a norm on the matrices $〈N|Dψ〉$, where the truncated elements replaced by zero, that measures this.
 
-\item{3.} The difference between the truncated state and the original one fails to satisfy the Picard condition when with respect to $|Dψ〉$.  What about $H|ψ〉$?
+%% Why grids don't work, and variation necessary
 
-\item{4.} When the least squares problem is solved with a different distance function, which sets distances along the large $N$ directions to zero, the fit fails on the first step.  Note that this isn't really a distance.  Also, I did it by solving $P|h〉=P|Dψ〉dz$; when $P$ truncates the Fock space, the operator $P|Dψ〉$ is singular.  Doing a weighted least squares fit, with the many particle directions having low weights, would be near-singular.
+This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ\rangle$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j\rangle$ approximates $|ψ\rangle$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ\rangle$ which we want to perturb to represent $|ψ\rangle+|dψ\rangle$, is no harder.  Because $G$ is linear, we can expand $|dψ\rangle$, and add it to the expansion of $|ψ\rangle$.
 
+The second problem, the variational one, is a generalisation.  As well as the grid $α_j$, we have a set of weights $f_j$ representing some wavefunction, presumably not $|ψ\rangle$.  Instead of expanding $|ψ\rangle$ over phase space, we want to expand it over the columns of $|Dψ(f,α)\rangle$, the set of all changes we can make by slightly adjusting the original expansion, and the grid.  Obviously, we can solve this problem simply by setting the coefficients of $|∂fψ(f,a)\rangle$ to the solution of the inverse problem, and those of $|∂fψ(f,a)\rangle$ to zero.  Is this the smallest norm solution?  Probably not: if a coherent state was moving in an oscillator, it might be easier to just rotate the $α_j$.
+
+Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ\rangle$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ\rangle$ in the future.
+
+So what are the critera for adjusting the grid?  I think there are two obvious ones: firstly, that the inverse problem stays well-posed.  Otherwise, we're wasting grid points.  Secondly, when we're expanding a derivative over the tangent space $|Dψ\rangle$, we want to tilt the tangent space closer to the derivative.  That's a second order effect, and won't come naturally from a least squares adjustment of $f$ and $α$.  The first criterion seems redundant: if we could better represent the goal by shifting two sample points apart, the second criterion will do that automatically.  However, if we only care about the tangent space and not the derivative map, we might need very large adjustments of the amplitudes and weights to get to the point in the tangent space that we want.  So a condition number criterion seems sensible.  There might be other criteria that I've overlooked.
+
+%% Fock space is cheating
+
+Expanding the quartic oscillator over Fock states allows it to be solved very stably, and as precisely as desired by rotating the phases of the expansion coefficients.  Also, it is easy to find the expansion over Fock states of a superpositon of coherent states.  This means that the stability of time discretisation can be removed from the problem entirely.  The state can be propagated exactly, and the coherent states adjusted to fit.  The most direct way to do so is by nonlinear optimisation at every timestep; Matlab provides the necessary routines in a convenient package.  Unfortunately, this is not at all stable.  
+
+In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis such as the Fock states would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
+
+To do this, we need some bracket matrices.  We have
+$$|Dψ(φ,α)〉=(1,a†)|ψ(φ,α)〉.$$
+The brackets with the number states are
+$$〈m|H/\hbar|n〉=n(n-1)δ_{mn}$$
+and
+$$〈n|Dψ(φ,α)〉=e^φ\pmatrix{{α^n\over \sqrt{n!}} &  α^{n-1}\sqrt{n\over (n-1)!}},$$
+as is the bracket of the quartic oscillator Hamiltonian $a^{2\dagger}a²$
+$$〈n|H/\hbar|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
+
+%% Singular value decompositions
+
+Variational dynamics seeks an expansion $g$ to approximate a quantum state $|ψ〉≈Gg$.  Given the form of Equation~1, this requires solving a Fredholm integral equation of the first kind.  That is the canonical example of an ill-posed problem: rounding and discretisation errors in $|ψ〉$ are magnified enormously in the solution $g$.  To solve these problems, it helps to understand the singular values and vectors of the operator $G$.
+
+The singular value expansion of the linear operator $G$ has the form
+$$Gf = ∑_{j=1}^∞ |g_j〉σ_j〈v_j,f〉,$$
+where the left singular vectors $|g_j〉$ are orthonormal kets, the singular values $σ_j$ are positive real numbers, the right singular vectors $v_j$ are normalised entire functions, and presumably $〈,〉$ is the Bargmann inner product.  This can be written
+$$G = |G〉SV†,$$
+where $|G〉$ is a row vector of the left singular kets, $S$ is a matrix with the singular values along the diagonal, and $V$ maps complex coefficients to linear combinations of the functions $v_j$.
+
+Because the expansions are underdetermined, the set $|g_j〉$ will be complete, but the set $v_j$ will not be.  Alternatively, some of the $v_j$ have zero singular values and no corresponding left singular vector.  One can write a full SVE, where $V†$ is a full expansion, but $S$ truncates the vector of coefficients.
+
+The instability in the dynamics is caused by the near-singularity of $|Dψ〉$.  If a singular value decomposition $|Dψ〉=|U〉SV†$ is taken, the singularity is indicated by small singular values on the diagonal of $S$.  It is often measured by the condition number of $|Dψ〉$, the ratio of the largest to the smallest singular value.  Let $C(z)$ be the condition number of $|Dψ(z)〉$.  As part of the regularisation process, it would be useful to avoid changing $z$ in directions that increase $C(z)$.  For example, if two coherent states had real amplitudes, and the real part of the expected amplitude needed to increase, it would be done by shifting the right hand one away from the left hand one, not the left hand one closer to the right hand.  Is there a way to make a computer do that?
+
+The least squares problem can be solved using the singular value decomposition: to approximate a state $|h〉≈|Dψ(z)〉dz$, we set $dz=VS^{-1}〈U|h〉$.  The first problem is that some of the $σ_i$ on the diagonal of $S$ will be small, because the $|u_i〉$ that correspond to them change different components of the superposition $|ψ(z)〉$ in ways that nearly cancel out.  So a error in the discrete representation of $|h〉$ in the direction $|u_i〉$ will cause a very large error in the least squares $dz$ in the direction $v_i$.   The way to avoid such large errors is to shift the small singular values of $S$ up to a lower bound $ε$, and thus reduce the large singular values of $S^{-1}$ below an upper bound $ε^{-1}$.  There are many and varied ways of doing that. 
+
+%% Picard plots
+
+The singular value expansion is useful for two reasons.  Firstly, the discrete version, the singular value decomposition, is the most stable way to solve badly-posed least squares problems.  Secondly, the sizes of the singular values, and the components of $H|ψ〉$ along the singular directions, determine whether the problem can be solved at all.
+
+The most important issue is the Picard condition.  This restates a very basic observation: for the problem $G\dot f=H|ψ〉$ to have a solution $\dot f$, the expansion of $f$ over an orthonormal basis must have a finite norm.  If the basis is chosen as the right singular vectors $v_j$, this means that the sum of the squared moduli of the components must be finite.  For $\dot f$ to satisfy the equation, the component of $v_j$ is $〈g_j|H|ψ〉/σ_j$.  So the Picard condition is that, for the equation to have a solution, the series
+$$∑_{j=1}^∞{\bigl|〈g_j|H|ψ〉\bigr|²\over σ_j²}$$
+must converge.  The singular values reduce with $j$, by definition; this requires that the components of the left singular vectors reduce somewhat faster.
+
+The variational problem seems to be pretty well-posed: if the initial superposition is the phase space function sampled on a grid, then the state that comes from a variational change in the amplitudes matches $H|ψ〉$ very closely.  I was working in a truncated Fock space; I wonder what happens as the truncation increases, while the grid stays a constant size?  Or alternately, if the grid shrinks while the Fock space stays constant.
+
+%% Adapting the sample points to maintain condition
+
+I'm getting a picture of how the final algorithm will look.  At each timestep, the directions belonging to large singular values of $|Dψ〉$ will be used for variational dynamics.  This can be done by solving at Tychonov conditioned problem, for example.  At the same time, the directions with small singular values will be used to keep the discretisation stable.  I think this requires two things: that $|Dψ〉$ is reasonably well conditioned, and that the angle between $H|ψ〉$ and the span of $|Dψ〉$ is small.  This raises a question: are there singular directions that have little effect on $|ψ〉$, but a large effect on $|Dψ〉$?  This seems likely; for example, shuffling the amplitudes to move two components further apart in phase space, then adjusting the weights so that $|ψ〉$ stays the same.  This could be done by a kind of Tychonov anti-regularisation: we improve the stability as much as we can, while constraining the change in $|ψ〉$.  I might need to constrain the norm of $dz$ too, so that linear approximations hold.
+
+To solving our differential equation, we need to solve an iterated least squares problem.  We need to do so in a way that preserves the condition of $|Dψ〉$.  When we shift $z$ in the direction $v_i$ as $dz=λv_i$, how does this condition number change?  Without loss of generality, it suffices to consider the effect on the smallest and largest singular values, that determine $C(z)$.  Note that $v_1$ and $v_R$ are eigenvectors of the matrix ${\cal V}(z)=〈Dψ(z)|Dψ(z)〉$, belonging to the eigenvalues $σ₁²$ and $σ_R²$; this is a familiar problem in pertubation theory.  Assume for now that we have found $D{\cal V}(z)$—this won't be analytic, so we will need to use real and imaginary parts, or Wirtinger calculus.  The change in $\cal V$ is of the form $d{\cal V}=∂_i{\cal V}(z)λ+∂*_i{\cal V}(z)λ*$, where the partial derivatives are taken in the directions $v_i$.
+
+As is well known in pertubation theory, the change in the eigenvalue $σ₁²$ corresponding to a small change $d{\cal V}$ is $v₁†d{\cal V}v₁$, and similarly for $σ_R²$.  Therefore the change in $C(z)²$ is 
+$$σ_R²v₁†d{\cal V}v₁-σ₁²v_R†d{\cal V}v_R \over σ_R².$$
+Given a proposed change $dz$, we can find the effect on the condition number.
+
+The question is how to apply this to condition the process of finding $dz$.  Given $z$, we can find out which directions of $dz$ correspond to large changes in the condition number.  However,  until we know $dz$, we don't know if these changes help or hurt.  The process might run like this: first, truncate the singular values.  Next, find the components $〈U_i|h〉$, and the corresponding components $v_iσ_i〈U_i|h〉$ of $dz$, given the truncation.  Then, truncate the components that will cause $C(z)$ to increase to values that limits the increase to an acceptable amount.
+
+I've figured out how to find the change in the condition number by pertubation theory.  That does require knowing the largest and smallest singular directions of $|Dψ〉$; perhaps there is a way to approximate them without finding an SVD.  How do I find the angle between $H|ψ〉$ and the space $|ψ〉$ can move in?  This seems to require shifting $z$ along each singular direction, solving the shifted least-squares problem, and comparing the residuals.  Is there a better way?
+
+The accuracy of the pertubation method is shown below.  The state is coherent, with ampltiude 2.  It was sampled at 5 amplitudes, shown on the left hand plot.  The weights were assigned by inverting the discretised $G$ operator on these sample points, with small singular values truncated by Matlab's {\tt pinv} function.  The the moduli of the resulting weights are shown in the right hand plot.  This method of fitting usually gives a Hilbert space residual around 0.01.
+
+The lower plot shows how the smallest singular value of the discrete $G$ changes, as the sample points are shifted.  The black lines show changes in the real parts of the amplitudes, the red lines in the imaginary parts.  The dotted black line shows the derivatives for the real parts calculated by pertubation theory, as follows.  The derivatives of the matrix $〈N|G|A〉$  with respect to each real part were computed by symmetric difference, with $h=0.01$.  Here, $|Α〉=(|α₁〉 |α₂〉 \cdots |α_R〉)$.  A matrix 
+$$M=\pmatrix{0 & 〈N|G|A〉\cr 〈A|G|N〉 & 0}$$
+was constructed; by substituting $〈N|G|A〉=USV†$, it is clear that the vector
+$$x={1\over √2}\pmatrix{u_R \cr v_R}$$
+is an eigenvector, with eigenvalue $σ_R$, and norm 1.  (Provided $N+1>R$.)  From first-order pertubation theory, the derivative of this eigenvalue with respect to amplitude $i$ is
+$$∂_i σ_i=x†∂_iMx.$$
+As shown in the plots, lines of this slope fit the singular value very well.
+
+\centerline{\XeTeXpicfile psfa.pdf width \hsize}
+
+\centerline{\XeTeXpicfile psv.pdf width \hsize}
+
+Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as the value of $z$ varies by $0.1$ in every direction.  The top line shows the effects of changing $φ$, the bottom line $α$, components are shown left to right.  Changes to real parts are black, imaginary parts red.  There are a few things to note.  The condition is very bad, with number $1.4×10^{11}$.  This is entirely due to the similar amplitudes of components 1 and 3: those graphs are on a different scale to the others, and it's logarithmic.  As they move closer and become identical, the condition number increases $10^{14}$.  No doubt it would go higher if we sampled the graphs more finely, but this is huge—reciprocal floating point epsilon is $5×10^{15}$.  If the separation between these components is doubled, the condition number improves by an order of magnitude.
+
+\centerline{\XeTeXpicfile j1.pdf width \hsize}
+
+\centerline{\XeTeXpicfile j2.pdf width \hsize}
+
+The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
+
+%% Shape of Hilbert space trajectories
+
+If Hilbert space is considered as a real vector space, complex multiples of the eigenstates of the Hamiltonian form planes instead of lines.  The eigenstates evolve as $e^{iωt}$, so, when the dynamics are projected onto an eigenplane, the state traces out a circle, with radius equal to the absolute value of the the coefficient of the eigenstate when the initial state is expanded.  Different eigenstates circle the origin with different frequencies.
+
+The semi-implicit formula has a special property: when the trajectory of $u(t)$ is a circle, the $vⁿ$ lie exactly on that circle, and the discretisation error is equivalent to rescaling time by a factor that depends on the frequency and the discrete timestep.  In Hilbert space, this means that the projections of the state onto eigenplanes still circle the origin exactly: only the frequencies are altered by discretisation.  So the effect of discretising quantum dynamics using the semi-implicit formula is merely to shift the energies of the eigenstates.  Of course, this can be a significant effect: it's the only difference between the harmonic and quartic oscillators.
+
+%% Discrete time and stiffness
 
 I used three discretisation formulae for ODE, with different regions of stability.  As a first step, the Hamiltonian and a coherent state with real amplitude 2 was expanded over Fock states $|0〉$ through $|10〉$, and the resulting equations for the components solved directly.  The Hamiltonian is
 $$H=\hbar a^{2\dagger}a²,$$
@@ -208,15 +240,22 @@ A third method is the semi-implicit one, with the formulae
 $$v^{\prime n}=vⁿ+½τf^{\prime n}\qquad v^{n+1}=vⁿ+τf^{\prime n}.$$
 With the Hamiltonian, this becomes
 $$c^{n+1}=cⁿ-iτH\biggl(1+{iτ\over 2}H\biggr)^{-1}cⁿ.$$
-If Hilbert space is considered as a real vector space, complex multiples of the eigenstates of the Hamiltonian form planes instead of lines.  The eigenstates evolve as $e^{iωt}$, so, when the dynamics are projected onto an eigenplane, the state traces out a circle, with radius equal to the absolute value of the the coefficient of the eigenstate when the initial state is expanded.  Different eigenstates circle the origin with different frequencies.
-
-The semi-implicit formula has a special property: when the trajectory of $u(t)$ is a circle, the $vⁿ$ lie exactly on that circle, and the discretisation error is equivalent to rescaling time by a factor that depends on the frequency and the discrete timestep.  In Hilbert space, this means that the projections of the state onto eigenplanes still circle the origin exactly: only the frequencies are altered by discretisation.  So the effect of discretising quantum dynamics using the semi-implicit formula is merely to shift the energies of the eigenstates.  Of course, this can be a significant effect: it's the only difference between the harmonic and quartic oscillators.
 
 The solutions from method 3 provide a test of the stiffness of the ODEs defined in parameter space by the least squares problem.  The step in Hilbert space is very nearly the same from one time step to the next.  If the step in parameter space changes dramatically, this would suggest that the variational solution is very sensitive to the state, and thus to some of the parameters.  This would indicate that the ODEs are stiff.
 
-The initial state was the ground state of the Morse oscillator potential, given various momentum kicks.  The number of components in the superposition representing this was varied.  The initial superposition was found by the AMPL optimisation program, with the constraint that no component would have a weight less that ?.
+The following graphs show a coherent state, with real amplitude 2, propagating in a quartic oscillator potential.  The propagation was done exactly, in a Fock space truncated at $|19〉$; at times $π/10, π/5, 3π/10,\ldots,π$, a 10 component superposition was fit to the state by the routine {\tt cohfit5}.  The SVD of $|Dψ〉$ was computed for each of these superpositions, and the Picard condition investigated.  It appears that this discretisation is inherently ill-posed.
 
-I want to measure the numerical stability of the variational dynamics derived from Schrödinger's equation.  I can do that by measuring how the discretisation error converges as the timestep is reduced.  The second hypothesis is that the instability is due to stiffness, which can be tested by discretising time in ways with a variety of stability regions, and seeing whether the stability differs.
+\centerline{\XeTeXpicfile spsns.pdf width \hsize}
+Amplitudes of components
+
+\centerline{\XeTeXpicfile traj.pdf width \hsize}
+Left: expectation value $〈a〉$ at sampled times.  Right: residual of fit by superposition (solid) and condition number of Jacobian of fitted superposition (dotted)
+
+\centerline{\XeTeXpicfile picard.pdf width \hsize}
+Picard plots at fitted times.  Circles are singular values, crosses components of LSVs, red stars components of RSVs.  The discrete Picard condition is clearly not satisfied.
+
+\centerline{\XeTeXpicfile svnum.pdf width \hsize}
+Expected particle number for left singular vectors.  The svs with small sws have large particle number.  When $H$ is quartic, these have large components in $H|ψ〉$.  In order for the svs to be orthogonal, the points are likely to lie around the line ${\rm sv}=n$.
 
 In the second choice, the state is approximated as a superposition of coherent states,
 $$|ψ(z(t))〉=∑_{φ,α∈z(t)}e^{φ+αa†}|0〉=∑_{φ,α∈z(t)}e^{φ+½|α|²}|α〉.$$
@@ -234,44 +273,43 @@ The midpoint formula is used exactly, and $fⁿ$ satisfies the least squares pro
 $$〈N|Dψ(zⁿ)〉fⁿ≈-i〈N|Dψ(zⁿ)〉{H\over \hbar}|ψ(zⁿ)〉.$$
 Usually, this would be expanded over $〈Dψ(zⁿ)|$ to give a set of normal equations.  However, when $|Dψ(zⁿ)〉$ is near singular, the numerical stability of the normal equations is suspect.  Expanding over an orthonormal basis removes this confounding instability.
 
-To do this, we need some bracket matrices.  We have
-$$|Dψ(φ,α)〉=(1,a†)|ψ(φ,α)〉.$$
-The brackets with the number states are
-$$〈m|H/\hbar|n〉=n(n-1)δ_{mn}$$
-and
-$$〈n|Dψ(φ,α)〉=e^φ\pmatrix{{α^n\over \sqrt{n!}} &  α^{n-1}\sqrt{n\over (n-1)!}},$$
-as is the bracket of the quartic oscillator Hamiltonian $a^{2\dagger}a²$
-$$〈n|H/\hbar|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
+\centerline{\XeTeXpicfile flwc0n10.pdf width \hsize}
 
-The instability in the dynamics is caused by the near-singularity of $|Dψ〉$.  If a singular value decomposition $|Dψ〉=|U〉SV†$ is taken, the singularity is indicated by small singular values on the diagonal of $S$.  It is often measured by the condition number of $|Dψ〉$, the ratio of the largest to the smallest singular value.  Let $C(z)$ be the condition number of $|Dψ(z)〉$.  As part of the regularisation process, it would be useful to avoid changing $z$ in directions that increase $C(z)$.  For example, if two coherent states had real amplitudes, and the real part of the expected amplitude needed to increase, it would be done by shifting the right hand one away from the left hand one, not the left hand one closer to the right hand.  Is there a way to make a computer do that?
+\centerline{\XeTeXpicfile flwc0n5.pdf width \hsize}
 
-The least squares problem can be solved using the singular value decomposition: to approximate a state $|h〉≈|Dψ(z)〉dz$, we set $dz=VS^{-1}〈U|h〉$.  The first problem is that some of the $σ_i$ on the diagonal of $S$ will be small, because the $|u_i〉$ that correspond to them change different components of the superposition $|ψ(z)〉$ in ways that nearly cancel out.  So a error in the discrete representation of $|h〉$ in the direction $|u_i〉$ will cause a very large error in the least squares $dz$ in the direction $v_i$.   The way to avoid such large errors is to shift the small singular values of $S$ up to a lower bound $ε$, and thus reduce the large singular values of $S^{-1}$ below an upper bound $ε^{-1}$.  There are many and varied ways of doing that. 
+The above plots show my first attempt at this.  The initial state was coherent, with real amplitude 2.  A superposition of 5 coherent states was initialised with amplitudes normally distributed around 2, the norm of the superposition being 1, and the components having equal norms.  This superposition was fit to the coherent state by minimising their distance in Hilbert space; for stability, the weights were constrained so that no component had a norm less than 0.1.  This was done by the Matlab routine {\tt fmincon}.  The initial state was truncated to Fock states $|0〉$ to $|10〉$, and propagated exactly in a Hamiltonian $\hbar a^{2\dagger}a²$ with timestep 0.03.  After each step, the fitting of the superposition to the exact state was repeated.
 
-To solving our differential equation, we need to solve an iterated least squares problem.  We need to do so in a way that preserves the condition of $|Dψ〉$.  When we shift $z$ in the direction $v_i$ as $dz=λv_i$, how does this condition number change?  Without loss of generality, it suffices to consider the effect on the smallest and largest singular values, that determine $C(z)$.  Note that $v_1$ and $v_R$ are eigenvectors of the matrix ${\cal V}(z)=〈Dψ(z)|Dψ(z)〉$, belonging to the eigenvalues $σ₁²$ and $σ_R²$; this is a familiar problem in pertubation theory.  Assume for now that we have found $D{\cal V}(z)$—this won't be analytic, so we will need to use real and imaginary parts, or Wirtinger calculus.  The change in $\cal V$ is of the form $d{\cal V}=∂_i{\cal V}(z)λ+∂*_i{\cal V}(z)λ*$, where the partial derivatives are taken in the directions $v_i$.
+The results are shown in the first Figure.  The left hand plot shows the complex amplitude of the exact solution in black, and the fitted solution in blue.  The right hand plot shows the residual of the fit as a solid line, and the condition number of $|Dψ(z)〉$ at the fitted $z$ as a dotted line.  The program stopped after a short time, when the fitted amplitudes caused overflow when expanded over Fock coefficients.  
 
-As is well known in pertubation theory, the change in the eigenvalue $σ₁²$ corresponding to a small change $d{\cal V}$ is $v₁†d{\cal V}v₁$, and similarly for $σ_R²$.  Therefore the change in $C(z)²$ is 
-$$σ_R²v₁†d{\cal V}v₁-σ₁²v_R†d{\cal V}v_R \over σ_R².$$
-Given a proposed change $dz$, we can find the effect on the condition number.
+The second Figure shows the same simulation, with the states expanded over Fock states $|0〉$ to $|5〉$.  This has a significant effect on the truncated exact solution, adding an extra loop to the amplitude.  The fitting works a bit longer, but still fails at a very short time.
 
-The question is how to apply this to condition the process of finding $dz$.  Given $z$, we can find out which directions of $dz$ correspond to large changes in the condition number.  However,  until we know $dz$, we don't know if these changes help or hurt.  The process might run like this: first, truncate the singular values.  Next, find the components $〈U_i|h〉$, and the corresponding components $v_iσ_i〈U_i|h〉$ of $dz$, given the truncation.  Then, truncate the components that will cause $C(z)$ to increase to values that limits the increase to an acceptable amount.
+\centerline{\XeTeXpicfile flwc2n10.pdf width \hsize}
 
-Coding this will be quite involved, and the result might not be very efficient.  However, if it allows physically chosen bases to be used in  variational simulations, it is likely to be worthwhile.
+\centerline{\XeTeXpicfile flwc2n5.pdf width \hsize}
 
-\centerline{\XeTeXpicfile j1.pdf width \hsize}
+The next two plots show a different fitting strategy.  Instead of constraining the weights, a cost term was added in quadrature to the Hilbert space distance, proportional to the logarithm of the condition number of $|Dψ(z)〉$ for the fitted $z$.  The constant of proportionality was $10^{-5}$; this was adjusted until a good fit was obtained.  The most apparent thing is that the fit is much more stable: this is being done with timestep 0.1 instead of 0.3, but the fit stays stable for the whole period.  (I had to redraw the initial amplitudes a few times before that happened.)  It isn't a very good fit through the middle of the period: the residual increases to order 1.  The really interesting thing is what happened when, by accident, I truncated the Fock basis at $N=5$.  As before, this perturbs the trajectory in Hilbert space.  However, the perturbed trajectory can be fit very well: the residual is between $10^{-2}$ and $10^{-5}$, and this is done with quite well conditioned superpositions.
 
-To test this idea, a five component superposition was fit to an amplitude 2 coherent state.  The Hilbert space residual was $1.3×10^{-3}$.  The amplitudes and norms of the components are shown above; the fitting routine constrained the norm of each component to be at least 0.1.  Note that components 1 and 3 ended up with very similar amplitudes.
+So even without stiffness in a discrete time propagation, there is something in the high energy components of $H|ψ〉$ that makes fitting the state with coherent states unstable.  This isn't too surprising: these high energy components are rapidly oscillating, and will by magnified when the inverse problem is solved with fairly smooth, low amplitude coherent states.  To fit the oscillating components, we need coherent states with large amplitudes, and low weights.  But the low weights will increase the condition number of $|Dψ〉$, so the regularisation scheme will avoid these, unless there are many components in the superposition and all their weights are low.  Let's investigate what happens as the number of components and the Fock truncation are varied together.
 
-Below is a plot of the condition number of $|Dψ(z)〉$ for this superposition, as the value of $z$ varies by $0.1$ in every direction.  The top line shows the effects of changing $φ$, the bottom line $α$, components are shown left to right.  Changes to real parts are black, imaginary parts red.  There are a few things to note.  The condition is very bad, with number $1.4×10^{11}$.  This is entirely due to the similar amplitudes of components 1 and 3: those graphs are on a different scale to the others, and it's logarithmic.  As they move closer and become identical, the condition number increases $10^{14}$.  No doubt it would go higher if we sampled the graphs more finely, but this is huge—reciprocal floating point epsilon is $5×10^{15}$.  If the separation between these components is doubled, the condition number improves by an order of magnitude.
+The things I've noticed so far are:
+\item{1.} When a superposition is iteratively fitted to the exactly propagated state, adding a term to the cost proportional to the Jacobian $|Dψ〉$ keeps the fit stable for an entire cycle.  It isn't accurate, though.
 
-\centerline{\XeTeXpicfile j2.pdf width \hsize}
+Measuring state differences in a truncated fock space makes the fit stable and accurate.  Of course, the truncated state is different from the original one, so the original state is not fit precisely.  When this was done, the least squares problem involved 6 fock coefficients, and the amplitude vector has 10 elements.  So almost all the truncated problems were underdetermined: some singular values of the Jacobian are exactly zero.  Matlab claims that backslash solves underdetermined problems by giving a solution with as many zero elements as possible.  The documentation doesn't say how it chooses which elements to make zero.  That's different from the other regularisation methods we've tried.  Of course, the problems are being solved inside Matlab's optimisation routine, and I don't know what it's doing.
 
-The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
+%% The complete algorithm
 
-The experiment with following the exact solution by nonlinear optimisation was repeated.  Instead of constraining the weights of the components, the logarithm of the condition number of the derivative was added in quadrature to the residual of the fit to give a cost.  This worked much better, getting stably to $t=0.4$ instead of under 0.1.  At that point, the residuals increased to order 1, and the superposition stopped following the exact solution.  This cold mean that 5 components weren't enough to represent those states, except that the same thing happened with 10 components.
+The final algorithm would propagate $|ψ〉$ in Hilbert space by a semi-implicit method, solving a variational problem to represent each state.  This is a slight generalisation, because you need to project $H|ψ_{n+½}〉$ in to the span of $|Dψ_n〉$, and the ensembles at the two times are slightly different.  It might help to propagate from $n$ to $n+½$ by changing only weights, leaving the same ensemble.  On the other hand, the change is only that the $α*$ become $β*$, so it should be managable.
 
-Note that the optimisation is a nonlinear least squares problem, and special solvers exist for this case.
+There shouldn't be an need for fancy methods to fit the initial state: one can take a guess $z₀$, and variationally solve the equation $|Dψ(z)〉dz=|ψ₀〉-|ψ(z)〉$.  One could even change the conditioning rules as the state propagates, so that $|Dψ〉$ is aligned with $|ψ₀〉-|ψ(z)〉$ to start with, then with $H|ψ(z)〉$ later on.  That way, you start the actual simulation with a well conditioned approximant.
 
-Some furt
+%% Numerical experiments
+
+I want to measure the numerical stability of the variational dynamics derived from Schrödinger's equation.  I can do that by measuring how the discretisation error converges as the timestep is reduced.  The second hypothesis is that the instability is due to stiffness, which can be tested by discretising time in ways with a variety of stability regions, and seeing whether the stability differs.
+
+
+%%%%
+
+\item{4.} When the least squares problem is solved with a different distance function, which sets distances along the large $N$ directions to zero, the fit fails on the first step.  Note that this isn't really a distance.  Also, I did it by solving $P|h〉=P|Dψ〉dz$; when $P$ truncates the Fock space, the operator $P|Dψ〉$ is singular.  Doing a weighted least squares fit, with the many particle directions having low weights, would be near-singular.
 
 
 \bye

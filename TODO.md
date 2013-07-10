@@ -11,11 +11,15 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
+5. Julia: lazily initialized matrices.  latrix.jl.  Trap on index errors.
+
+1. Compute the direction where σ_R increases most rapidy with respect to the change in |ψ(z)〉.  From a random initial sampling, drift in that direction at a constant rate of change of |ψ(z)〉.  See what happens.
+
 0. Look at the conditioning of G and |Dψ〉 sampled on random grids.
 
-1. Look at the difference between large singular directions of the expansion and variational problems.  (Say, operator distances between low-rank approximations.)
+2. Debug rejection sampling, perhaps separate it from cohfit.
 
-2. Check that first-order pertubation theory approximates the derivative of condition number.
+1. Look at the difference between large singular directions of the expansion and variational problems.  (Say, operator distances between low-rank approximations.)
 
 1. Try to solve the H=0 problem, while improving the condition of Dψ
 
