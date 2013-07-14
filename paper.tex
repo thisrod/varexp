@@ -61,6 +61,7 @@ The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}
 
 Assuming that there is no way to expand a state with a smaller norm than a Gaussian entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
 
+
 %% Consequences of lemma
 
 To sum up, this analysis shows that $G$ is a projector.  Therefore, if the amplitudes of the coherent states are held constant, and the discretised problem is solved by adjusting their weights, the solutions that come from an SVD should be very stable indeed.  This might depend somewhat on how evenly the amplitudes are spaced: I could start with a regular grid, and add Gaussian noise to see what changed.
@@ -74,6 +75,18 @@ It turns out that complex convolutions are not like real convolutions: the imagi
 If the Hypothesis is right, the Picard condition is very obviously satisfied.  The operator $G$ is a projection.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm.  Functions in the null space of $G$ don't correspond to left singular vectors, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
 
 %% Discrete phase space
+
+We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$.  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
+
+Since there are only $R$ weights to adjust, the condition $|\vec g|=|g|$ can be satisfied only for $R$ linearly independent functions $g_r$.  The obvious choice is $g_r(α*)=(〈α_r|G^+)(α*)=〈α|α_r〉=\exp(-½|α|²-½|α_r|²+α*α_r)$, with $|\hat g_r^s|²=w_s²\exp(-|α_s-α_r²)$, and $|g_r|²=π$.  The condition becomes
+$$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
+	e^{-|α₂-α₁|²} & 1 &  & e^{-|α₂-α_R|²} \cr
+	& & \ddots & \cr
+	e^{-|α_R-α₁|²} & e^{-|α_R-α₂|²} & & 1}
+\pmatrix{w₁²\cr w₂²\cr\vdots\cr w_R²}
+= \pmatrix{π\cr π\cr\vdots\cr π}.
+$$
+Unfortunately, for random samples $A$, this tends not to have a solution: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
 
 The obvious discrete version of the problem, where the state is approximated by a finite linear combination of coherent states, doesn't relate to the continuous problem in an obvious way.  The weights of the components don't simple sample $f(α)$: they also adjust for how close the sample points are, and how much the $|α_i〉$ overlap.  The operator $G$ is probably being disceretised by some kind of Galerkin formula; I don't know what the basis functions are in phase space and Hilbert space.
 
@@ -90,6 +103,20 @@ There are two types of ill-posed problems, rank-deficient and discrete.  They ar
 I've been assuming that the variational problem is discrete, because it comes from a discretisation of an integral equation.  However, the integral equation is a complex convolution, and for some values of the complex amplitude, the kernel oscillates arbitrarily sharply.  This is the same sort of integral equation as the Fourier transform, where we know $f(t)$, and want to find $F(ω)$ such that
 $$f(t)=\int F(ω)e^{iωt}\,dω.$$
 This also has a kernel that oscillates at a rate proportional to $ω$, and it also has very stable solutions.  (What is the SVD of the DFT matrix?  It's ${\rm anything}×1×{\rm FT anything}$: Rayleigh theorem.)
+
+A numerical example is shown below.  The state $|ψ〉$ is the Schrödinger cat that a coherent state becomes after half a cycle in a quartic oscillator; the amplitude of the initial coherent state was $2$.  A set of 40 sample amplitudes $α_r$ was drawn from the probability distribution $|g(a*)|²$, where $g=G⁺|ψ〉$.  These are plotted below, as circles in phase space.  For smaller ensembles, the results were not consistent between draws.
+
+\centerline{\XeTeXpicfile cats.pdf width \hsize}
+
+The next Figure is a Picard plot for the Galerkin discretisation $〈A|A〉f=〈A|ψ〉$, where $f$ is a vector of weights such that $|A〉f$ approximates $|ψ〉$.  Below it is a plot of the expansions over number states of the singular kets $〈n|u_r〉$, where $|A〉=|U〉SV$.  For the kets to be orthogonal, $|u_r〉$ must have support close to $n=r$.  The components of the cat have coherent amplitude 2, so their largest number component is $n=4$, and the components drop quickly as $n$ increases further.  Above $r=15$, the singular ket $|u_r〉$ has very small components on these number states, so it hardly overlaps $|ψ〉$.  At the same time, the singular kets start to have particle numbers too large to be consistent with the sample amplitudes $α_r$, so the singular values decrease.  In fact, they decrease more rapidly than the components of $|ψ〉$, and the discrete Picard condition is not satisfied.  Seeing that $G$ is perfectly conditioned, this is a very bad discretisation.
+
+The final graph is an L curve when the discrete problem is Tychonov regularised.  It shows the expected shape, with minimum residual around $2×10^{-8}$.  Six regularised solutions are shown above; the modulus of $f_r$ is the disk's saturation, and the phase determines its hue.  Note that least norm regularisation has the desirable property that adjacent $α_r$ have similar $f_r$: the least norm solution to $a+b+c=X$ is $a=b=c=X/3$.
+
+\centerline{\XeTeXpicfile catpicard.pdf width \hsize}
+
+\centerline{\XeTeXpicfile catsws.pdf width \hsize}
+
+\centerline{\XeTeXpicfile catl.pdf width \hsize}
 
 %% Truncated Hilbert space
 
