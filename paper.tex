@@ -231,6 +231,17 @@ As shown in the plots, lines of this slope fit the singular value very well.
 
 Given the gradient $Dσ_R$, we wish to find a direction where $σ_R$ increases most rapidly for a given change in $|ψ〉$.  Given a small change $|dψ〉$ lying in the tangent plane, the corresponding change in $z$ is given by $dz=〈Dψ^{+}|dψ〉$, where $〈Dψ^{+}|$ is the pseudoinverse of $|Dψ〉$.  The change in $σ_R$ is $dσ_R=Dσ_Rdz=Dσ_R〈Dψ^{+}|dψ〉$.  So the gradient direction in Hilbert space is $|Dψ^{+}〉Dσ_R†$; the corresponding direction in $z$ space is $〈Dψ^{+}|Dψ^{+}〉Dσ_R†$.  In terms of the SVD $|Dψ〉=|U〉SV†$, this is $〈U|S^{-2}|U〉Dσ_R†$.  Here, $|ψ〉$ is considered a function of $4R$ real variables instead of $2R$ complex ones.
 
+There are now three goals for optimisation of $\dot z$:
+\item{1.} The ket $|ψ(z)〉$ solves Schrödinger's equation.  I.e., $|Dψ(z)〉\dot z=H|ψ(z)〉$.
+\item{2.} Singular vectors of $|Dψ〉$ belonging to small singular values do not dominate the solution.  This is controlled by a Tychonov condition, $\dot z=0$, or perhaps by truncation.
+\item{3.} The condition of $|A(z)〉$ improves.  This can be set up as a least squares condition $Dσ_R(z)\dot z+Cσ_R(z)\dot z*=|σ_R||\dot z|_{\rm opt}$, given a desired rate of change of $z$.  No doubt there is a better way.
+
+Putting these conditions together, with regularisation parameters $λ$ and $ε$, gives the problem
+$$\pmatrix{|Dψ(z)〉& 0 \cr λI & 0 \cr Dσ_R(z) & Cσ_R(z)}
+	\pmatrix{\dot z\cr \dot z*} =
+	\pmatrix{H|ψ(z)〉\cr 0\cr |σ_R||\dot z|_{\rm opt}}.$$
+This raises a technical problem, because we need to constrain $\dot z*$ to be the conjugate of $\dot z$.  Alternatively, if we write $z=x+iy$, we need to solve a complex least squares problem under the constraint that the solution is real.  Neither of those sounds trivial, but it shouldn't be impossible.
+
 Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as the value of $z$ varies by $0.1$ in every direction.  The top line shows the effects of changing $φ$, the bottom line $α$, components are shown left to right.  Changes to real parts are black, imaginary parts red.  There are a few things to note.  The condition is very bad, with number $1.4×10^{11}$.  This is entirely due to the similar amplitudes of components 1 and 3: those graphs are on a different scale to the others, and it's logarithmic.  As they move closer and become identical, the condition number increases $10^{14}$.  No doubt it would go higher if we sampled the graphs more finely, but this is huge—reciprocal floating point epsilon is $5×10^{15}$.  If the separation between these components is doubled, the condition number improves by an order of magnitude.
 
 \centerline{\XeTeXpicfile j1.pdf width \hsize}

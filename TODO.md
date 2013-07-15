@@ -15,9 +15,7 @@ Tasks
 
 1. Compute the direction where σ_R increases most rapidy with respect to the change in |ψ(z)〉.  From a random initial sampling, drift in that direction at a constant rate of change of |ψ(z)〉.  See what happens.
 
-0. Look at the conditioning of G and |Dψ〉 sampled on random grids.
-
-2. Debug rejection sampling, perhaps separate it from cohfit.
+0. Look at the conditioning of G and |Dψ〉 sampled on random grids.  Compare to conditioning on an even grid, as that grid becomes sparser, and more random points are added.
 
 1. Look at the difference between large singular directions of the expansion and variational problems.  (Say, operator distances between low-rank approximations.)
 
@@ -25,41 +23,13 @@ Tasks
 
 1. Investigate the conditioning of the variational problem as a phase space grid shrinks smaller than the Fock space.
 
-2. Do variational dynamics, using the large 〈u_i|H|ψ〉 directions to solve the problem, and the small ones to improve the condition of |Dψ〉 and the angle between H|ψ〉 and the span of |Dψ〉.
-
-2. Prove hypothesised SVE of G.  Note that polynomials in z and z* span functions of a complex variable: could show that the non-constant z* ones annihilate G.
-
-0. Try evolving the α to reduce the condition number of the current ensemble, then solve the least squares problem by adjusting the φ.
+2. Prove hypothesised SVE of G.  Note that polynomials in z and z* span functions of a complex variable: could show that the non-constant z* ones annihilate G.  (Check Bargmann first.)
 
 1. Find a way to automatically set the weight of the condition number
 
-2. Test large superpositions propagated step to step, not randomly drawn
-
-2. Test how the condition number of the jacobian varies for states near those fitted to the exact oscillator states.
-
-2. Test the Picard condition for H|ψ(z)〉=|Dψ(z)〉dz, for states fitted to the exact oscillator states.
-
-1. Average particle number of singular vectors vs singular value
-
 2. Why does truncating the Fock space make things better, while ignoring the distance components along those axes makes things worse?
 
-0. Track the states and condition number gradients in follow.
-
-0. Play with optimisation options to speed it up, or give up earlier.
-
-2. Vary the singular-value truncation threshold
-
-2. Test if chasing the exact solution converges when more components are added.
-
-3. Tidy up dry.py
-
-0. Derive details of backward Euler and semi-implicit method 2.
-
 1. Find out how people usually handle stiffness in the method of lines.
-
-6. Experiment with speed of sparse diagonal matrices
-
-6. Experiment with speed of generators vs. matrix multiplication
 
 3. Check that Methods 2 and 3 actually differ.
 
@@ -67,13 +37,7 @@ Tasks
 
 2. Derive the brackets 〈N|H|N〉 and 〈N|H|ψ〉 for the Morse oscillator.
 
-3. Choose time discretisations to compare.
-
-4. Find sensible discretisations of the initial state for the quartic oscillator using AMPL.
-
-5. Derive momentum-kicked ground state of Mores oscillator
-
-4. Find sensible discretisations for the Morse oscillator using AMPL.
+5. Derive momentum-kicked ground state of Morse oscillator
 
 Topics to write
 =====
