@@ -76,7 +76,7 @@ If the Hypothesis is right, the Picard condition is very obviously satisfied.  T
 
 %% Discrete phase space
 
-We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$.  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
+We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$, corresponding to a row of kets $|A〉=\bigl(|α₁〉\ ⋯\ |α_R〉\bigr).  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
 
 Since there are only $R$ weights to adjust, the condition $|\vec g|=|g|$ can be satisfied only for $R$ linearly independent functions $g_r$.  The obvious choice is $g_r(α*)=(〈α_r|G^+)(α*)=〈α|α_r〉=\exp(-½|α|²-½|α_r|²+α*α_r)$, with $|\hat g_r^s|²=w_s²\exp(-|α_s-α_r²)$, and $|g_r|²=π$.  The condition becomes
 $$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
@@ -122,7 +122,19 @@ The final graph is an L curve when the discrete problem is Tychonov regularised.
 
 I still haven't thought in detail about the results with truncated Fock spaces.  Obviously, when we restrict the domain of $G$ to the lowest $N$ energy levels, the restricted operator has at most $N$ singular directions.  Since the low energy levels are the ones a restricted grid tends to represent, those singular directions will have relatively large singular values.  So when we do this, we get a well-posed problem, but we lose the ability to add components with small singular values, in order to expand the states we'll get in the future.  And in fact, by solving the inverse problem, we can always get a nice solution in any case.  Numerical experiments suggest that the variational problem is quite well posed for a single step, too.
 
-The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.  Numerical experiments in the script {\tt sve.m} support this.  The operator $G$ was discretised on a grid in phase space, with spacing $h=0.3$, and various extents shown in the graphs.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|10〉$.  The graph below shows the singular values of the discretised operator converging to $π^{-½}$, as the extent of the grid passes through $|α|²=10$.
+The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.  This can also be seen from the expansions of coherent states.  The normalised entire expansion of $|α〉$ is
+$$g(β*)=〈β|α〉=e^{-½|α|²-½|β|²+β*α},$$
+whence
+$$\|g\|²=\int |g(β)|²\,d²β=\int e^{-|β-α|²}\,d²β=π.$$
+The norm of $|α〉$ is of course 1.  If we used the Bargmann space, we could easily absorb the $π$ into the inner product, and make $G$ a generalised projector.
+
+The lemma gives a very simple singular value expansion of $G$.  Because there is only one nonzero singular value, any orthonormal basis of ket space will do as the left singular vectors.  Let's choose the number states for familiarity.  Then
+$$Gg=∑_n |n〉π\int ν_n*(α)g(α)\,d²α=|N〉π\int ν*(α)g(α),$$
+where $|N〉=\bigl(|0〉\ |1〉\ |2〉\ …\bigr)$ and $ν(α)=\bigl(ν₀(α)\ ν₁(α)\ …\bigr)$ could be thought of as infinite matrices whose columns are the left singular vectors $|n〉$ and their normalised entire expansions, the right singular vectors $v_n$.  The pesudoinverse, 
+$$G⁺|ψ〉=νπ〈N|ψ〉= ∑_n ν_nπ〈n|ψ〉,$$
+maps $|ψ〉$ to its normalised entire expansion.  Expanding over number states is useful because the maximum number in a system is usually limited by conservation of energy.  In real systems, the components decay exponentially with $n$, and become smaller than numerical rounding errors at reasonably small numbers.
+
+Numerical experiments in the script {\tt sve.m} support this.  The operator $G$ was discretised on a grid in phase space, with spacing $h=0.3$, and various extents shown in the graphs.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|10〉$.  The graph below shows the singular values of the discretised operator converging to $π^{-½}$, as the extent of the grid passes through $|α|²=10$.
 
 \centerline{\XeTeXpicfile svgrid.pdf width \hsize}
 
