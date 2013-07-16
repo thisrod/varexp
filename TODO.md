@@ -11,6 +11,8 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
+0. Watch the change from the variational problem to the expansion one as the Tychonov cost of |dα|² increases.
+
 5. Julia: lazily initialized matrices.  latrix.jl.  Trap on index errors.
 
 1. Compute the direction where σ_R increases most rapidy with respect to the change in |ψ(z)〉.  From a random initial sampling, drift in that direction at a constant rate of change of |ψ(z)〉.  See what happens.

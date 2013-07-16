@@ -209,21 +209,40 @@ To solving our differential equation, we need to solve an iterated least squares
 
 As is well known in pertubation theory, the change in the eigenvalue $σ₁²$ corresponding to a small change $d{\cal V}$ is $v₁†d{\cal V}v₁$, and similarly for $σ_R²$.  Therefore the change in $C(z)²$ is 
 $$σ_R²v₁†d{\cal V}v₁-σ₁²v_R†d{\cal V}v_R \over σ_R².$$
-Given a proposed change $dz$, we can find the effect on the condition number.
+Given a proposed change $dz$, we can find the effect on the condition number.  However, it would be simpler to constrain the smallest singular value, and likely just as effective.
 
-The question is how to apply this to condition the process of finding $dz$.  Given $z$, we can find out which directions of $dz$ correspond to large changes in the condition number.  However,  until we know $dz$, we don't know if these changes help or hurt.  The process might run like this: first, truncate the singular values.  Next, find the components $〈U_i|h〉$, and the corresponding components $v_iσ_i〈U_i|h〉$ of $dz$, given the truncation.  Then, truncate the components that will cause $C(z)$ to increase to values that limits the increase to an acceptable amount.
+Let 
+$$|A(α)〉=(|α₁〉 |α₂〉 \cdots |α_R〉)=(\cdots e^{-½|α_r|²+α_ra†}\cdots)|0〉.$$
+This is not an analytic function, so there is no Cauchy derivative such that $|A(z+h)〉=|A(z)〉+|DA(z)〉h+O(h²)$.  There are, however, Wirtinger derivatives such that $|A(z+h)〉=|A(z)〉+|DA(z)〉h+|CA(z)〉h†$.  As a point of notation, let $〈A(z+h)|=〈A(z)|+h†〈CA(z)|+h〈DA(z)|$, so that $〈CA(z)|$ is the conjugate bra to $|DA(z)〉$.  Let $|DA(z)〉=(|∂₁A(z)〉\cdots |∂_RA(z)〉)$, and $|CA(z)〉=(|∂*₁A(z)〉\cdots |∂*_RA(z)〉)$.  Because $|A〉$ is a matrix valued function, these are also matrices, with $|DA〉$ and $|CA〉$ being higher rank tensors.  I hope the product notation is not too confusing.  The Wirtinger derivatives are
+$$|∂_rA(α)〉=\pmatrix{0 & … & 0 & (-{α*_r\over2}+a†)|α_r〉& 0 & … & 0},$$
+and
+$$|∂*_rA(α)〉=\pmatrix{0 & … & 0 & -{α*_r\over2}|α_r〉& 0 & … & 0}.$$
 
-I've figured out how to find the change in the condition number by pertubation theory.  That does require knowing the largest and smallest singular directions of $|Dψ〉$; perhaps there is a way to approximate them without finding an SVD.  How do I find the angle between $H|ψ〉$ and the space $|ψ〉$ can move in?  This seems to require shifting $z$ along each singular direction, solving the shifted least-squares problem, and comparing the residuals.  Is there a better way?
+To find the derivative of the smallest singular value $σ_R(α)$, consider the matrix
+$$M(α)=\pmatrix{0 & |A(α)〉\cr 〈A(α)| & 0}.$$
+Here, $|A(α)〉$ maps weight vectors in $C^R$ to kets, while $〈A(α)|$ maps kets back to column vectors of inner products.  The operation of the zeros is obvious; formally, they need to be a row of null kets and a column of null bras.  The matrix operates on vectors of a ket followed by $R$ complex numbers.  Let $|A(α)〉=|U〉SV†$ be a singular value decomposition, whence $〈A(α)|=VS〈U|$.  The vector
+$$x={1\over \sqrt2}\pmatrix{|u_R〉 \cr v_R}$$
+is a normalised eigenvector  of $M$, belonging to the eigenvalue $σ_R(α)$.  From first-order pertubation theory, the derivative of this eigenvalue with respect to $α_r$ is
+$$∂_r σ_R=x†∂_rMx\qquad ∂*_r σ_R=x†∂*_rMx.$$
+Then 
+$$\eqalign{∂_r σ_R(α)&=x†∂_rM(α)x\cr
+	&=x†\pmatrix{0 & |∂_rA(α)〉\cr 〈∂_rA(α)| & 0}x \cr
+	&=½\pmatrix{〈u_R| & v†_r}
+		\pmatrix{0 & \matrix{0& (-{α*_r\over2}+a†)|α_r〉&0}\cr 
+			\matrix{0\cr -{α_r\over2}〈α_r|\cr 0}& }
+		\pmatrix{|u_R〉 \cr v_R} \cr
+	&=-½\Re(α*_rv_R^r〈u_R|α_r〉)+½v_R^r〈u_R|a†|α_r〉,
+}$$
+and similarly
+$$∂*_r σ_R(α)=-½\Re(v_R^{r\ast}α_r〈α_r|u_R〉)+½v_R^{r\ast}〈α_r|a|u_R〉.$$
+More simply, if $α=x+iy$,
+$${∂σ_R\over ∂x} = ∂_r σ_R+∂*_r σ_R=\Re(v_R^r〈u_R|(a†-α*_r)|α_r〉),$$
+$${∂σ_R\over ∂y} = i∂_r σ_R-i∂*_r σ_R=-\Im(v_R^r〈u_R|a†|α_r〉).$$
+
 
 The accuracy of the pertubation method is shown below.  The state is coherent, with ampltiude 2.  It was sampled at 5 amplitudes, shown on the left hand plot.  The weights were assigned by inverting the discretised $G$ operator on these sample points, with small singular values truncated by Matlab's {\tt pinv} function.  The the moduli of the resulting weights are shown in the right hand plot.  This method of fitting usually gives a Hilbert space residual around 0.01.
 
-The lower plot shows how the smallest singular value of the discrete $G$ changes, as the sample points are shifted.  The black lines show changes in the real parts of the amplitudes, the red lines in the imaginary parts.  The dotted black line shows the derivatives for the real parts calculated by pertubation theory, as follows.  The derivatives of the matrix $〈N|G|A〉$  with respect to each real part were computed by symmetric difference, with $h=0.01$.  Here, $|Α〉=(|α₁〉 |α₂〉 \cdots |α_R〉)$.  A matrix 
-$$M=\pmatrix{0 & 〈N|G|A〉\cr 〈A|G|N〉 & 0}$$
-was constructed; by substituting $〈N|G|A〉=USV†$, it is clear that the vector
-$$x={1\over \sqrt2}\pmatrix{u_R \cr v_R}$$
-is an eigenvector, with eigenvalue $σ_R$, and norm 1.  (Provided $N+1>R$.)  From first-order pertubation theory, the derivative of this eigenvalue with respect to amplitude $i$ is
-$$∂_i σ_i=x†∂_iMx.$$
-As shown in the plots, lines of this slope fit the singular value very well.
+The lower plot shows how the smallest singular value of the discrete $G$ changes, as the sample points are shifted.  The black lines show changes in the real parts of the amplitudes, the red lines in the imaginary parts.  The dotted black line shows the derivatives for the real parts calculated by pertubation theory, finding the derivatives of $〈N|∂_rA〉$ by symmetric difference, with $h=0.01$.  Lines of this slope fit the singular value very well.
 
 \centerline{\XeTeXpicfile psfa.pdf width \hsize}
 
@@ -235,6 +254,7 @@ There are now three goals for optimisation of $\dot z$:
 \item{1.} The ket $|ψ(z)〉$ solves Schrödinger's equation.  I.e., $|Dψ(z)〉\dot z=H|ψ(z)〉$.
 \item{2.} Singular vectors of $|Dψ〉$ belonging to small singular values do not dominate the solution.  This is controlled by a Tychonov condition, $\dot z=0$, or perhaps by truncation.
 \item{3.} The condition of $|A(z)〉$ improves.  This can be set up as a least squares condition $Dσ_R(z)\dot z+Cσ_R(z)\dot z*=|σ_R||\dot z|_{\rm opt}$, given a desired rate of change of $z$.  No doubt there is a better way.
+\item{4.} There might need to be fourth condition, to prevent amplitudes with small weights from wandering off to infinity.
 
 Putting these conditions together, with regularisation parameters $λ$ and $ε$, gives the least squares problem
 $$\pmatrix{|Dψ(z)〉& 0 \cr λI & 0 \cr Dσ_R(z) & Cσ_R(z)}
