@@ -76,7 +76,7 @@ If the Hypothesis is right, the Picard condition is very obviously satisfied.  T
 
 %% Discrete phase space
 
-We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$, corresponding to a row of kets $|A〉=\bigl(|α₁〉\ ⋯\ |α_R〉\bigr).  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
+We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$, corresponding to a row of kets $|A〉=\bigl(|α₁〉\ ⋯\ |α_R〉\bigr)$.  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
 
 Since there are only $R$ weights to adjust, the condition $|\vec g|=|g|$ can be satisfied only for $R$ linearly independent functions $g_r$.  The obvious choice is $g_r(α*)=(〈α_r|G^+)(α*)=〈α|α_r〉=\exp(-½|α|²-½|α_r|²+α*α_r)$, with $|\hat g_r^s|²=w_s²\exp(-|α_s-α_r²)$, and $|g_r|²=π$.  The condition becomes
 $$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
@@ -236,11 +236,22 @@ There are now three goals for optimisation of $\dot z$:
 \item{2.} Singular vectors of $|Dψ〉$ belonging to small singular values do not dominate the solution.  This is controlled by a Tychonov condition, $\dot z=0$, or perhaps by truncation.
 \item{3.} The condition of $|A(z)〉$ improves.  This can be set up as a least squares condition $Dσ_R(z)\dot z+Cσ_R(z)\dot z*=|σ_R||\dot z|_{\rm opt}$, given a desired rate of change of $z$.  No doubt there is a better way.
 
-Putting these conditions together, with regularisation parameters $λ$ and $ε$, gives the problem
+Putting these conditions together, with regularisation parameters $λ$ and $ε$, gives the least squares problem
 $$\pmatrix{|Dψ(z)〉& 0 \cr λI & 0 \cr Dσ_R(z) & Cσ_R(z)}
-	\pmatrix{\dot z\cr \dot z*} =
+	\pmatrix{\dot z\cr \dot z*} ≈
 	\pmatrix{H|ψ(z)〉\cr 0\cr |σ_R||\dot z|_{\rm opt}}.$$
-This raises a technical problem, because we need to constrain $\dot z*$ to be the conjugate of $\dot z$.  Alternatively, if we write $z=x+iy$, we need to solve a complex least squares problem under the constraint that the solution is real.  Neither of those sounds trivial, but it shouldn't be impossible.
+This raises a technical problem, because we need to constrain $\dot z*$ to be the conjugate of $\dot z$.  In the space of complex numbers, this constraint is not linear, because $(cz)*≠cz*$.  However, that is true if $c$.  Moreover, if $z=x+iy$, then $|z-w|²=|x-\Re w|²+|y-\Im w|²$, so a least squares problem in $z$ has the same solution as the equivalent least squares problem in $x$ and $y$.
+
+Consider the problem 
+$$ \pmatrix{A & B}\pmatrix{z\cr z*}≈c,$$
+with $z∈C^m$, $c∈C^n$, and $A,B∈C^{m×n}$.  If $z=x+iy$, the left hand side can be rearranged
+$$\pmatrix{A & B}\pmatrix{z\cr z*}
+	=\pmatrix{A & B}\pmatrix{I&iI\cr I&-iI}\pmatrix{x\cr y}
+	=\pmatrix{A+B & iA-iB}\pmatrix{x\cr y}.$$
+Separating the rows into real and imaginary parts gives
+$$\pmatrix{\Re (A+B) & \Re(iA-iB)\cr\Im(A+B) & \Im(iA-iB)}\pmatrix{x\cr y}
+	=\pmatrix{\Re A+\Re B & \Im B-\Im A\cr\Im A+\Im B & \Re A-\Re B)}
+		\pmatrix{x\cr y}≈\pmatrix{\Re c\cr \Im c}.$$
 
 Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as the value of $z$ varies by $0.1$ in every direction.  The top line shows the effects of changing $φ$, the bottom line $α$, components are shown left to right.  Changes to real parts are black, imaginary parts red.  There are a few things to note.  The condition is very bad, with number $1.4×10^{11}$.  This is entirely due to the similar amplitudes of components 1 and 3: those graphs are on a different scale to the others, and it's logarithmic.  As they move closer and become identical, the condition number increases $10^{14}$.  No doubt it would go higher if we sampled the graphs more finely, but this is huge—reciprocal floating point epsilon is $5×10^{15}$.  If the separation between these components is doubled, the condition number improves by an order of magnitude.
 
