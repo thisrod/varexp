@@ -5,13 +5,16 @@
 
 \title{Stability of variational quantum dynamics with Gaussian approximants}
 
+\def\G{|Γ〉}
+\def\cite#1{$[\hbox{\tt #1}]$}
+
 %% Background
 
 When the first quantum physicists realised that the position of a particle is essentially uncertain, they were destined to seek the conditions that cause it to follow a normal law of error, and discover the gaussian wave packet.  They soon understood the free particle and turned to the harmonic oscillator, investigating the form of its ground state and the way its excited states generate sinusoidal motion in the classical limit.  These problems were also solved by the gaussian wave packet.  With its width fixed by equipartition of energy and the uncertainty principle, it became the coherent state.
 
 The simplest mechanical systems allow Schrödinger's law of motion to be solved in closed form, but most quantum problems must be solved approximately.  This can be done variationally, specifying a class of approximants that can be manipulated exactly, then finding one of them that most nearly solves the problem.  To test how well a wave function approximates the dynamics of a system, the difference between the two sides of Schrödinger's equation can be measured by the Hilbert space norm.  It remains to choose a class of approximants.  The gaussian wave packets are an common choice, because they differ in their scale and their central position and momentum, useful properties to determine for any quantum state.
 
-The invention of the laser called for a quantum theory of intense radiation.  Laser beams are difficult because their quantum descriptions are so large: they involve up to $10^{18}$ photons, distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When atomic Bose-Einstein condensates were made, and very coherent matter became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
+The invention of the laser called for a quantum theory of intense radiation.  It is difficult to analyse laser beams because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When atomic Bose-Einstein condensates were made, and very coherent matter became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
 
 In the 1970s, Heller put the two ideas together, proposing to simulate quantum dynamics variationally, using finite superpositions of coherent states as the approximants.  This is an appealing approach.  Every quantum state can be approximated arbitrarily well as the number of components in the superposition increases.  The experience of quantum optics shows that many systems can be approximated by a reasonable number of components, and variational dynamics should avoid the covergence problems that limit the Monte-Carlo methods.
 
@@ -21,11 +24,27 @@ Since Heller suggested it, there have been several attempts to apply this numeri
 %% Consequence
 These attempts have aimed to solve chemistry problems, involving dozens of atoms, where the lack of convergence limited the precision that could be obtained, but superpositions with a few components, and ad-hoc methods to improve the stability, still gave useful results.  The kind of problems that people approach with phase space methods come from atom optics or condensed matter; they involve thousands or millions of atoms, and the convergence problems would prevent any useful information being obtained.  A systematic approach to regularisation is required in order to approach these problems variationally.  The prospective rewards are great: these problems include high temperature superconductivity and the dynamics of the early universe, topics on which today's physicists expend massive efforts.
 
-When used on computers, the variational methods expand quantum states over finitely many coherent states.  This is a discretisation of the expansion introduced by Glauber, a mapping $G$ from square-integrable functions to Fock space, where
-$$Gf={1\over π}\int g(α*)|α〉\,d²α.\eqno{(1)}$$
-This is different from Glauber's use: he uses $f=ge^{½|α|²}$.  Is it easier to work Glauber's way, with the $e^{-½|α|²}$ in the mapping, so that the singular vectors are entire functions?  You'd have to use a Bargmann inner product to normalise them; the theory of that is well developed.
-
 %% Phase space expansion as a linear operator
+
+The expansion operator introduced by Glauber\cite{prx-131-2766} is
+$$\G f={1\over π}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
+The notation $\int f(α)\,d²α$ means $\int_{-∞}^{∞}\int_{-∞}^{∞} f(x+iy)\,dx\,dy$.  The function $f$ is a function of a complex variable, such that $e^{-½|α|²}f(α)$ is square-integrable.  Bargmann\cite{} showed that these functions form a Hilbert space under the inner product $〈g,f〉=\int e^{-|α|²}g*(α)f(α)\,d²α$; we will call it the space of phase space distributions, or just distributions.  In this paper, the application of a linear function is written as a product, and functions whose range is ket space are denoted by kets, usually with a greek letter.  So $\G f$ is the ket that results from applying the linear operator $\G$ to the phase space distribution $f$.
+
+The state $|α〉$ is a coherent state with complex amplitude $α$.  These can be defined in a number of ways, perhaps most simply in second quantisation, as eigenstates of a boson annihilation operator, with $a|α〉=α|α〉$.  The annihilation operator is not hermitian, so the eigenvalues $α$ are complex numbers.  In first quantisation, such an operator is the complex amplitude
+$$a=?(λx+ip/λ),\qquad\hbox{Get constants from Cahill}$$
+where $x$ and $p$ are the position and momentum operators; the bosons in this case are vibrational quanta in a notional harmonic potential, centred at the origin, with frequency ?.
+
+Coherent states are not orthogonal, but their brackets follow the law
+$$〈β|α〉=e^{-½|β|²-½|α|²+β*α},$$
+whence
+$$|〈β|α〉|²=e^{-|β-α|²}.$$
+Their projector follows
+$$\int |α〉〈α|\,d²α=π.$$
+For an orthonormal basis, the right hand side would be 1 instead of $π$.  It follows that the operator $\G$ is onto: let $|ψ〉$ any ket, and set $f₀(α*)=e^{½|α|²}〈α|ψ〉$.  Then
+$$\G f₀={1\over π}\int |α〉〈α|ψ〉\,d²α=|ψ〉.$$
+Furthermore, coherent states have the property that $e^{½|α|²}|α〉$ is an entire function of $α$, so $f₀$ is an entire function.  Glauber showed that it is the unique entire solution to $\G f₀=|ψ〉$.  Further properties of the coherent states will be stated as required.  Glauber's summary of them is paraphrased in every quantum optics textbook ever written.
+
+Obviously, $\G$ is not one to one, because the images of the entire functions already fill ket space.
 
 %% SVE lemma
 
