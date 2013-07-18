@@ -288,6 +288,23 @@ Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as 
 
 The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
 
+%% convergence to the initial state
+
+As discussed below, the time-dependent Schrödinger equation for a quartic oscillator is numerically difficult, no matter how it is discretised.  The following problem aimed to solve an intrinsically simple differential equation, 
+$$ {d\over ds}|ψ(z(s))〉=|ψ₀〉-|ψ(z(s))〉.$$
+Here, $|ψ₀〉$ was the half cycle cat state; $|ψ(z)〉$ had 15 components, and was initialised by sampling random, and linearly fitting weights.  The result is shown on the left below.  The clusters of complementary colours indicate components that nearly cancel each other out; these should not be present when the condition of $|A〉$ is constrained, but are expected from random sampling.  They might also indicate too small a Tychonov parameter: large parameters will tend to give nearby points equal weights.
+
+\centerline{\XeTeXpicfile expens.pdf width \hsize}
+
+The equation was solved, in the script {\tt hzero.m}.  The results are shown below, and the final superposition is plotted on the right above.  The second graph below isthe smallest singular value of $|A〉$.  Many draws of initial samples give the exponential decay one would expect.  This one gave two surprises: initially, the distance between $|ψ〉$ and $|ψ₀〉$ increases with time.  This is entirely wrong, according to the differential equation.  The initial state was a good approximation to $|ψ₀〉$, so there might not be much scope to improve the approximant.  However, it should certainly not move away from the target.
+
+The variational method was the least distance in Hilbert space, with Tychonov regularisation.  Time was discretised by Euler's formula, which should solve exponential decay very stably.
+
+The second surprise is at large $s$, where the approximant improves, but so does the condition of $|A〉$.  In most draws of initial samples, the approximant improves by clustering the amplitudes towards the states $|2i〉$ and $|-2i〉$, which makes the conditioning worse.
+
+\centerline{\XeTeXpicfile exp.pdf width \hsize}
+
+
 %% Shape of Hilbert space trajectories
 
 If Hilbert space is considered as a real vector space, complex multiples of the eigenstates of the Hamiltonian form planes instead of lines.  The eigenstates evolve as $e^{iωt}$, so, when the dynamics are projected onto an eigenplane, the state traces out a circle, with radius equal to the absolute value of the the coefficient of the eigenstate when the initial state is expanded.  Different eigenstates circle the origin with different frequencies.
