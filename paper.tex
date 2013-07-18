@@ -42,7 +42,7 @@ Their projector follows
 $$\int |α〉〈α|\,d²α=π.$$
 For an orthonormal basis, the right hand side would be 1 instead of $π$.  It follows that the operator $\G$ is onto: let $|ψ〉$ any ket, and set $f₀(α*)=e^{½|α|²}〈α|ψ〉$.  Then
 $$\G f₀={1\over π}\int |α〉〈α|ψ〉\,d²α=|ψ〉.$$
-Furthermore, coherent states have the property that $e^{½|α|²}|α〉$ is an entire function of $α$, so $f₀$ is an entire function.  Glauber showed that it is the unique entire solution to $\G f₀=|ψ〉$.  Further properties of the coherent states will be stated as required.  Glauber's summary of them is paraphrased in every quantum optics textbook ever written.
+Furthermore, coherent states have the property that $e^{½|α|²}|α〉$ is an entire function of $α$ (clarify), so $f₀$ is an entire function.  Glauber showed that it is the unique entire solution to $\G f₀=|ψ〉$.  Further properties of the coherent states will be stated as required.  Glauber's summary of them is paraphrased in every quantum optics textbook ever written.
 
 Obviously, $\G$ is not one to one, because the images of the entire functions already fill ket space.
 
@@ -224,44 +224,32 @@ The variational problem seems to be pretty well-posed: if the initial superposit
 
 I'm getting a picture of how the final algorithm will look.  At each timestep, the directions belonging to large singular values of $|Dψ〉$ will be used for variational dynamics.  This can be done by solving at Tychonov conditioned problem, for example.  At the same time, the directions with small singular values will be used to keep the discretisation stable.  I think this requires two things: that $|Dψ〉$ is reasonably well conditioned, and that the angle between $H|ψ〉$ and the span of $|Dψ〉$ is small.  This raises a question: are there singular directions that have little effect on $|ψ〉$, but a large effect on $|Dψ〉$?  This seems likely; for example, shuffling the amplitudes to move two components further apart in phase space, then adjusting the weights so that $|ψ〉$ stays the same.  This could be done by a kind of Tychonov anti-regularisation: we improve the stability as much as we can, while constraining the change in $|ψ〉$.  I might need to constrain the norm of $dz$ too, so that linear approximations hold.
 
-To solving our differential equation, we need to solve an iterated least squares problem.  We need to do so in a way that preserves the condition of $|Dψ〉$.  When we shift $z$ in the direction $v_i$ as $dz=λv_i$, how does this condition number change?  Without loss of generality, it suffices to consider the effect on the smallest and largest singular values, that determine $C(z)$.  Note that $v_1$ and $v_R$ are eigenvectors of the matrix ${\cal V}(z)=〈Dψ(z)|Dψ(z)〉$, belonging to the eigenvalues $σ₁²$ and $σ_R²$; this is a familiar problem in pertubation theory.  Assume for now that we have found $D{\cal V}(z)$—this won't be analytic, so we will need to use real and imaginary parts, or Wirtinger calculus.  The change in $\cal V$ is of the form $d{\cal V}=∂_i{\cal V}(z)λ+∂*_i{\cal V}(z)λ*$, where the partial derivatives are taken in the directions $v_i$.
-
-As is well known in pertubation theory, the change in the eigenvalue $σ₁²$ corresponding to a small change $d{\cal V}$ is $v₁†d{\cal V}v₁$, and similarly for $σ_R²$.  Therefore the change in $C(z)²$ is 
-$$σ_R²v₁†d{\cal V}v₁-σ₁²v_R†d{\cal V}v_R \over σ_R².$$
-Given a proposed change $dz$, we can find the effect on the condition number.  However, it would be simpler to constrain the smallest singular value, and likely just as effective.
+To solve our differential equation, we need to solve an iterated least squares problem.  We need to do so in a way that preserves the condition of $|A(z)〉$.  When we shift $z$ in the direction $\dot z$, how does the condition change?  The issue is the small singular values, so it makes sense to constrain the smallest singular value $σ_R$.  This is a function of $z$.  We proceed to calculate its derivative by first order pertubation theory.
 
 Let 
-$$|A(α)〉=(|α₁〉 |α₂〉 \cdots |α_R〉)=(\cdots e^{-½|α_r|²+α_ra†}\cdots)|0〉.$$
-This is not an analytic function, so there is no Cauchy derivative such that $|A(z+h)〉=|A(z)〉+|DA(z)〉h+O(h²)$.  There are, however, Wirtinger derivatives such that $|A(z+h)〉=|A(z)〉+|DA(z)〉h+|CA(z)〉h†$.  As a point of notation, let $〈A(z+h)|=〈A(z)|+h†〈CA(z)|+h〈DA(z)|$, so that $〈CA(z)|$ is the conjugate bra to $|DA(z)〉$.  Let $|DA(z)〉=(|∂₁A(z)〉\cdots |∂_RA(z)〉)$, and $|CA(z)〉=(|∂*₁A(z)〉\cdots |∂*_RA(z)〉)$.  Because $|A〉$ is a matrix valued function, these are also matrices, with $|DA〉$ and $|CA〉$ being higher rank tensors.  I hope the product notation is not too confusing.  The Wirtinger derivatives are
-$$|∂_rA(α)〉=\pmatrix{0 & … & 0 & (-{α*_r\over2}+a†)|α_r〉& 0 & … & 0},$$
-and
-$$|∂*_rA(α)〉=\pmatrix{0 & … & 0 & -{α*_r\over2}|α_r〉& 0 & … & 0}.$$
+$$|A(α)〉=\pmatrix{|α₁〉& \cdots &|α_R〉}
+	=\pmatrix{\cdots &e^{-½|α_r|²+α_ra†}&\cdots}|0〉.$$
+This is not an analytic function, so there is no Cauchy derivative such that $|A(z+h)〉=|A(z)〉+|DA(z)〉h+O(h²)$.  There are Wirtinger derivatives such that $|A(z+h)〉=|A(z)〉+|DA(z)〉h+|CA(z)〉h†$.  However, in this case it is easier to work with real and imaginary parts, defining
+$$|A'(x,y)〉=\pmatrix{|x₁+iy₁〉&\cdots &|x_R+iy_R〉}
+	=\pmatrix{\cdots &e^{-½x_r²-½y_r²+(x_r+iy_r)a†}&\cdots}|0〉.$$
+The partial derivatives are easily determined to be
+$$|∂_rA'(x,y)〉=\cases{
+	\pmatrix{0 & (-x_r+a†)|x_r+iy_r〉 & 0} & $1≤ r≤ R$, \cr
+	\pmatrix{0 & (-y_r+ia†)|x_r+iy_r〉 & 0} & $R<r≤ 2R$.}$$
+Because $|A〉$ matrix-valued, its total derivative is some kind of third rank tensor, and its partial derivatives are simpler to work with.  The total derivative $Dσ_R$ is just a row vector, and will be used often.
 
-To find the derivative of the smallest singular value $σ_R(α)$, consider the matrix
-$$M(α)=\pmatrix{0 & |A(α)〉\cr 〈A(α)| & 0}.$$
-Here, $|A(α)〉$ maps weight vectors in $C^R$ to kets, while $〈A(α)|$ maps kets back to column vectors of inner products.  The operation of the zeros is obvious; formally, they need to be a row of null kets and a column of null bras.  The matrix operates on vectors of a ket followed by $R$ complex numbers.  Let $|A(α)〉=|U〉SV†$ be a singular value decomposition, whence $〈A(α)|=VS〈U|$.  The vector
+Let the singular value decomposition of $|A(α)〉$ be $|A(α)〉=|U〉SV†$.  The standard ways to compute singular values use the matrix
+$$M(x,y)=\pmatrix{0 & |A'(x,y)〉\cr 〈A'(x,y)| & 0}.$$
+Here, $|A(x,y)〉$ maps weight vectors in $C^R$ to kets, while $〈A(x,y)|=VS〈U|$ maps kets back to column vectors of inner products.  The operation of the zeros is obvious; formally, they need to be a row of null kets and a column of null bras.  The matrix $M(x,y)$ operates on a vector comprising a ket above $R$ complex numbers.  Now, the vector
 $$x={1\over \sqrt2}\pmatrix{|u_R〉 \cr v_R}$$
-is a normalised eigenvector  of $M$, belonging to the eigenvalue $σ_R(α)$.  From first-order pertubation theory, the derivative of this eigenvalue with respect to $α_r$ is
-$$∂_r σ_R=x†∂_rMx\qquad ∂*_r σ_R=x†∂*_rMx.$$
-Then 
-$$\eqalign{∂_r σ_R(α)&=x†∂_rM(α)x\cr
-	&=x†\pmatrix{0 & |∂_rA(α)〉\cr 〈∂_rA(α)| & 0}x \cr
-	&=½\pmatrix{〈u_R| & v†_r}
-		\pmatrix{0 & \matrix{0& (-{α*_r\over2}+a†)|α_r〉&0}\cr 
-			\matrix{0\cr -{α_r\over2}〈α_r|\cr 0}& }
-		\pmatrix{|u_R〉 \cr v_R} \cr
-	&=-½\Re(α*_rv_R^r〈u_R|α_r〉)+½v_R^r〈u_R|a†|α_r〉,
-}$$
-and similarly
-$$∂*_r σ_R(α)=-½\Re(v_R^{r\ast}α_r〈α_r|u_R〉)+½v_R^{r\ast}〈α_r|a|u_R〉.$$
-More simply, if $α=x+iy$,
-$${∂σ_R\over ∂x} = ∂_r σ_R+∂*_r σ_R=\Re(v_R^r〈u_R|(a†-α*_r)|α_r〉),$$
-$${∂σ_R\over ∂y} = i∂_r σ_R-i∂*_r σ_R=-\Im(v_R^r〈u_R|a†|α_r〉).$$
+is a normalised eigenvector  of $M$, belonging to the eigenvalue $σ_R(x,y)$.  As is well known in first-order pertubation theory, the derivative of this eigenvalue with respect to $x$ and $y$ is given by
+$$∂_rσ_R=x†(∂_rM)x
+	=½\pmatrix{〈u_R| & v†_R}\pmatrix{0 & |∂_rA'(x,y)〉\cr 〈∂_rA'(x,y)| & 0}\pmatrix{|u_R〉 \cr v_R}=\Re\left(〈u_R|∂_rA〉v_R\right).$$
+Substituting the partial derivatives gives
+$$∂_rσ_R=\cases{\Re\left(〈u_R|(-x_r+a†)|α_r〉v_R^r\right) &  $1≤ r≤ R$, \cr
+	\Re\left(〈u_R|(-y_r+ia†)|α_r〉v_R^r\right) & $R<r≤ 2R$.}$$
 
-
-The accuracy of the pertubation method is shown below.  The state is coherent, with ampltiude 2.  It was sampled at 5 amplitudes, shown on the left hand plot.  The weights were assigned by inverting the discretised $G$ operator on these sample points, with small singular values truncated by Matlab's {\tt pinv} function.  The the moduli of the resulting weights are shown in the right hand plot.  This method of fitting usually gives a Hilbert space residual around 0.01.
-
-The lower plot shows how the smallest singular value of the discrete $G$ changes, as the sample points are shifted.  The black lines show changes in the real parts of the amplitudes, the red lines in the imaginary parts.  The dotted black line shows the derivatives for the real parts calculated by pertubation theory, finding the derivatives of $〈N|∂_rA〉$ by symmetric difference, with $h=0.01$.  Lines of this slope fit the singular value very well.
+The accuracy of the pertubation method is shown below.  A vector of 5 amplitudes was drawn from a normal distribution around amplitude 2, shown in the upper plot.  The lower plots show how the smallest singular value of $|A〉$ varies as the amplitudes shift.  The five columns show changes in the five amplitudes.  The black lines show how $σ_R(x,y)$ varies with the real part $x$, the red lines how it varies with $y$.  The dotted lines show the linear approximation derived above by pertubation theory, and the second row of plots show the error in the approximation.  The linear approximation is good; presumably it holds for changes small compared to the separation of the amplitudes.
 
 \centerline{\XeTeXpicfile psfa.pdf width \hsize}
 
