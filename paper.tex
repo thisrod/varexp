@@ -125,6 +125,16 @@ This also has a kernel that oscillates at a rate proportional to $ω$, and it al
 
 A numerical example is shown below.  The state $|ψ〉$ is the Schrödinger cat that a coherent state becomes after half a cycle in a quartic oscillator; the amplitude of the initial coherent state was $2$.  A set of 40 sample amplitudes $α_r$ was drawn from the probability distribution $|g(a*)|²$, where $g=G⁺|ψ〉$.  These are plotted below, as circles in phase space.  For smaller ensembles, the results were not consistent between draws.
 
+A basic question is why regularisation helps.  Usually, it's applied to the inversion of measured data, where the right hand side of the least squares problem includes noise.  The aim is to prevent amplified noise from dominating the solution.  In our problem, the right hand side is calculated instead of measured, and the only noise is rounding errors.  Those are 16 orders of magnitude smaller than the exact right hand side, so rounding the small singular values up to $10^{-10}$ should be more than adequate.  We've needed much stronger regularisation than that: therefore, rounding errors aren't the problem.
+
+The only other error I can think of is nonlinearity.  Tychonov parameters of order $10^{-10}$ do work for the linear expansion problem.  Perhaps we're not doing regularisation, we're actually establishing a trust region, where the linear least squares problem is a good approximation to the actual change in $|ψ(z)〉$.
+
+If that's the case, it's tempting to make the weights linear instead of logarithmic, so that that part of the problem is exactly linear.  However, the function $e^φ$ is pretty nearly linear in the range we're shifting $φ$, so that can't help much.  In fact, the whole problem is quite linear.
+
+It seems that, when two amplitudes are very close, the solutions where the weights cancel out are better fits than the smooth ones—that seems to be the case in the l-curve experiments for the expansion problem.  To avoid the amplitudes clustering, I need to find out how good a fit is possible with evenly spaced ampltiudes, and set the regularisation parameter so that the residual is on that order.  In fact, I already know how large the phase space expansion should be: the function being sampled should have a norm around $π^½$.  And we're back to the other open question, how to relate the norm of a function to the norm of a set of samples at irregular points.  How can I estimate how much of phase space “belongs” to each amplitude sample, in order to get a volume over which the function has that value?
+
+The obvious way would be to assign amplitudes to the nearest sample.  That makes the volume for each sample a quite irregular prism; maybe there is a simple way to calculate the volumes of those, but I don't know it.  What if we assign a value to each point as an average over the sampled values, weighted, say, in proportion to the squared distances?  There would need to be some extra condition to ensure the function tends to zero at points remote from the samples.  Something like $x^{-2}e^{-|x|²} sounds plausible: it's quadratic at sort range, where the gaussian is flat, but outside the support of the samples, it decays in the right way for a phase space expansion.  I think the short range part needs to be a power law, so that it doesn't have a length scale built in when the distances between samples are random.  What's the best exponent?  I expect it depends on the dimension of the phase space, which would determine how many samples we expect to find close to a given one.
+
 \centerline{\XeTeXpicfile cats.pdf width \hsize}
 
 The next Figure is a Picard plot for the Galerkin discretisation $〈A|A〉f=〈A|ψ〉$, where $f$ is a vector of weights such that $|A〉f$ approximates $|ψ〉$.  Below it is a plot of the expansions over number states of the singular kets $〈n|u_r〉$, where $|A〉=|U〉SV$.  For the kets to be orthogonal, $|u_r〉$ must have support close to $n=r$.  The components of the cat have coherent amplitude 2, so their largest number component is $n=4$, and the components drop quickly as $n$ increases further.  Above $r=15$, the singular ket $|u_r〉$ has very small components on these number states, so it hardly overlaps $|ψ〉$.  At the same time, the singular kets start to have particle numbers too large to be consistent with the sample amplitudes $α_r$, so the singular values decrease.  In fact, they decrease more rapidly than the components of $|ψ〉$, and the discrete Picard condition is not satisfied.  Seeing that $G$ is perfectly conditioned, this is a very bad discretisation.
@@ -303,6 +313,10 @@ The variational method was the least distance in Hilbert space, with Tychonov re
 The second surprise is at large $s$, where the approximant improves, but so does the condition of $|A〉$.  In most draws of initial samples, the approximant improves by clustering the amplitudes towards the states $|2i〉$ and $|-2i〉$, which makes the conditioning worse.
 
 \centerline{\XeTeXpicfile exp.pdf width \hsize}
+
+There are a few things to note about the initial trajectory.  The initial weights already satisfy a least squares condition.  Therefore, the intial change in the superposition should be entirely in the amplitudes: the weights are already optimal.  If that isn't the case, the regularisation of the expansion problem would have to be inconsistent with that of the variational problem, so that we're accepting variational changes that we previously rejected when we found the initial state.
+
+
 
 
 %% Shape of Hilbert space trajectories
