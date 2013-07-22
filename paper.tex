@@ -26,11 +26,11 @@ These attempts have aimed to solve chemistry problems, involving dozens of atoms
 
 %% Phase space expansion as a linear operator
 
-The expansion operator introduced by Glauber\cite{prx-131-2766} is
-$$\G f={1\over π}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
-The notation $\int f(α)\,d²α$ means $\int_{-∞}^{∞}\int_{-∞}^{∞} f(x+iy)\,dx\,dy$.  The function $f$ is a function of a complex variable, such that $e^{-½|α|²}f(α)$ is square-integrable.  Bargmann\cite{} showed that these functions form a Hilbert space under the inner product $〈g,f〉=\int e^{-|α|²}g*(α)f(α)\,d²α$; we will call it the space of phase space distributions, or just distributions.  In this paper, the application of a linear function is written as a product, and functions whose range is ket space are denoted by kets, usually with a greek letter.  So $\G f$ is the ket that results from applying the linear operator $\G$ to the phase space distribution $f$.
+The expansion introduced by Glauber\cite{prx-131-2766} is performed by the operator
+$$\G f=π^{-½}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
+The notation $\int f(α)\,d²α$ means $\int_{-∞}^{∞}\int_{-∞}^{∞} f(x+iy)\,dx\,dy$.  The function $f$ is a function of a complex variable, such that $e^{-½|α|²}f(α)$ is square-integrable.  Bargmann\cite{} showed that these functions form a Hilbert space under the inner product $〈g,f〉=\int e^{-|α|²}g*(α)f(α)\,d²α$; this paper refers to it as the space of phase space distributions, or just distributions.  In this paper, the application of a linear function is written as a product, and functions whose range is ket space are denoted by kets, usually with a greek letter.  So $\G f$ is the ket that results from applying the linear operator $\G$ to the phase space distribution $f$.
 
-The state $|α〉$ is a coherent state with complex amplitude $α$.  These can be defined in a number of ways, perhaps most simply in second quantisation, as eigenstates of a boson annihilation operator, with $a|α〉=α|α〉$.  The annihilation operator is not hermitian, so the eigenvalues $α$ are complex numbers.  In first quantisation, such an operator is the complex amplitude
+The state $|α〉$ is a coherent state with complex amplitude $α$.  These can be defined in a number of ways, perhaps most simply in second quantisation, as eigenstates of a boson annihilation operator $a$, with $a|α〉=α|α〉$.  The annihilation operator is not hermitian, so the eigenvalues $α$ are complex numbers.  In first quantisation, such an operator is the complex amplitude
 $$a=?(λx+ip/λ),\qquad\hbox{Get constants from Cahill}$$
 where $x$ and $p$ are the position and momentum operators; the bosons in this case are vibrational quanta in a notional harmonic potential, centred at the origin, with frequency ?.
 
@@ -38,9 +38,9 @@ Coherent states are not orthogonal, but their brackets follow the law
 $$〈β|α〉=e^{-½|β|²-½|α|²+β*α},$$
 whence
 $$|〈β|α〉|²=e^{-|β-α|²}.$$
-Their projector follows
+The projector satisfies the law
 $$\int |α〉〈α|\,d²α=π.$$
-For an orthonormal basis, the right hand side would be 1 instead of $π$.  It follows that the operator $\G$ is onto: let $|ψ〉$ any ket, and set $f₀(α*)=e^{½|α|²}〈α|ψ〉$.  Then
+For an orthonormal basis, the right hand side would be 1 instead of $π$.  It follows that the operator $\G$ is onto: let $|ψ〉$ any ket, and set $f₀(α*)=π^{-½}e^{½|α|²}〈α|ψ〉$.  Then
 $$\G f₀={1\over π}\int |α〉〈α|ψ〉\,d²α=|ψ〉.$$
 Furthermore, coherent states have the property that $e^{½|α|²}|α〉$ is an entire function of $α$ (clarify), so $f₀$ is an entire function.  Glauber showed that it is the unique entire solution to $\G f₀=|ψ〉$.  Further properties of the coherent states will be stated as required.  Glauber's summary of them is paraphrased in every quantum optics textbook ever written.
 
@@ -48,7 +48,7 @@ Obviously, $\G$ is not one to one, because the images of the entire functions al
 
 %% SVE lemma
 
-Hypothesis: The singular values of $G$ are 0 and $\sqrt π$, and the space belonging to $\sqrt π$ comprises the functions $f$ for which $fe^{½|α|²}$ is analytic.
+Hypothesis: The singular values of $|Γ〉$ are 0 and 1, and the space belonging to 1 comprises the entire functions.
 
 There are two ways one could set about proving the Hypothesis.  Firstly, one could show that any function orthogonal to the Gaussian analytics annihilates $G$.  Otherwise, one could show that the norms of all Gaussian analytics are scaled by the same factor going to F
 ock space, and that they are a pre-image of Fock space.  The second approach sounds simpler.
@@ -76,22 +76,18 @@ $$\int ₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
 so
 $$\|g\|=π^½.$$
 
-The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.
-
-Assuming that there is no way to expand a state with a smaller norm than a Gaussian entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
+Assuming that there is no way to expand a state with a smaller norm than an entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
 
 
 %% Consequences of lemma
 
-To sum up, this analysis shows that $G$ is a projector.  Therefore, if the amplitudes of the coherent states are held constant, and the discretised problem is solved by adjusting their weights, the solutions that come from an SVD should be very stable indeed.  This might depend somewhat on how evenly the amplitudes are spaced: I could start with a regular grid, and add Gaussian noise to see what changed.
+If the domain and range of an operator are the same, and the operator has singular values 0 and 1, then that operator is an orthogonal projector onto its range.  The operator $|Γ〉$ is a generalisation of that.  It is the composition of an orthogonal projection of function space onto the entire functions followed by an isometric mapping of the entire functions onto the kets.  The orthogonality and isometry are under the Bargmann inner product for phase space functions.  Therefore, if the amplitudes of the coherent states are held constant, and the discretised problem is solved by adjusting their weights, the solutions that come from an SVD should be very stable indeed.  This might depend somewhat on how evenly the amplitudes are spaced: I could start with a regular grid, and add Gaussian noise to see what changed.
 
 So $G$ is a projection: if the inner product is normalised properly, $G$ keeps the component of $f$ in the space of entire functions, and discards the orthogonal component.  The continuous problem is simply underdetermined, and the inverse problem can be regularised very easily by excluding components with zero singular values from the solution.  That isn't what I see with discrete versions: they seem to have a steady decay of singular values, not a sudden drop to zero.  This must be entirely an artefact of the discretisation.
 
-The theorems on how quickly singular values of convolution operators decay don't apply here.  They apply to convolutions of real functions, which can only oscillate at a fixed rate.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy; considered as wavefunctions, the coherent states do: the wavenumber is proportional to the imaginary part of $α$.
-
-It turns out that complex convolutions are not like real convolutions: the imaginary part of $t-t'$ can control the rate at which the kernel oscillates.  Each line of constant imaginary part in the convolution is determined by a limited range of frequencies from the function, but that frequency range can vary with the imaginary part, so that all frequency components of the function contribute to the convolution somewhere.  Is the Fourier transform a complex convolution?
-
-If the Hypothesis is right, the Picard condition is very obviously satisfied.  The operator $G$ is a projection.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm.  Functions in the null space of $G$ don't correspond to left singular vectors, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
+The part of $|Γ〉$ that projects functions onto entire functions can be written as follows
+$$π^{-½}〈β|Γ〉f=π^{-1}∫〈β|α〉e^{-½|α|²}f(α*)\,d²α=π^{-1}∫〈0|D(α-β)|0〉e^{-½|α|²}f(α*)\,d²α.$$
+This appears to be a convolution of the function $e^{-½|α|²}f(α*)$ with the kernel $〈0|D(α)|0〉$.  There are many theorems to the effect that singular values of real convolution operators decay rapidly, and the operators are badly conditioned.  It is interesting that these results do not apply to the complex convolution $|Γ〉$: as a projector, it is as nice an operator as it could possibly be.  I think the loophole is that of real functions can only oscillate at a limited rate, so that their Fourier transforms have finite norm.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy.  And the kernel $〈0|D(α)|0〉$ does: it is a wave packet with carrier frequency proportional to the imaginary part of $α$.
 
 %% Discrete phase space
 
@@ -133,7 +129,9 @@ If that's the case, it's tempting to make the weights linear instead of logarith
 
 It seems that, when two amplitudes are very close, the solutions where the weights cancel out are better fits than the smooth ones—that seems to be the case in the l-curve experiments for the expansion problem.  To avoid the amplitudes clustering, I need to find out how good a fit is possible with evenly spaced ampltiudes, and set the regularisation parameter so that the residual is on that order.  In fact, I already know how large the phase space expansion should be: the function being sampled should have a norm around $π^½$.  And we're back to the other open question, how to relate the norm of a function to the norm of a set of samples at irregular points.  How can I estimate how much of phase space “belongs” to each amplitude sample, in order to get a volume over which the function has that value?
 
-The obvious way would be to assign amplitudes to the nearest sample.  That makes the volume for each sample a quite irregular prism; maybe there is a simple way to calculate the volumes of those, but I don't know it.  What if we assign a value to each point as an average over the sampled values, weighted, say, in proportion to the squared distances?  There would need to be some extra condition to ensure the function tends to zero at points remote from the samples.  Something like $x^{-2}e^{-|x|²} sounds plausible: it's quadratic at sort range, where the gaussian is flat, but outside the support of the samples, it decays in the right way for a phase space expansion.  I think the short range part needs to be a power law, so that it doesn't have a length scale built in when the distances between samples are random.  What's the best exponent?  I expect it depends on the dimension of the phase space, which would determine how many samples we expect to find close to a given one.
+The obvious way would be to assign amplitudes to the nearest sample.  That makes the volume for each sample a quite irregular prism; maybe there is a simple way to calculate the volumes of those, but I don't know it.  What if we assign a value to each point as an average over the sampled values, weighted, say, in proportion to the squared distances?  There would need to be some extra condition to ensure the function tends to zero at points remote from the samples.  Something like $x^{-2}e^{-|x|²}$ sounds plausible: it's quadratic at sort range, where the gaussian is flat, but outside the support of the samples, it decays in the right way for a phase space expansion.  I think the short range part needs to be a power law, so that it doesn't have a length scale built in when the distances between samples are random.  What's the best exponent?  I expect it depends on the dimension of the phase space, which would determine how many samples we expect to find close to a given one.
+
+The Picard condition is very obviously satisfied by the projection operator $|Γ〉$.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm as itself.  Functions in the null space of $|Γ〉$ don't have components in the left singular directions, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
 
 \centerline{\XeTeXpicfile cats.pdf width \hsize}
 
