@@ -78,7 +78,6 @@ $$\|g\|=π^½.$$
 
 Assuming that there is no way to expand a state with a smaller norm than an entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
 
-
 %% Consequences of lemma
 
 If the domain and range of an operator are the same, and the operator has singular values 0 and 1, then that operator is an orthogonal projector onto its range.  The operator $|Γ〉$ is a generalisation of that.  It is the composition of an orthogonal projection of function space onto the entire functions followed by an isometric mapping of the entire functions onto the kets.  The orthogonality and isometry are under the Bargmann inner product for phase space functions.  Therefore, if the amplitudes of the coherent states are held constant, and the discretised problem is solved by adjusting their weights, the solutions that come from an SVD should be very stable indeed.  This might depend somewhat on how evenly the amplitudes are spaced: I could start with a regular grid, and add Gaussian noise to see what changed.
@@ -88,6 +87,51 @@ So $G$ is a projection: if the inner product is normalised properly, $G$ keeps t
 The part of $|Γ〉$ that projects functions onto entire functions can be written as follows
 $$π^{-½}〈β|Γ〉f=π^{-1}∫〈β|α〉e^{-½|α|²}f(α*)\,d²α=π^{-1}∫〈0|D(α-β)|0〉e^{-½|α|²}f(α*)\,d²α.$$
 This appears to be a convolution of the function $e^{-½|α|²}f(α*)$ with the kernel $〈0|D(α)|0〉$.  There are many theorems to the effect that singular values of real convolution operators decay rapidly, and the operators are badly conditioned.  It is interesting that these results do not apply to the complex convolution $|Γ〉$: as a projector, it is as nice an operator as it could possibly be.  I think the loophole is that of real functions can only oscillate at a limited rate, so that their Fourier transforms have finite norm.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy.  And the kernel $〈0|D(α)|0〉$ does: it is a wave packet with carrier frequency proportional to the imaginary part of $α$.
+
+%% Finite phase space
+
+The operator $|Γ〉$ acts on functions defined over the whole complex plane.  For states with high particle number, the smallest preimages have support far from the origin.  We can not compute with such functions: any discretisation will sample values of $f$ on a finite subset of the plane.  Unfortunately, the conditioning of these restricted operators will be worse than that of $|Γ〉$.  We have excluded the small preimages of the states with large particle number, so they must be represented by functions with support close to the origin, but with large norms.  Hence the restricted operators will have small singular values corresponding to states with many particles.
+
+Define a restricted operator
+$$|Γ_χ〉f=π^{-½}\int |α〉e^{-½|α|²}χ(α*)f(α*)\,d²α.$$
+For now, suppose that $χ$ has circular symmetry, with $χ(z)=χ(|z|)$.  The most obvious examples are characteristic functions, where $χ$ is 1 inside a circle of radius $b$, and 0 outside.  However, the formalism allows more gradual truncation as well.  We can rewrite this
+$$\eqalign{|Γ_χ〉f&=π^{-½}∑_n(n!)^{-½}|n〉\int αⁿe^{-|α|²}χ(α*)f(α*)\,d²α\cr
+	&=π^{-½}∑_n(n!)^{-½}|n〉\int_0^∞ r^{n+1}e^{-r²}χ(r)\int_0^{2π}f(re^{-iθ})e^{inθ}\,dθdr\cr
+	&=2\sqrt π∑_n(n!)^{-½}|n〉\int_0^∞ r^{n+1}e^{-r²}χ(r)f_n(r)dr,}$$
+where
+$$f(re^{iθ})=∑_{m=-∞}^∞ f_m(r)e^{imθ}.$$
+Presumably, the right singular vectors have the $f_n$ of least norm such that 
+$$2\sqrt π(n!)^{-½}\int_0^∞ r^{n+1}e^{-r²}χ(r)f_n(r)dr=1.$$
+
+What is the appropriate norm to use?  In the case that $χ$ is a characteristic function on the domain $D$, it is presumably the truncated Bargmann norm
+$$〈g,f〉=\int_D e^{-|α|²}g*(α)f(α)\,d²α=\int e^{-|α|²}χ(α)g*(α)f(α)\,d²α.$$
+Note that this is only an inner product when $g$ and $f$ are restricted to $D$.  In this case, we wish to minimise 
+$$\|f_n\|²=2π\int_0^b re^{-r²}f²_n(r)\,dr,$$
+given 
+$$2\sqrt π(n!)^{-½}\int_0^b r^{n+1}e^{-r²}f_n(r)dr=1.$$
+If one considers changing $f$ by $Δa$ in an interval around $a$, the Lagrange condition is
+$$re^{-r²}f_n(r)\propto r^{n+1}e^{-r²},$$
+or 
+$$f_n(r)\propto rⁿ.$$
+The analytic functions still win.  
+In this case, the integrals are identical, so, for the preimage of $|n〉$,
+$$\|f_n\|²=\sqrt{πn!},$$
+and, presuming $|n〉$ is the singular vector, the singular value is
+$$σ_n=(πn!)^{-1/4}.$$
+I've done something wrong, because the result doesn't depend on $b$.
+
+
+Numerical experiments in the script {\tt sve.m} support this.  The operator $G$ was discretised on a grid in phase space, with spacing $h=0.3$, and various extents shown in the graphs.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|10〉$.  The graph below shows the singular values of the discretised operator converging to $π^{-½}$, as the extent of the grid passes through $|α|²=10$.
+
+\centerline{\XeTeXpicfile svgrid.pdf width \hsize}
+
+The following three figures show the right singular vectors, sampled versions of phase space functions.  The brightness of the plots indicates $|v_n(α)|$, the colors indicate phase.  These look very much like number states; that is an artefact of the way ket space was truncated and and phase space was discretised.  In the continuous limit there is only one singular value, and the vectors are degenerate.  For the $4×4$ grid, number states 5-10 don't fit, and the error in their singular values is of order 0.1 or more.  As the grid expands, the pre-images of higher number states fit in it, and more singular values have converged.
+
+\centerline{\XeTeXpicfile rsv2.pdf width 0.5\hsize
+\XeTeXpicfile rsv3.pdf width 0.5\hsize}
+\centerline{\XeTeXpicfile rsv4.pdf width 0.5\hsize}
+
+Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
 %% Discrete phase space
 
@@ -160,18 +204,6 @@ $$Gg=∑_n |n〉π\int ν_n*(α)g(α)\,d²α=|N〉π\int ν*(α)g(α),$$
 where $|N〉=\bigl(|0〉\ |1〉\ |2〉\ …\bigr)$ and $ν(α)=\bigl(ν₀(α)\ ν₁(α)\ …\bigr)$ could be thought of as infinite matrices whose columns are the left singular vectors $|n〉$ and their normalised entire expansions, the right singular vectors $v_n$.  The pesudoinverse, 
 $$G⁺|ψ〉=νπ〈N|ψ〉= ∑_n ν_nπ〈n|ψ〉,$$
 maps $|ψ〉$ to its normalised entire expansion.  Expanding over number states is useful because the maximum number in a system is usually limited by conservation of energy.  In real systems, the components decay exponentially with $n$, and become smaller than numerical rounding errors at reasonably small numbers.
-
-Numerical experiments in the script {\tt sve.m} support this.  The operator $G$ was discretised on a grid in phase space, with spacing $h=0.3$, and various extents shown in the graphs.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|10〉$.  The graph below shows the singular values of the discretised operator converging to $π^{-½}$, as the extent of the grid passes through $|α|²=10$.
-
-\centerline{\XeTeXpicfile svgrid.pdf width \hsize}
-
-The following three figures show the right singular vectors, sampled versions of phase space functions.  The brightness of the plots indicates $|v_n(α)|$, the colors indicate phase.  These look very much like number states; that is an artefact of the way ket space was truncated and and phase space was discretised.  In the continuous limit there is only one singular value, and the vectors are degenerate.  For the $4×4$ grid, number states 5-10 don't fit, and the error in their singular values is of order 0.1 or more.  As the grid expands, the pre-images of higher number states fit in it, and more singular values have converged.
-
-\centerline{\XeTeXpicfile rsv2.pdf width 0.5\hsize
-\XeTeXpicfile rsv3.pdf width 0.5\hsize}
-\centerline{\XeTeXpicfile rsv4.pdf width 0.5\hsize}
-
-Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
 Truncating Fock space has a similar effect to truncating the singular values, assuming the singular directions belonging to small values have large particle numbers.  (And they do: when I plotted their overlaps with coherent states, they formed rings without support at the origin.)  And indeed, the trajectories for the average amplitude change in similar ways due to truncation: they pick up an extra loop in the complex plane.
 
