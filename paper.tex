@@ -44,7 +44,15 @@ For an orthonormal basis, the right hand side would be 1 instead of $π$.  It fo
 $$\G f₀={1\over π}\int |α〉〈α|ψ〉\,d²α=|ψ〉.$$
 Furthermore, coherent states have the property that $e^{½|α|²}|α〉$ is an entire function of $α$ (clarify), so $f₀$ is an entire function.  Glauber showed that it is the unique entire solution to $\G f₀=|ψ〉$.  Further properties of the coherent states will be stated as required.  Glauber's summary of them is paraphrased in every quantum optics textbook ever written.
 
-Obviously, $\G$ is not one to one, because the images of the entire functions already fill ket space.
+Prior to Glauber, Bargmann pointed out that the Hilbert space of wavefunctions is isomorphic to the space of entire functions of a complex variable, under the inner product
+$$\langle g,f\rangle=\int g*(z)f(z)\,d²z.$$
+He introduced the isometry
+$$\langle Γ^+|ψ\rangle(α)=π^{-½}\langle α|ψ\rangle,$$
+which Glauber showed was a pseudoinverse of $|Γ\rangle$, in the sense that
+$$|Γ\rangle\langle Γ^+|=1.$$
+The other combination, $\langle Γ^+|Γ\rangle$, is an orthogonal projector from the functions of a complex variable onto the entire functions, under the Bargmann inner product.  It follows that $f=\langle Γ^+|ψ\rangle$ is the function with least norm that satisfies $|Γ\rangle f=|ψ\rangle$.  As shown above, $\|f\|=\| |ψ\rangle\|$.
+
+If, following Bargmann, we identify the quantum space with the entire functions, $|Γ\rangle$ becomes the projector $\langle Γ^+|Γ\rangle$.  Therefore the singularity of $|Γ\rangle$ is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ\rangle$, which can be most simply done by Tychonov regularisation, we ensure that $f$ is close to $\langle Γ^+|ψ\rangle$.  And $\langle Γ^+|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem causes so much trouble.
 
 %% SVE lemma
 
