@@ -50,7 +50,7 @@ He introduced the isometry
 $$\langle Γ^+|ψ\rangle(α)=π^{-½}\langle α|ψ\rangle,$$
 which Glauber showed was a pseudoinverse of $|Γ\rangle$, in the sense that
 $$|Γ\rangle\langle Γ^+|=1.$$
-The other combination, $\langle Γ^+|Γ\rangle$, is an orthogonal projector from the functions of a complex variable onto the entire functions, under the Bargmann inner product.  It follows that $f=\langle Γ^+|ψ\rangle$ is the function with least norm that satisfies $|Γ\rangle f=|ψ\rangle$.  As shown above, $\|f\|=\| |ψ\rangle\|$.
+The other combination, $\langle Γ^+|Γ\rangle$, is an orthogonal projector from the functions of a complex variable onto the entire functions, under the Bargmann inner product.  It follows that $f=\langle Γ^+|ψ\rangle$ is the function with least norm that satisfies $|Γ\rangle f=|ψ\rangle$.  As shown above, $‖f‖=‖ |ψ\rangle‖$.
 
 If, following Bargmann, we identify the quantum space with the entire functions, $|Γ\rangle$ becomes the projector $\langle Γ^+|Γ\rangle$.  Therefore the singularity of $|Γ\rangle$ is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ\rangle$, which can be most simply done by Tychonov regularisation, we ensure that $f$ is close to $\langle Γ^+|ψ\rangle$.  And $\langle Γ^+|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem causes so much trouble.
 
@@ -78,11 +78,11 @@ $$g(α)=e^{-½|α|²}{αⁿ\over(n!)^½},$$
 the Glauber preimage of $|n〉$.  We have 
 $$|g(α)|²={1\over n!}e^{-|α|²}|α|^{2n},$$
 so the squared norm is
-$$\|g\|²={1\over n!}\int ₀^∞2πr^{2n+1}e^{-r²}\,dr={2π\over n!}\int ₀^∞r^{2n+1}e^{-r²}\,dr.$$
+$$‖g‖²={1\over n!}\int ₀^∞2πr^{2n+1}e^{-r²}\,dr={2π\over n!}\int ₀^∞r^{2n+1}e^{-r²}\,dr.$$
 According to Wolfram,
 $$\int ₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
 so
-$$\|g\|=π^½.$$
+$$‖g‖=π^½.$$
 
 Assuming that there is no way to expand a state with a smaller norm than an entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
 
@@ -114,32 +114,46 @@ $$2\sqrt π(n!)^{-½}\int_0^∞ r^{n+1}e^{-r²}χ(r)f_n(r)dr=1.$$
 What is the appropriate norm to use?  In the case that $χ$ is a characteristic function on the domain $D$, it is presumably the truncated Bargmann norm
 $$〈g,f〉=\int_D e^{-|α|²}g*(α)f(α)\,d²α=\int e^{-|α|²}χ(α)g*(α)f(α)\,d²α.$$
 Note that this is only an inner product when $g$ and $f$ are restricted to $D$.  In this case, we wish to minimise 
-$$\|f_n\|²=2π\int_0^b re^{-r²}f²_n(r)\,dr,$$
+$$‖f_n‖²=2π\int_0^b re^{-r²}f²_n(r)\,dr,$$
 given 
 $$2\sqrt π(n!)^{-½}\int_0^b r^{n+1}e^{-r²}f_n(r)dr=1.$$
 If one considers changing $f$ by $Δa$ in an interval around $a$, the Lagrange condition is
 $$re^{-r²}f_n(r)\propto r^{n+1}e^{-r²},$$
 or 
 $$f_n(r)\propto rⁿ.$$
-The analytic functions still win.  
-In this case, the integrals are identical, so, for the preimage of $|n〉$,
-$$\|f_n\|²=\sqrt{πn!},$$
-and, presuming $|n〉$ is the singular vector, the singular value is
-$$σ_n=(πn!)^{-1/4}.$$
-I've done something wrong, because the result doesn't depend on $b$.
+The analytic functions still win.  Let $f_n(r)=rⁿ$.  Then
+$$‖f_n‖²=2π\int_0^b r^{2n+1}e^{-r²}\,dr$$
+and
+$$‖ |Γ_χ〉f_n‖=2\sqrt π(n!)^{-½}\int_0^b r^{2n+1}e^{-r²}dr,$$
+so we have
+$$σ_n={‖ |Γ_χ〉f_n‖\over ‖f_n‖}=\sqrt{2\over n!}
+	\left(\int_0^b r^{2n+1}e^{-r²}dr\right)^½.$$
+According to Wolfram,
+$$\int_0^b r^{2n+1}e^{-r²}dr=½\left(Γ(n+1)-Γ(n+1,b²)\right),$$
+where $Γ$ is Mathematica's version of the incomplete gamma function.  Therefore, recalling that $n!=Γ(n+1)$,
+$$σ_n=\left(1-{Γ(n+1,b²)\over Γ(n+1)}\right)^½.$$
+Unfortunately, Matlab defines the incomplete gamma function in a different way than Mathematica does.  Fortunately, that Matlab function, {\tt gammainc}, is exactly the square of the right-hand side of the above equation.
 
+This all seems wrong, because the incomplete gamma function varies the wrong way with $n$.  It becomes small as $n→0$.
 
 Numerical experiments in the script {\tt sve.m} support this.  The operator $G$ was discretised on a grid in phase space, with spacing $h=0.3$, and various extents shown in the graphs.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|10〉$.  The graph below shows the singular values of the discretised operator converging to $π^{-½}$, as the extent of the grid passes through $|α|²=10$.
 
-\centerline{\XeTeXpicfile svgrid.pdf width \hsize}
+\topinsert \XeTeXpicfile svgrid.pdf width \hsize \endinsert
 
 The following three figures show the right singular vectors, sampled versions of phase space functions.  The brightness of the plots indicates $|v_n(α)|$, the colors indicate phase.  These look very much like number states; that is an artefact of the way ket space was truncated and and phase space was discretised.  In the continuous limit there is only one singular value, and the vectors are degenerate.  For the $4×4$ grid, number states 5-10 don't fit, and the error in their singular values is of order 0.1 or more.  As the grid expands, the pre-images of higher number states fit in it, and more singular values have converged.
 
-\centerline{\XeTeXpicfile rsv2.pdf width 0.5\hsize
-\XeTeXpicfile rsv3.pdf width 0.5\hsize}
-\centerline{\XeTeXpicfile rsv4.pdf width 0.5\hsize}
+\topinsert \XeTeXpicfile rsv2.pdf width 0.5\hsize
+\XeTeXpicfile rsv3.pdf width 0.5\hsize \endinsert
+\topinsert \XeTeXpicfile rsv4.pdf width 0.5\hsize \endinsert
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
+
+%% Sampling on random grids
+
+\topinsert \XeTeXpicfile gweight.pdf width \hsize 
+The weights $w_i$ required in order that the integrals of the functions $u_i(x)=e^{-(x-x_i)²}$ are given by the sums $∑_j w_j u_i(x_j)$.  The points $x_i$ are normally distributed (top), or evenly spaced (bottom).  Note how nearby points tend to cancel each others' samples.  I expect experts in Chebyshev sampling would not be surprised by this, but I am not yet such an expert.
+\endinsert
+
 
 %% Discrete phase space
 
@@ -204,7 +218,7 @@ I still haven't thought in detail about the results with truncated Fock spaces. 
 The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.  This can also be seen from the expansions of coherent states.  The normalised entire expansion of $|α〉$ is
 $$g(β*)=〈β|α〉=e^{-½|α|²-½|β|²+β*α},$$
 whence
-$$\|g\|²=\int |g(β)|²\,d²β=\int e^{-|β-α|²}\,d²β=π.$$
+$$‖g‖²=\int |g(β)|²\,d²β=\int e^{-|β-α|²}\,d²β=π.$$
 The norm of $|α〉$ is of course 1.  If we used the Bargmann space, we could easily absorb the $π$ into the inner product, and make $G$ a generalised projector.
 
 The lemma gives a very simple singular value expansion of $G$.  Because there is only one nonzero singular value, any orthonormal basis of ket space will do as the left singular vectors.  Let's choose the number states for familiarity.  Then
