@@ -10,13 +10,13 @@
 
 %% Background
 
-When the first quantum physicists realised that the position of a particle is essentially uncertain, they were destined to seek the conditions that cause it to follow a normal law of error, and discover the gaussian wave packet.  They soon understood the free particle and turned to the harmonic oscillator, investigating the form of its ground state and the way its excited states generate sinusoidal motion in the classical limit.  These problems were also solved by the gaussian wave packet.  With its width fixed by equipartition of energy and the uncertainty principle, it became the coherent state.
+When they realised that positions and momenta are essentially uncertain, the first quantum physicists were bound to discover the gaussian wave packet by seeking conditions that produce a normal distribution of probability.  They soon understood the free particle and turned to the harmonic oscillator, investigating the form of its ground state and the way its excited states generate sinusoidal motion in the classical limit.  These problems were also solved by the gaussian wave packet.  With its width fixed by equipartition of energy and the uncertainty principle, it became the coherent state.
 
 The simplest mechanical systems allow Schrödinger's law of motion to be solved in closed form, but most quantum problems must be solved approximately.  This can be done variationally, specifying a class of approximants that can be manipulated exactly, then finding one of them that most nearly solves the problem.  To test how well a wave function approximates the dynamics of a system, the difference between the two sides of Schrödinger's equation can be measured by the Hilbert space norm.  It remains to choose a class of approximants.  The gaussian wave packets are an common choice, because they differ in their scale and their central position and momentum, useful properties to determine for any quantum state.
 
 The invention of the laser called for a quantum theory of intense radiation.  It is difficult to analyse laser beams because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When atomic Bose-Einstein condensates were made, and very coherent matter became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
 
-In the 1970s, Heller put the two ideas together, proposing to simulate quantum dynamics variationally, using finite superpositions of coherent states as the approximants.  This is an appealing approach.  Every quantum state can be approximated arbitrarily well as the number of components in the superposition increases.  The experience of quantum optics shows that many systems can be approximated by a reasonable number of components, and variational dynamics should avoid the covergence problems that limit the Monte-Carlo methods.
+In the 1970s, Heller put the two ideas together, proposing to simulate quantum dynamics variationally, using finite superpositions of coherent states as the approximants.  This is an appealing approach.  Every quantum state can be approximated arbitrarily well as the number of components in the superposition increases.  The experience of quantum optics shows that, in many systems, the approximation converges with a reasonable number of components.  Also, variational dynamics should avoid the covergence problems that limit the Monte-Carlo methods.
 
 %% Problem
 
@@ -26,9 +26,9 @@ These attempts have aimed to solve chemistry problems, involving dozens of atoms
 
 %% Phase space expansion as a linear operator
 
-The expansion introduced by Glauber\cite{prx-131-2766} is performed by the operator
+Expansion over coherent states is a linear operator from functions of a complex variable to quantum states,
 $$\G f=π^{-½}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
-The notation $\int f(α)\,d²α$ means $\int_{-∞}^{∞}\int_{-∞}^{∞} f(x+iy)\,dx\,dy$.  The function $f$ is a function of a complex variable, such that $e^{-½|α|²}f(α)$ is square-integrable.  Bargmann\cite{} showed that these functions form a Hilbert space under the inner product $〈g,f〉=\int e^{-|α|²}g*(α)f(α)\,d²α$; this paper refers to it as the space of phase space distributions, or just distributions.  In this paper, the application of a linear function is written as a product, and functions whose range is ket space are denoted by kets, usually with a greek letter.  So $\G f$ is the ket that results from applying the linear operator $\G$ to the phase space distribution $f$.
+The notation $\int f(α)\,d²α$ means $\int_{-∞}^{∞}\int_{-∞}^{∞} f(x+iy)\,dx\,dy$.  The function $f$ is such that $e^{-½|α|²}f(α)$ is square-integrable.  Bargmann\cite{pam-14-187} showed that these functions form a Hilbert space under the inner product $〈g,f〉=\int e^{-|α|²}g*(α)f(α)\,d²α$; this paper refers to it as the space of phase space distributions, or just distributions.  When norms of functions are written below, the norm is the one derived from this inner product.  In this paper, $\G f$ denotes the ket that results from applying the linear operator $\G$ to the phase space distribution $f$; application and composition of linear operators is shown by juxtaposition, and functions whose values are quantum states are written as kets, usually with a greek letter.
 
 The state $|α〉$ is a coherent state with complex amplitude $α$.  These can be defined in a number of ways, perhaps most simply in second quantisation, as eigenstates of a boson annihilation operator $a$, with $a|α〉=α|α〉$.  The annihilation operator is not hermitian, so the eigenvalues $α$ are complex numbers.  In first quantisation, such an operator is the complex amplitude
 $$a=?(λx+ip/λ),\qquad\hbox{Get constants from Cahill}$$
@@ -37,60 +37,54 @@ where $x$ and $p$ are the position and momentum operators; the bosons in this ca
 Coherent states are not orthogonal, but their brackets follow the law
 $$〈β|α〉=e^{-½|β|²-½|α|²+β*α},$$
 whence
-$$|〈β|α〉|²=e^{-|β-α|²}.$$
-The projector satisfies the law
+$$\bigl|〈β|α〉\bigr|²=e^{-|β-α|²}.$$
+The projector satisfies
 $$\int |α〉〈α|\,d²α=π.$$
-For an orthonormal basis, the right hand side would be 1 instead of $π$.  It follows that the operator $\G$ is onto: let $|ψ〉$ any ket, and set $f₀(α*)=π^{-½}e^{½|α|²}〈α|ψ〉$.  Then
-$$\G f₀={1\over π}\int |α〉〈α|ψ〉\,d²α=|ψ〉.$$
-Furthermore, coherent states have the property that $e^{½|α|²}|α〉$ is an entire function of $α$ (clarify), so $f₀$ is an entire function.  Glauber showed that it is the unique entire solution to $\G f₀=|ψ〉$.  Further properties of the coherent states will be stated as required.  Glauber's summary of them is paraphrased in every quantum optics textbook ever written.
+This is similar to the law for an orthonormal basis, except that the right hand side is $π$ instead of 1.  Further properties of the coherent states will be stated as required.  Glauber's summary of them\cite{prx-131-2766} is paraphrased in every quantum optics textbook ever written.
 
-Prior to Glauber, Bargmann pointed out that the Hilbert space of wavefunctions is isomorphic to the space of entire functions of a complex variable, under the inner product
-$$\langle g,f\rangle=\int g*(z)f(z)\,d²z.$$
-He introduced the isometry
-$$\langle Γ^+|ψ\rangle(α)=π^{-½}\langle α|ψ\rangle,$$
-which Glauber showed was a pseudoinverse of $|Γ\rangle$, in the sense that
-$$|Γ\rangle\langle Γ^+|=1.$$
-The other combination, $\langle Γ^+|Γ\rangle$, is an orthogonal projector from the functions of a complex variable onto the entire functions, under the Bargmann inner product.  It follows that $f=\langle Γ^+|ψ\rangle$ is the function with least norm that satisfies $|Γ\rangle f=|ψ\rangle$.  As shown above, $‖f‖=‖ |ψ\rangle‖$.
+% It follows that $\G$ is onto: let $|ψ〉$ any ket, and set $f₀(α*)=π^{-½}e^{½|α|²}〈α|ψ〉$.  Then
+% $$\G f₀={1\over π}\int |α〉〈α|ψ〉\,d²α=|ψ〉.$$
+% Furthermore, coherent states have the property that $e^{½|α|²}|α〉$ is an entire function of $α$ (clarify), so $f₀$ is an entire function.  Glauber showed that it is the unique entire solution to $\G f₀=|ψ〉$.
 
-If, following Bargmann, we identify the quantum space with the entire functions, $|Γ\rangle$ becomes the projector $\langle Γ^+|Γ\rangle$.  Therefore the singularity of $|Γ\rangle$ is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ\rangle$, which can be most simply done by Tychonov regularisation, we ensure that $f$ is close to $\langle Γ^+|ψ\rangle$.  And $\langle Γ^+|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem causes so much trouble.
+Bargmann showed that the Hilbert space of wavefunctions is isomorphic to the space of phase space distributions, under the isometry $〈Γ⁺|$, where
+$$〈 Γ⁺|ψ〉(α)=π^{-½}〈 α|ψ〉.$$
+Being a linear operator from quantum states to phase space functions, $〈Γ⁺|$ is written as a ket.  It is a pseudoinverse of $|Γ〉$, in the sense that $|Γ〉〈 Γ⁺|$ is the identity operator in state space.  The other composition, $〈 Γ⁺|Γ〉$, projects the functions of a complex variable onto the entire functions, orthogonally under the Bargmann inner product.  It follows that $f=〈 Γ⁺|ψ〉$ is the function with least norm that satisfies $|Γ〉 f=|ψ〉$, with $‖f‖=\bigl‖ |ψ〉\bigr‖$.
+
+If, following Bargmann, we identify the quantum space with the entire functions, $|Γ\rangle$ becomes the projector $\langle Γ⁺|Γ\rangle$.  Therefore the singularity of $|Γ\rangle$ is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ\rangle$, which can be most simply done by Tychonov regularisation, we ensure that $f$ is close to $\langle Γ⁺|ψ\rangle$.  And $\langle Γ⁺|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem causes so much trouble.
 
 %% SVE lemma
 
-Hypothesis: The singular values of $|Γ〉$ are 0 and 1, and the space belonging to 1 comprises the entire functions.
-
-There are two ways one could set about proving the Hypothesis.  Firstly, one could show that any function orthogonal to the Gaussian analytics annihilates $G$.  Otherwise, one could show that the norms of all Gaussian analytics are scaled by the same factor going to F
-ock space, and that they are a pre-image of Fock space.  The second approach sounds simpler.
-
-This won't be a rigourous argument: it could turn out that there's another class of expansions with half the norm, and the entire functions have components belonging to the 0 singular value.  My numerical experiment suggests otherwise; let's ignore that possibility for now.
-
-Let $f$ be a normalised entire function, in Glauber's sense.  I.e., 
-$$f(z)=∑c_n{zⁿ\over (n!)^½},$$
-for some normalised vector $c$.
-
-  Our expansion function is 
-$$g(α)=f(α)e^{-½|α|²}.$$
-If $f$ has the Taylor expansion
-$$f(z)=∑_n c_n{zⁿ\over(n!)^½},$$
-then 
-$$Gg = ∑_n c_n|n〉.$$
-The functions $zⁿ$ for $n≥0$ span the entire functions (or their span is a dense subset, or something like that), so let's find the norm of 
-$$g(α)=e^{-½|α|²}{αⁿ\over(n!)^½},$$
-the Glauber preimage of $|n〉$.  We have 
-$$|g(α)|²={1\over n!}e^{-|α|²}|α|^{2n},$$
-so the squared norm is
-$$‖g‖²={1\over n!}\int ₀^∞2πr^{2n+1}e^{-r²}\,dr={2π\over n!}\int ₀^∞r^{2n+1}e^{-r²}\,dr.$$
-According to Wolfram,
-$$\int ₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
-so
-$$‖g‖=π^½.$$
-
-Assuming that there is no way to expand a state with a smaller norm than an entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
+% Hypothesis: The singular values of $|Γ〉$ are 0 and 1, and the space belonging to 1 comprises the entire functions.
+% 
+% There are two ways one could set about proving the Hypothesis.  Firstly, one could show that any function orthogonal to the Gaussian analytics annihilates $G$.  Otherwise, one could show that the norms of all Gaussian analytics are scaled by the same factor going to F
+% ock space, and that they are a pre-image of Fock space.  The second approach sounds simpler.
+% 
+% This won't be a rigourous argument: it could turn out that there's another class of expansions with half the norm, and the entire functions have components belonging to the 0 singular value.  My numerical experiment suggests otherwise; let's ignore that possibility for now.
+% 
+% Let $f$ be a normalised entire function, in Glauber's sense.  I.e., 
+% $$f(z)=∑c_n{zⁿ\over (n!)^½},$$
+% for some normalised vector $c$.
+% 
+%   Our expansion function is 
+% $$g(α)=f(α)e^{-½|α|²}.$$
+% If $f$ has the Taylor expansion
+% $$f(z)=∑_n c_n{zⁿ\over(n!)^½},$$
+% then 
+% $$Gg = ∑_n c_n|n〉.$$
+% The functions $zⁿ$ for $n≥0$ span the entire functions (or their span is a dense subset, or something like that), so let's find the norm of 
+% $$g(α)=e^{-½|α|²}{αⁿ\over(n!)^½},$$
+% the Glauber preimage of $|n〉$.  We have 
+% $$|g(α)|²={1\over n!}e^{-|α|²}|α|^{2n},$$
+% so the squared norm is
+% $$‖g‖²={1\over n!}\int ₀^∞2πr^{2n+1}e^{-r²}\,dr={2π\over n!}\int ₀^∞r^{2n+1}e^{-r²}\,dr.$$
+% According to Wolfram,
+% $$\int ₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
+% so
+% $$‖g‖=π^½.$$
+% 
+% Assuming that there is no way to expand a state with a smaller norm than an entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
 
 %% Consequences of lemma
-
-If the domain and range of an operator are the same, and the operator has singular values 0 and 1, then that operator is an orthogonal projector onto its range.  The operator $|Γ〉$ is a generalisation of that.  It is the composition of an orthogonal projection of function space onto the entire functions followed by an isometric mapping of the entire functions onto the kets.  The orthogonality and isometry are under the Bargmann inner product for phase space functions.  Therefore, if the amplitudes of the coherent states are held constant, and the discretised problem is solved by adjusting their weights, the solutions that come from an SVD should be very stable indeed.  This might depend somewhat on how evenly the amplitudes are spaced: I could start with a regular grid, and add Gaussian noise to see what changed.
-
-So $G$ is a projection: if the inner product is normalised properly, $G$ keeps the component of $f$ in the space of entire functions, and discards the orthogonal component.  The continuous problem is simply underdetermined, and the inverse problem can be regularised very easily by excluding components with zero singular values from the solution.  That isn't what I see with discrete versions: they seem to have a steady decay of singular values, not a sudden drop to zero.  This must be entirely an artefact of the discretisation.
 
 The part of $|Γ〉$ that projects functions onto entire functions can be written as follows
 $$π^{-½}〈β|Γ〉f=π^{-1}∫〈β|α〉e^{-½|α|²}f(α*)\,d²α=π^{-1}∫〈0|D(α-β)|0〉e^{-½|α|²}f(α*)\,d²α.$$
@@ -159,7 +153,7 @@ The weights $w_i$ required in order that the integrals of the functions $u_i(x)=
 
 We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$, corresponding to a row of kets $|A〉=\bigl(|α₁〉\ ⋯\ |α_R〉\bigr)$.  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
 
-Since there are only $R$ weights to adjust, the condition $|\vec g|=|g|$ can be satisfied only for $R$ linearly independent functions $g_r$.  The obvious choice is $g_r(α*)=(〈α_r|G^+)(α*)=〈α|α_r〉=\exp(-½|α|²-½|α_r|²+α*α_r)$, with $|\hat g_r^s|²=w_s²\exp(-|α_s-α_r²)$, and $|g_r|²=π$.  The condition becomes
+Since there are only $R$ weights to adjust, the condition $|\vec g|=|g|$ can be satisfied only for $R$ linearly independent functions $g_r$.  The obvious choice is $g_r(α*)=(〈α_r|G⁺)(α*)=〈α|α_r〉=\exp(-½|α|²-½|α_r|²+α*α_r)$, with $|\hat g_r^s|²=w_s²\exp(-|α_s-α_r²)$, and $|g_r|²=π$.  The condition becomes
 $$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
 	e^{-|α₂-α₁|²} & 1 &  & e^{-|α₂-α_R|²} \cr
 	& & \ddots & \cr
