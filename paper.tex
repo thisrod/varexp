@@ -6,6 +6,7 @@
 \title{Stability of variational quantum dynamics with Gaussian approximants}
 
 \def\G{|Γ〉}
+\def\Gx{|Γ_χ〉}
 \def\cite#1{$[\hbox{\tt #1}]$}
 
 %% Background
@@ -94,10 +95,25 @@ This appears to be a convolution of the function $e^{-½|α|²}f(α*)$ with the 
 
 The operator $|Γ〉$ acts on functions defined over the whole complex plane.  For states with high particle number, the smallest preimages have support far from the origin.  We can not compute with such functions: any discretisation will sample values of $f$ on a finite subset of the plane.  Unfortunately, the conditioning of these restricted operators will be worse than that of $|Γ〉$.  We have excluded the small preimages of the states with large particle number, so they must be represented by functions with support close to the origin, but with large norms.  Hence the restricted operators will have small singular values corresponding to states with many particles.
 
-Define a restricted operator
-$$|Γ_χ〉f=π^{-½}\int |α〉e^{-½|α|²}χ(α*)f(α*)\,d²α.$$
-For now, suppose that $χ$ has circular symmetry, with $χ(z)=χ(|z|)$.  The most obvious examples are characteristic functions, where $χ$ is 1 inside a circle of radius $b$, and 0 outside.  However, the formalism allows more gradual truncation as well.  We can rewrite this
-$$\eqalign{|Γ_χ〉f&=π^{-½}∑_n(n!)^{-½}|n〉\int αⁿe^{-|α|²}χ(α*)f(α*)\,d²α\cr
+%% The SVE
+
+The above paragraph can be stated quantitatively.  Define a restricted operator
+$$\Gx f=π^{-½}\int |α〉e^{-½|α|²}χ(α*)f(α*)\,d²α.$$
+Most obviously, $χ$ could be a characteristic function, with $χ(z)$ being 1 for $|z|≤b$ and 0 outside this disk.  The formalism allows gradual truncation too.
+
+The sizes of states and their expansions can be read from the singular value expansion of $\Gx $.   If the domain and range of $\G$ were the same space, it would have an eigenvalue decomposition; the SVE is a generalisation of that.  It has the form
+$$\Gx f = ∑_{i=1}^∞ |u_i〉σ_i〈v_i,f〉.$$
+The kets $|g_i〉$ are an orthonormal basis of state space, known as the left singular vectors of $\Gx$.  The $σ_i$ are positive real numbers, called singular values.  The functions $v_i$ are are orthonormal under the Bargmann inner product, and are called right singular vectors.
+
+In the case where $χ=1$, and $\Gx=\G$, the expansion is quite arbitrary.  The left singular kets can be any orthonormal basis, the right singular vector $v_i$ is the unique entire functions for which $\G v_i=|u_i〉$, and every singular value is 1.  If the domain and range of $\G$ were the same, this would indicate that it was a projector.  The component of $|ψ〉$ in the null space of $\G$ is discarded, being orthogonal to every $v_i$, while the other component keeps the same expansion coefficients, while the basis $v_i$ is replaced by the $|u_i〉$.
+
+When the operator is restricted, the SVE gives more information. If $\Gx$ were one to one, each $v_i$ would be the unique preimage of $|g_i〉$; since $\Gx$ is singular, $v_i$ is the preimage with least norm.  The singular values are the ratios of $‖\Gx v_i‖$ to $‖v_i‖$.  If $|u_i〉$ has a low particle number, it can be expanded efficiently: $v_i$ will be close to $〈Γ⁺|u_i〉$, and $σ_i$ will be close to 1.  If $|u_i〉$ includes components with large particle number, its expansion will have a larger norm than itself.  In this case, $v_i$ will be a truncation of $〈Γ⁺|u_i〉$ to small amplitudes, and $σ_i$ will be small.
+
+Before we study the singular values and vectors of $\Gx$, consider why small singular values are a problem.  The pseudoinverse of $\Gx$ with least norm is
+$$〈Γ⁺_χ|=∑_{i=1}^∞ v_iσ_i^{-1}〈u_i|.$$  Suppose this is applied to a state $|ψ〉$ that has a low expected particle number, but small components with large particle number.  Such a component will overlap some $|u_i〉$ belonging to small $σ_i$, and $〈Γ⁺_χ|$ will multiply it by $σ_i^{-1}$, generating large components of those $v_i$ in the expansion function.  In the continuous expansion, this isn't a problem: the information is still there, and the state can be recovered by applying $\Gx$ to the expansion.  When the expansion is discretised, however, it is very easy for the small, low particle number component of $〈Γ⁺_χ|ψ〉$ that contains the important information about $|ψ〉$ to disappear in the large components of $〈Γ⁺_χ|ψ〉$ that give minor details of high particle number components of $|ψ〉$.
+
+Let's compute some singular values and vectors.  Suppose that $χ$ has circular symmetry, with $χ(z)=χ(|z|)$.  We can rewrite this
+$$\eqalign{\Gx f&=π^{-½}∑_n(n!)^{-½}|n〉\int αⁿe^{-|α|²}χ(α*)f(α*)\,d²α\cr
 	&=π^{-½}∑_n(n!)^{-½}|n〉\int_0^∞ r^{n+1}e^{-r²}χ(r)\int_0^{2π}f(re^{-iθ})e^{inθ}\,dθdr\cr
 	&=2\sqrt π∑_n(n!)^{-½}|n〉\int_0^∞ r^{n+1}e^{-r²}χ(r)f_n(r)dr,}$$
 where
@@ -118,9 +134,9 @@ $$f_n(r)\propto rⁿ.$$
 The analytic functions still win.  Let $f_n(r)=rⁿ$.  Then
 $$‖f_n‖²=2π\int_0^b r^{2n+1}e^{-r²}\,dr$$
 and
-$$‖ |Γ_χ〉f_n‖=2\sqrt π(n!)^{-½}\int_0^b r^{2n+1}e^{-r²}dr,$$
+$$‖ \Gx f_n‖=2\sqrt π(n!)^{-½}\int_0^b r^{2n+1}e^{-r²}dr,$$
 so we have
-$$σ_n={‖ |Γ_χ〉f_n‖\over ‖f_n‖}=\sqrt{2\over n!}
+$$σ_n={‖ \Gx f_n‖\over ‖f_n‖}=\sqrt{2\over n!}
 	\left(\int_0^b r^{2n+1}e^{-r²}dr\right)^½.$$
 According to Wolfram,
 $$\int_0^b r^{2n+1}e^{-r²}dr=½\left(Γ(n+1)-Γ(n+1,b²)\right),$$
@@ -146,6 +162,8 @@ Reducing the dimension of Fock space so that the problem is underdetermined mean
 
 \topinsert \XeTeXpicfile gweight.pdf width \hsize 
 The weights $w_i$ required in order that the integrals of the functions $u_i(x)=e^{-(x-x_i)²}$ are given by the sums $∑_j w_j u_i(x_j)$.  The points $x_i$ are normally distributed (top), or evenly spaced (bottom).  Note how nearby points tend to cancel each others' samples.  I expect experts in Chebyshev sampling would not be surprised by this, but I am not yet such an expert.
+
+The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
 \endinsert
 
 
@@ -172,38 +190,6 @@ $$f(β)=∑_i w_if(α_i)〈β|α_i〉.$$
 (I'm assuming we put the factor $1/π$ in $G$.)  This doesn't have a solution for general superpositions of coherent states.  Surely there's some quadrature rule for a sampled phase-space function?
 
 Using the Galerkin criterion, there doesn't seem to be one where the coefficient of $|α_i〉$ only depends on $f(α_i)$.  However, the Galerkin formula $〈A|A〉f=〈A|ψ〉$, where $〈α_i|ψ〉=f(α_i)$, seems like a good candidate for a more general rule.
-
-There are two types of ill-posed problems, rank-deficient and discrete.  They are distingished by how the singular values decay to zero.  In a rank-deficient problem, there is a sharp cut between large and small singular values.  The large ones are large enough that components in their singular directions do not contribute excessively to the solution, the small ones would contribute huge components, but they are small enough to round to zero, and ignore the component along that singular direction.  In discrete problems, the singular values decay continuously.  The size of the components of the solution varies continuously: there is no point where they become huge, but a continuous minimum and a gradual rise as the singular values get smaller.
-
-I've been assuming that the variational problem is discrete, because it comes from a discretisation of an integral equation.  However, the integral equation is a complex convolution, and for some values of the complex amplitude, the kernel oscillates arbitrarily sharply.  This is the same sort of integral equation as the Fourier transform, where we know $f(t)$, and want to find $F(ω)$ such that
-$$f(t)=\int F(ω)e^{iωt}\,dω.$$
-This also has a kernel that oscillates at a rate proportional to $ω$, and it also has very stable solutions.  (What is the SVD of the DFT matrix?  It's ${\rm anything}×1×{\rm FT anything}$: Rayleigh theorem.)
-
-A numerical example is shown below.  The state $|ψ〉$ is the Schrödinger cat that a coherent state becomes after half a cycle in a quartic oscillator; the amplitude of the initial coherent state was $2$.  A set of 40 sample amplitudes $α_r$ was drawn from the probability distribution $|g(a*)|²$, where $g=G⁺|ψ〉$.  These are plotted below, as circles in phase space.  For smaller ensembles, the results were not consistent between draws.
-
-A basic question is why regularisation helps.  Usually, it's applied to the inversion of measured data, where the right hand side of the least squares problem includes noise.  The aim is to prevent amplified noise from dominating the solution.  In our problem, the right hand side is calculated instead of measured, and the only noise is rounding errors.  Those are 16 orders of magnitude smaller than the exact right hand side, so rounding the small singular values up to $10^{-10}$ should be more than adequate.  We've needed much stronger regularisation than that: therefore, rounding errors aren't the problem.
-
-The only other error I can think of is nonlinearity.  Tychonov parameters of order $10^{-10}$ do work for the linear expansion problem.  Perhaps we're not doing regularisation, we're actually establishing a trust region, where the linear least squares problem is a good approximation to the actual change in $|ψ(z)〉$.
-
-If that's the case, it's tempting to make the weights linear instead of logarithmic, so that that part of the problem is exactly linear.  However, the function $e^φ$ is pretty nearly linear in the range we're shifting $φ$, so that can't help much.  In fact, the whole problem is quite linear.
-
-It seems that, when two amplitudes are very close, the solutions where the weights cancel out are better fits than the smooth ones—that seems to be the case in the l-curve experiments for the expansion problem.  To avoid the amplitudes clustering, I need to find out how good a fit is possible with evenly spaced ampltiudes, and set the regularisation parameter so that the residual is on that order.  In fact, I already know how large the phase space expansion should be: the function being sampled should have a norm around $π^½$.  And we're back to the other open question, how to relate the norm of a function to the norm of a set of samples at irregular points.  How can I estimate how much of phase space “belongs” to each amplitude sample, in order to get a volume over which the function has that value?
-
-The obvious way would be to assign amplitudes to the nearest sample.  That makes the volume for each sample a quite irregular prism; maybe there is a simple way to calculate the volumes of those, but I don't know it.  What if we assign a value to each point as an average over the sampled values, weighted, say, in proportion to the squared distances?  There would need to be some extra condition to ensure the function tends to zero at points remote from the samples.  Something like $x^{-2}e^{-|x|²}$ sounds plausible: it's quadratic at sort range, where the gaussian is flat, but outside the support of the samples, it decays in the right way for a phase space expansion.  I think the short range part needs to be a power law, so that it doesn't have a length scale built in when the distances between samples are random.  What's the best exponent?  I expect it depends on the dimension of the phase space, which would determine how many samples we expect to find close to a given one.
-
-The Picard condition is very obviously satisfied by the projection operator $|Γ〉$.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm as itself.  Functions in the null space of $|Γ〉$ don't have components in the left singular directions, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
-
-\centerline{\XeTeXpicfile cats.pdf width \hsize}
-
-The next Figure is a Picard plot for the Galerkin discretisation $〈A|A〉f=〈A|ψ〉$, where $f$ is a vector of weights such that $|A〉f$ approximates $|ψ〉$.  Below it is a plot of the expansions over number states of the singular kets $〈n|u_r〉$, where $|A〉=|U〉SV$.  For the kets to be orthogonal, $|u_r〉$ must have support close to $n=r$.  The components of the cat have coherent amplitude 2, so their largest number component is $n=4$, and the components drop quickly as $n$ increases further.  Above $r=15$, the singular ket $|u_r〉$ has very small components on these number states, so it hardly overlaps $|ψ〉$.  At the same time, the singular kets start to have particle numbers too large to be consistent with the sample amplitudes $α_r$, so the singular values decrease.  In fact, they decrease more rapidly than the components of $|ψ〉$, and the discrete Picard condition is not satisfied.  Seeing that $G$ is perfectly conditioned, this is a very bad discretisation.
-
-The final graph is an L curve when the discrete problem is Tychonov regularised.  It shows the expected shape, with minimum residual around $2×10^{-8}$.  Six regularised solutions are shown above; the modulus of $f_r$ is the disk's saturation, and the phase determines its hue.  Note that least norm regularisation has the desirable property that adjacent $α_r$ have similar $f_r$: the least norm solution to $a+b+c=X$ is $a=b=c=X/3$.
-
-\centerline{\XeTeXpicfile catpicard.pdf width \hsize}
-
-\centerline{\XeTeXpicfile catsws.pdf width \hsize}
-
-\centerline{\XeTeXpicfile catl.pdf width \hsize}
 
 %% Truncated Hilbert space
 
@@ -250,17 +236,6 @@ $$〈n|Dψ(φ,α)〉=e^φ\pmatrix{{α^n\over \sqrt{n!}} &  α^{n-1}\sqrt{n\over 
 as is the bracket of the quartic oscillator Hamiltonian $a^{2\dagger}a²$
 $$〈n|H/\hbar|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
 
-%% Singular value decompositions
-
-Variational dynamics seeks an expansion $g$ to approximate a quantum state $|ψ〉≈Gg$.  Given the form of Equation~1, this requires solving a Fredholm integral equation of the first kind.  That is the canonical example of an ill-posed problem: rounding and discretisation errors in $|ψ〉$ are magnified enormously in the solution $g$.  To solve these problems, it helps to understand the singular values and vectors of the operator $G$.
-
-The singular value expansion of the linear operator $G$ has the form
-$$Gf = ∑_{j=1}^∞ |g_j〉σ_j〈v_j,f〉,$$
-where the left singular vectors $|g_j〉$ are orthonormal kets, the singular values $σ_j$ are positive real numbers, the right singular vectors $v_j$ are normalised entire functions, and presumably $〈,〉$ is the Bargmann inner product.  This can be written
-$$G = |G〉SV†,$$
-where $|G〉$ is a row vector of the left singular kets, $S$ is a matrix with the singular values along the diagonal, and $V$ maps complex coefficients to linear combinations of the functions $v_j$.
-
-Because the expansions are underdetermined, the set $|g_j〉$ will be complete, but the set $v_j$ will not be.  Alternatively, some of the $v_j$ have zero singular values and no corresponding left singular vector.  One can write a full SVE, where $V†$ is a full expansion, but $S$ truncates the vector of coefficients.
 
 The instability in the dynamics is caused by the near-singularity of $|Dψ〉$.  If a singular value decomposition $|Dψ〉=|U〉SV†$ is taken, the singularity is indicated by small singular values on the diagonal of $S$.  It is often measured by the condition number of $|Dψ〉$, the ratio of the largest to the smallest singular value.  Let $C(z)$ be the condition number of $|Dψ(z)〉$.  As part of the regularisation process, it would be useful to avoid changing $z$ in directions that increase $C(z)$.  For example, if two coherent states had real amplitudes, and the real part of the expected amplitude needed to increase, it would be done by shifting the right hand one away from the left hand one, not the left hand one closer to the right hand.  Is there a way to make a computer do that?
 
@@ -275,6 +250,42 @@ $$∑_{j=1}^∞{\bigl|〈g_j|H|ψ〉\bigr|²\over σ_j²}$$
 must converge.  The singular values reduce with $j$, by definition; this requires that the components of the left singular vectors reduce somewhat faster.
 
 The variational problem seems to be pretty well-posed: if the initial superposition is the phase space function sampled on a grid, then the state that comes from a variational change in the amplitudes matches $H|ψ〉$ very closely.  I was working in a truncated Fock space; I wonder what happens as the truncation increases, while the grid stays a constant size?  Or alternately, if the grid shrinks while the Fock space stays constant.
+
+%% ill-posedness
+
+As shown above, the restricted expansion operator $\Gx $ has singular values that decay to very small values, whose singular vectors are states with particle numbers corresponding to coherent amplitudes outside the support of $χ$.  
+
+There are two types of ill-posed problems, rank-deficient and discrete.  They are distingished by how the singular values decay to zero.  In a rank-deficient problem, there is a sharp cut between large and small singular values.  The large ones are large enough that components in their singular directions do not contribute excessively to the solution, the small ones would contribute huge components, but they are small enough to round to zero, and ignore the component along that singular direction.  In discrete problems, the singular values decay continuously.  The size of the components of the solution varies continuously: there is no point where they become huge, but a continuous minimum and a gradual rise as the singular values get smaller.
+
+I've been assuming that the variational problem is discrete, because it comes from a discretisation of an integral equation.  However, the integral equation is a complex convolution, and for some values of the complex amplitude, the kernel oscillates arbitrarily sharply.  This is the same sort of integral equation as the Fourier transform, where we know $f(t)$, and want to find $F(ω)$ such that
+$$f(t)=\int F(ω)e^{iωt}\,dω.$$
+This also has a kernel that oscillates at a rate proportional to $ω$, and it also has very stable solutions.  (What is the SVD of the DFT matrix?  It's ${\rm anything}×1×{\rm FT anything}$: Rayleigh theorem.)
+
+A numerical example is shown below.  The state $|ψ〉$ is the Schrödinger cat that a coherent state becomes after half a cycle in a quartic oscillator; the amplitude of the initial coherent state was $2$.  A set of 40 sample amplitudes $α_r$ was drawn from the probability distribution $|g(a*)|²$, where $g=G⁺|ψ〉$.  These are plotted below, as circles in phase space.  For smaller ensembles, the results were not consistent between draws.
+
+A basic question is why regularisation helps.  Usually, it's applied to the inversion of measured data, where the right hand side of the least squares problem includes noise.  The aim is to prevent amplified noise from dominating the solution.  In our problem, the right hand side is calculated instead of measured, and the only noise is rounding errors.  Those are 16 orders of magnitude smaller than the exact right hand side, so rounding the small singular values up to $10^{-10}$ should be more than adequate.  We've needed much stronger regularisation than that: therefore, rounding errors aren't the problem.
+
+The only other error I can think of is nonlinearity.  Tychonov parameters of order $10^{-10}$ do work for the linear expansion problem.  Perhaps we're not doing regularisation, we're actually establishing a trust region, where the linear least squares problem is a good approximation to the actual change in $|ψ(z)〉$.
+
+If that's the case, it's tempting to make the weights linear instead of logarithmic, so that that part of the problem is exactly linear.  However, the function $e^φ$ is pretty nearly linear in the range we're shifting $φ$, so that can't help much.  In fact, the whole problem is quite linear.
+
+It seems that, when two amplitudes are very close, the solutions where the weights cancel out are better fits than the smooth ones—that seems to be the case in the l-curve experiments for the expansion problem.  To avoid the amplitudes clustering, I need to find out how good a fit is possible with evenly spaced ampltiudes, and set the regularisation parameter so that the residual is on that order.  In fact, I already know how large the phase space expansion should be: the function being sampled should have a norm around $π^½$.  And we're back to the other open question, how to relate the norm of a function to the norm of a set of samples at irregular points.  How can I estimate how much of phase space “belongs” to each amplitude sample, in order to get a volume over which the function has that value?
+
+The obvious way would be to assign amplitudes to the nearest sample.  That makes the volume for each sample a quite irregular prism; maybe there is a simple way to calculate the volumes of those, but I don't know it.  What if we assign a value to each point as an average over the sampled values, weighted, say, in proportion to the squared distances?  There would need to be some extra condition to ensure the function tends to zero at points remote from the samples.  Something like $x^{-2}e^{-|x|²}$ sounds plausible: it's quadratic at sort range, where the gaussian is flat, but outside the support of the samples, it decays in the right way for a phase space expansion.  I think the short range part needs to be a power law, so that it doesn't have a length scale built in when the distances between samples are random.  What's the best exponent?  I expect it depends on the dimension of the phase space, which would determine how many samples we expect to find close to a given one.
+
+The Picard condition is very obviously satisfied by the projection operator $|Γ〉$.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm as itself.  Functions in the null space of $|Γ〉$ don't have components in the left singular directions, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
+
+\topinsert\XeTeXpicfile cats.pdf width \hsize\endinsert
+
+The next Figure is a Picard plot for the Galerkin discretisation $〈A|A〉f=〈A|ψ〉$, where $f$ is a vector of weights such that $|A〉f$ approximates $|ψ〉$.  Below it is a plot of the expansions over number states of the singular kets $〈n|u_r〉$, where $|A〉=|U〉SV$.  For the kets to be orthogonal, $|u_r〉$ must have support close to $n=r$.  The components of the cat have coherent amplitude 2, so their largest number component is $n=4$, and the components drop quickly as $n$ increases further.  Above $r=15$, the singular ket $|u_r〉$ has very small components on these number states, so it hardly overlaps $|ψ〉$.  At the same time, the singular kets start to have particle numbers too large to be consistent with the sample amplitudes $α_r$, so the singular values decrease.  In fact, they decrease more rapidly than the components of $|ψ〉$, and the discrete Picard condition is not satisfied.  Seeing that $G$ is perfectly conditioned, this is a very bad discretisation.
+
+The final graph is an L curve when the discrete problem is Tychonov regularised.  It shows the expected shape, with minimum residual around $2×10^{-8}$.  Six regularised solutions are shown above; the modulus of $f_r$ is the disk's saturation, and the phase determines its hue.  Note that least norm regularisation has the desirable property that adjacent $α_r$ have similar $f_r$: the least norm solution to $a+b+c=X$ is $a=b=c=X/3$.
+
+\topinsert\XeTeXpicfile catpicard.pdf width \hsize\endinsert
+
+\topinsert\XeTeXpicfile catsws.pdf width \hsize\endinsert
+
+\topinsert\XeTeXpicfile catl.pdf width \hsize\endinsert
 
 %% Adapting the sample points to maintain condition
 
