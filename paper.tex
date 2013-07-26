@@ -166,90 +166,27 @@ The weights $w_i$ required in order that the integrals of the functions $u_i(x)=
 The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
 \endinsert
 
-
-%% Discrete phase space
-
-We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$, corresponding to a row of kets $|A〉=\bigl(|α₁〉\ ⋯\ |α_R〉\bigr)$.  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
-
-Since there are only $R$ weights to adjust, the condition $|\vec g|=|g|$ can be satisfied only for $R$ linearly independent functions $g_r$.  The obvious choice is $g_r(α*)=(〈α_r|G⁺)(α*)=〈α|α_r〉=\exp(-½|α|²-½|α_r|²+α*α_r)$, with $|\hat g_r^s|²=w_s²\exp(-|α_s-α_r²)$, and $|g_r|²=π$.  The condition becomes
-$$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
-	e^{-|α₂-α₁|²} & 1 &  & e^{-|α₂-α_R|²} \cr
-	& & \ddots & \cr
-	e^{-|α_R-α₁|²} & e^{-|α_R-α₂|²} & & 1}
-\pmatrix{w₁²\cr w₂²\cr\vdots\cr w_R²}
-= \pmatrix{π\cr π\cr\vdots\cr π}.
-$$
-Unfortunately, for random samples $A$, this tends not to have a solution: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
-
-The obvious discrete version of the problem, where the state is approximated by a finite linear combination of coherent states, doesn't relate to the continuous problem in an obvious way.  The weights of the components don't simple sample $f(α)$: they also adjust for how close the sample points are, and how much the $|α_i〉$ overlap.  The operator $G$ is probably being disceretised by some kind of Galerkin formula; I don't know what the basis functions are in phase space and Hilbert space.
-
-It would be useful to find a quadrature rule, with weights $w_i$, such that 
-$$∑_i w_if(α_i)|α_i〉≈\int f(α)|α〉d²α.$$
-Suppose we aim to be exactly right, in the case that $f(α)$ is the normalised entire function representing the left hand side, i.e.,
-$$f(β)=∑_i w_if(α_i)〈β|α_i〉.$$
-(I'm assuming we put the factor $1/π$ in $G$.)  This doesn't have a solution for general superpositions of coherent states.  Surely there's some quadrature rule for a sampled phase-space function?
-
-Using the Galerkin criterion, there doesn't seem to be one where the coefficient of $|α_i〉$ only depends on $f(α_i)$.  However, the Galerkin formula $〈A|A〉f=〈A|ψ〉$, where $〈α_i|ψ〉=f(α_i)$, seems like a good candidate for a more general rule.
-
-%% Truncated Hilbert space
-
-I still haven't thought in detail about the results with truncated Fock spaces.  Obviously, when we restrict the domain of $G$ to the lowest $N$ energy levels, the restricted operator has at most $N$ singular directions.  Since the low energy levels are the ones a restricted grid tends to represent, those singular directions will have relatively large singular values.  So when we do this, we get a well-posed problem, but we lose the ability to add components with small singular values, in order to expand the states we'll get in the future.  And in fact, by solving the inverse problem, we can always get a nice solution in any case.  Numerical experiments suggest that the variational problem is quite well posed for a single step, too.
-
-The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.  This can also be seen from the expansions of coherent states.  The normalised entire expansion of $|α〉$ is
-$$g(β*)=〈β|α〉=e^{-½|α|²-½|β|²+β*α},$$
-whence
-$$‖g‖²=\int |g(β)|²\,d²β=\int e^{-|β-α|²}\,d²β=π.$$
-The norm of $|α〉$ is of course 1.  If we used the Bargmann space, we could easily absorb the $π$ into the inner product, and make $G$ a generalised projector.
-
-The lemma gives a very simple singular value expansion of $G$.  Because there is only one nonzero singular value, any orthonormal basis of ket space will do as the left singular vectors.  Let's choose the number states for familiarity.  Then
-$$Gg=∑_n |n〉π\int ν_n*(α)g(α)\,d²α=|N〉π\int ν*(α)g(α),$$
-where $|N〉=\bigl(|0〉\ |1〉\ |2〉\ …\bigr)$ and $ν(α)=\bigl(ν₀(α)\ ν₁(α)\ …\bigr)$ could be thought of as infinite matrices whose columns are the left singular vectors $|n〉$ and their normalised entire expansions, the right singular vectors $v_n$.  The pesudoinverse, 
-$$G⁺|ψ〉=νπ〈N|ψ〉= ∑_n ν_nπ〈n|ψ〉,$$
-maps $|ψ〉$ to its normalised entire expansion.  Expanding over number states is useful because the maximum number in a system is usually limited by conservation of energy.  In real systems, the components decay exponentially with $n$, and become smaller than numerical rounding errors at reasonably small numbers.
-
-Truncating Fock space has a similar effect to truncating the singular values, assuming the singular directions belonging to small values have large particle numbers.  (And they do: when I plotted their overlaps with coherent states, they formed rings without support at the origin.)  And indeed, the trajectories for the average amplitude change in similar ways due to truncation: they pick up an extra loop in the complex plane.
-
-As the Fock space expands with $N»2R$, there are still only $2R$ singular directions.  Presumably these converge to limits as $N$ increases.  There might be a norm on the matrices $〈N|Dψ〉$, where the truncated elements replaced by zero, that measures this.
-
-%% Why grids don't work, and variation necessary
-
-This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ\rangle$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j\rangle$ approximates $|ψ\rangle$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ\rangle$ which we want to perturb to represent $|ψ\rangle+|dψ\rangle$, is no harder.  Because $G$ is linear, we can expand $|dψ\rangle$, and add it to the expansion of $|ψ\rangle$.
-
-The second problem, the variational one, is a generalisation.  As well as the grid $α_j$, we have a set of weights $f_j$ representing some wavefunction, presumably not $|ψ\rangle$.  Instead of expanding $|ψ\rangle$ over phase space, we want to expand it over the columns of $|Dψ(f,α)\rangle$, the set of all changes we can make by slightly adjusting the original expansion, and the grid.  Obviously, we can solve this problem simply by setting the coefficients of $|∂fψ(f,a)\rangle$ to the solution of the inverse problem, and those of $|∂fψ(f,a)\rangle$ to zero.  Is this the smallest norm solution?  Probably not: if a coherent state was moving in an oscillator, it might be easier to just rotate the $α_j$.
-
-Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ\rangle$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ\rangle$ in the future.
-
-So what are the critera for adjusting the grid?  I think there are two obvious ones: firstly, that the inverse problem stays well-posed.  Otherwise, we're wasting grid points.  Secondly, when we're expanding a derivative over the tangent space $|Dψ\rangle$, we want to tilt the tangent space closer to the derivative.  That's a second order effect, and won't come naturally from a least squares adjustment of $f$ and $α$.  The first criterion seems redundant: if we could better represent the goal by shifting two sample points apart, the second criterion will do that automatically.  However, if we only care about the tangent space and not the derivative map, we might need very large adjustments of the amplitudes and weights to get to the point in the tangent space that we want.  So a condition number criterion seems sensible.  There might be other criteria that I've overlooked.
-
-%% Fock space is cheating
-
-Expanding the quartic oscillator over Fock states allows it to be solved very stably, and as precisely as desired by rotating the phases of the expansion coefficients.  Also, it is easy to find the expansion over Fock states of a superpositon of coherent states.  This means that the stability of time discretisation can be removed from the problem entirely.  The state can be propagated exactly, and the coherent states adjusted to fit.  The most direct way to do so is by nonlinear optimisation at every timestep; Matlab provides the necessary routines in a convenient package.  Unfortunately, this is not at all stable.  
-
-In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis such as the Fock states would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
-
-To do this, we need some bracket matrices.  We have
-$$|Dψ(φ,α)〉=(1,a†)|ψ(φ,α)〉.$$
-The brackets with the number states are
-$$〈m|H/\hbar|n〉=n(n-1)δ_{mn}$$
-and
-$$〈n|Dψ(φ,α)〉=e^φ\pmatrix{{α^n\over \sqrt{n!}} &  α^{n-1}\sqrt{n\over (n-1)!}},$$
-as is the bracket of the quartic oscillator Hamiltonian $a^{2\dagger}a²$
-$$〈n|H/\hbar|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
-
-
-The instability in the dynamics is caused by the near-singularity of $|Dψ〉$.  If a singular value decomposition $|Dψ〉=|U〉SV†$ is taken, the singularity is indicated by small singular values on the diagonal of $S$.  It is often measured by the condition number of $|Dψ〉$, the ratio of the largest to the smallest singular value.  Let $C(z)$ be the condition number of $|Dψ(z)〉$.  As part of the regularisation process, it would be useful to avoid changing $z$ in directions that increase $C(z)$.  For example, if two coherent states had real amplitudes, and the real part of the expected amplitude needed to increase, it would be done by shifting the right hand one away from the left hand one, not the left hand one closer to the right hand.  Is there a way to make a computer do that?
-
-The least squares problem can be solved using the singular value decomposition: to approximate a state $|h〉≈|Dψ(z)〉dz$, we set $dz=VS^{-1}〈U|h〉$.  The first problem is that some of the $σ_i$ on the diagonal of $S$ will be small, because the $|u_i〉$ that correspond to them change different components of the superposition $|ψ(z)〉$ in ways that nearly cancel out.  So a error in the discrete representation of $|h〉$ in the direction $|u_i〉$ will cause a very large error in the least squares $dz$ in the direction $v_i$.   The way to avoid such large errors is to shift the small singular values of $S$ up to a lower bound $ε$, and thus reduce the large singular values of $S^{-1}$ below an upper bound $ε^{-1}$.  There are many and varied ways of doing that. 
-
 %% Picard plots
-
-The singular value expansion is useful for two reasons.  Firstly, the discrete version, the singular value decomposition, is the most stable way to solve badly-posed least squares problems.  Secondly, the sizes of the singular values, and the components of $H|ψ〉$ along the singular directions, determine whether the problem can be solved at all.
 
 The most important issue is the Picard condition.  This restates a very basic observation: for the problem $G\dot f=H|ψ〉$ to have a solution $\dot f$, the expansion of $f$ over an orthonormal basis must have a finite norm.  If the basis is chosen as the right singular vectors $v_j$, this means that the sum of the squared moduli of the components must be finite.  For $\dot f$ to satisfy the equation, the component of $v_j$ is $〈g_j|H|ψ〉/σ_j$.  So the Picard condition is that, for the equation to have a solution, the series
 $$∑_{j=1}^∞{\bigl|〈g_j|H|ψ〉\bigr|²\over σ_j²}$$
 must converge.  The singular values reduce with $j$, by definition; this requires that the components of the left singular vectors reduce somewhat faster.
 
 The variational problem seems to be pretty well-posed: if the initial superposition is the phase space function sampled on a grid, then the state that comes from a variational change in the amplitudes matches $H|ψ〉$ very closely.  I was working in a truncated Fock space; I wonder what happens as the truncation increases, while the grid stays a constant size?  Or alternately, if the grid shrinks while the Fock space stays constant.
+
+%% Tychonov conditioning
+
+There is a family of methods for inverting operators with small singular values, known as regularisation methods.  A very useful idea is due to Tychonov.  The problem
+$$\Gx f=|ψ〉$$
+can be regarded as a least squares problem, where $|ψ〉$ is chosen to minimise the residual $‖\Gx f-|ψ〉‖²$.  The exact solution has residual zero, of course.  The problem is that it is swamped by components with small singular values of $\Gx$.  Suppose we modify this problem, and seek $|ψ〉$ to minimise $‖\Gx f-|ψ〉‖²+λ‖f‖²$, where $λ$ is a positive number, known as a Lagrange parameter for reasons that will become clear shortly.  There are two things to note here.  Firstly, this is still a least squares problem: it is equivalent to minimising 
+$$\left‖ \pmatrix{\Gx \cr λ} f-\pmatrix{|ψ〉\cr 0}\right‖².$$
+Therefore, it can be solved stably by the usual least squares methods.  Secondly, suppose $f_λ$ is the solution for a given value of $λ$.  If another function, $g$, had the same norm but a smaller residual, then $f$ would not minimise the Tychonov expression.  The Tychonov method is equivalent to constraining the norm of $f$, and seeking the solution with smallest residual given the constraint.  Or, equivalently, constraining the residual and seeking the solution with smallest norm.  This equivalence to a constrained optimisation problem is why $λ$ is a Lagrange parameter.
+
+Solving the Tychonov problem for various values of $λ$ generates a family of solutions.  These can be plotted on a graph of residual against solution norm, where they mark the edge of the space of possible solutions.  Above and to the right of the curve, a solution can be found with the given norm and residual: below and to the left, it can't.
+
+\topinsert\XeTeXpicfile lcurve-1.pdf \endinsert
+
+An example for a typical application is shown below.  The context is that some observations $b$ are predicted by a physical state $x$, according to the linear law $Ax=b$.  The real state is $x₀$, and it has generated observations $b=Ax₀+e$, where $e$ consists of measurement error.  The problem $Ax=b$ is solved for $x$, with various Lagrange parameters.  At the top left, the norm of $x$ is constrained to be zero, so the solution is $x=0$, and the residual is the norm of $b$.  As the constraint on the norm is relaxed, the solution becomes closer to $x₀$, and the residual decreases.  At the elbow of the curve, the norm of the solution is constrained to be close to the norm of the real state $x₀$, the solution is close to $x₀$, and the residual is the norm of the measurement error.  Relaxing the constraint further allows solutions $x$ that fit the measurements better than the real state $x₀$ does.  Typically, they won't fit much better, so the residual doesn't decrease much below $‖e‖$.  However, the solution now includes components belonging to small singular values, and the norm of the solution will increase as far as it is allowed to.
 
 %% ill-posedness
 
@@ -354,6 +291,83 @@ Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as 
 \centerline{\XeTeXpicfile j2.pdf width \hsize}
 
 The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
+
+%% Tychonov regularisation
+
+
+%% Discrete phase space
+
+We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$, corresponding to a row of kets $|A〉=\bigl(|α₁〉\ ⋯\ |α_R〉\bigr)$.  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
+
+Since there are only $R$ weights to adjust, the condition $|\vec g|=|g|$ can be satisfied only for $R$ linearly independent functions $g_r$.  The obvious choice is $g_r(α*)=(〈α_r|G⁺)(α*)=〈α|α_r〉=\exp(-½|α|²-½|α_r|²+α*α_r)$, with $|\hat g_r^s|²=w_s²\exp(-|α_s-α_r²)$, and $|g_r|²=π$.  The condition becomes
+$$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
+	e^{-|α₂-α₁|²} & 1 &  & e^{-|α₂-α_R|²} \cr
+	& & \ddots & \cr
+	e^{-|α_R-α₁|²} & e^{-|α_R-α₂|²} & & 1}
+\pmatrix{w₁²\cr w₂²\cr\vdots\cr w_R²}
+= \pmatrix{π\cr π\cr\vdots\cr π}.
+$$
+Unfortunately, for random samples $A$, this tends not to have a solution: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
+
+The obvious discrete version of the problem, where the state is approximated by a finite linear combination of coherent states, doesn't relate to the continuous problem in an obvious way.  The weights of the components don't simple sample $f(α)$: they also adjust for how close the sample points are, and how much the $|α_i〉$ overlap.  The operator $G$ is probably being disceretised by some kind of Galerkin formula; I don't know what the basis functions are in phase space and Hilbert space.
+
+It would be useful to find a quadrature rule, with weights $w_i$, such that 
+$$∑_i w_if(α_i)|α_i〉≈\int f(α)|α〉d²α.$$
+Suppose we aim to be exactly right, in the case that $f(α)$ is the normalised entire function representing the left hand side, i.e.,
+$$f(β)=∑_i w_if(α_i)〈β|α_i〉.$$
+(I'm assuming we put the factor $1/π$ in $G$.)  This doesn't have a solution for general superpositions of coherent states.  Surely there's some quadrature rule for a sampled phase-space function?
+
+Using the Galerkin criterion, there doesn't seem to be one where the coefficient of $|α_i〉$ only depends on $f(α_i)$.  However, the Galerkin formula $〈A|A〉f=〈A|ψ〉$, where $〈α_i|ψ〉=f(α_i)$, seems like a good candidate for a more general rule.
+
+%% Truncated Hilbert space
+
+I still haven't thought in detail about the results with truncated Fock spaces.  Obviously, when we restrict the domain of $G$ to the lowest $N$ energy levels, the restricted operator has at most $N$ singular directions.  Since the low energy levels are the ones a restricted grid tends to represent, those singular directions will have relatively large singular values.  So when we do this, we get a well-posed problem, but we lose the ability to add components with small singular values, in order to expand the states we'll get in the future.  And in fact, by solving the inverse problem, we can always get a nice solution in any case.  Numerical experiments suggest that the variational problem is quite well posed for a single step, too.
+
+The norm of $Gg$ is 1, so this suggests the singular values of $G$ are $π^{-½}$.  This can also be seen from the expansions of coherent states.  The normalised entire expansion of $|α〉$ is
+$$g(β*)=〈β|α〉=e^{-½|α|²-½|β|²+β*α},$$
+whence
+$$‖g‖²=\int |g(β)|²\,d²β=\int e^{-|β-α|²}\,d²β=π.$$
+The norm of $|α〉$ is of course 1.  If we used the Bargmann space, we could easily absorb the $π$ into the inner product, and make $G$ a generalised projector.
+
+The lemma gives a very simple singular value expansion of $G$.  Because there is only one nonzero singular value, any orthonormal basis of ket space will do as the left singular vectors.  Let's choose the number states for familiarity.  Then
+$$Gg=∑_n |n〉π\int ν_n*(α)g(α)\,d²α=|N〉π\int ν*(α)g(α),$$
+where $|N〉=\bigl(|0〉\ |1〉\ |2〉\ …\bigr)$ and $ν(α)=\bigl(ν₀(α)\ ν₁(α)\ …\bigr)$ could be thought of as infinite matrices whose columns are the left singular vectors $|n〉$ and their normalised entire expansions, the right singular vectors $v_n$.  The pesudoinverse, 
+$$G⁺|ψ〉=νπ〈N|ψ〉= ∑_n ν_nπ〈n|ψ〉,$$
+maps $|ψ〉$ to its normalised entire expansion.  Expanding over number states is useful because the maximum number in a system is usually limited by conservation of energy.  In real systems, the components decay exponentially with $n$, and become smaller than numerical rounding errors at reasonably small numbers.
+
+Truncating Fock space has a similar effect to truncating the singular values, assuming the singular directions belonging to small values have large particle numbers.  (And they do: when I plotted their overlaps with coherent states, they formed rings without support at the origin.)  And indeed, the trajectories for the average amplitude change in similar ways due to truncation: they pick up an extra loop in the complex plane.
+
+As the Fock space expands with $N»2R$, there are still only $2R$ singular directions.  Presumably these converge to limits as $N$ increases.  There might be a norm on the matrices $〈N|Dψ〉$, where the truncated elements replaced by zero, that measures this.
+
+%% Why grids don't work, and variation necessary
+
+This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ\rangle$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j\rangle$ approximates $|ψ\rangle$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ\rangle$ which we want to perturb to represent $|ψ\rangle+|dψ\rangle$, is no harder.  Because $G$ is linear, we can expand $|dψ\rangle$, and add it to the expansion of $|ψ\rangle$.
+
+The second problem, the variational one, is a generalisation.  As well as the grid $α_j$, we have a set of weights $f_j$ representing some wavefunction, presumably not $|ψ\rangle$.  Instead of expanding $|ψ\rangle$ over phase space, we want to expand it over the columns of $|Dψ(f,α)\rangle$, the set of all changes we can make by slightly adjusting the original expansion, and the grid.  Obviously, we can solve this problem simply by setting the coefficients of $|∂fψ(f,a)\rangle$ to the solution of the inverse problem, and those of $|∂fψ(f,a)\rangle$ to zero.  Is this the smallest norm solution?  Probably not: if a coherent state was moving in an oscillator, it might be easier to just rotate the $α_j$.
+
+Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ\rangle$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ\rangle$ in the future.
+
+So what are the critera for adjusting the grid?  I think there are two obvious ones: firstly, that the inverse problem stays well-posed.  Otherwise, we're wasting grid points.  Secondly, when we're expanding a derivative over the tangent space $|Dψ\rangle$, we want to tilt the tangent space closer to the derivative.  That's a second order effect, and won't come naturally from a least squares adjustment of $f$ and $α$.  The first criterion seems redundant: if we could better represent the goal by shifting two sample points apart, the second criterion will do that automatically.  However, if we only care about the tangent space and not the derivative map, we might need very large adjustments of the amplitudes and weights to get to the point in the tangent space that we want.  So a condition number criterion seems sensible.  There might be other criteria that I've overlooked.
+
+%% Fock space is cheating
+
+Expanding the quartic oscillator over Fock states allows it to be solved very stably, and as precisely as desired by rotating the phases of the expansion coefficients.  Also, it is easy to find the expansion over Fock states of a superpositon of coherent states.  This means that the stability of time discretisation can be removed from the problem entirely.  The state can be propagated exactly, and the coherent states adjusted to fit.  The most direct way to do so is by nonlinear optimisation at every timestep; Matlab provides the necessary routines in a convenient package.  Unfortunately, this is not at all stable.  
+
+In a sense, expanding over Fock states is cheating.  If it were practical to do this, there would be no point using a variational method: these would be employed in many-particle problems, where an orthonormal basis such as the Fock states would be unmanagably large.  In principle, the operations required for the second and third methods could be performed on the superpositions of coherent states, using the normal equations, without projection on an orthonormal basis; in a many-particle problem, they would have to be.  However, this would raise the question whether those least-square solutions from the normal equations were stable.  By using an orthonormal basis, we can be more confident of this.
+
+To do this, we need some bracket matrices.  We have
+$$|Dψ(φ,α)〉=(1,a†)|ψ(φ,α)〉.$$
+The brackets with the number states are
+$$〈m|H/\hbar|n〉=n(n-1)δ_{mn}$$
+and
+$$〈n|Dψ(φ,α)〉=e^φ\pmatrix{{α^n\over \sqrt{n!}} &  α^{n-1}\sqrt{n\over (n-1)!}},$$
+as is the bracket of the quartic oscillator Hamiltonian $a^{2\dagger}a²$
+$$〈n|H/\hbar|ψ(φ,α)〉=e^φα^n\sqrt{n(n-1)\over(n-2)!}.$$
+
+
+The instability in the dynamics is caused by the near-singularity of $|Dψ〉$.  If a singular value decomposition $|Dψ〉=|U〉SV†$ is taken, the singularity is indicated by small singular values on the diagonal of $S$.  It is often measured by the condition number of $|Dψ〉$, the ratio of the largest to the smallest singular value.  Let $C(z)$ be the condition number of $|Dψ(z)〉$.  As part of the regularisation process, it would be useful to avoid changing $z$ in directions that increase $C(z)$.  For example, if two coherent states had real amplitudes, and the real part of the expected amplitude needed to increase, it would be done by shifting the right hand one away from the left hand one, not the left hand one closer to the right hand.  Is there a way to make a computer do that?
+
+The least squares problem can be solved using the singular value decomposition: to approximate a state $|h〉≈|Dψ(z)〉dz$, we set $dz=VS^{-1}〈U|h〉$.  The first problem is that some of the $σ_i$ on the diagonal of $S$ will be small, because the $|u_i〉$ that correspond to them change different components of the superposition $|ψ(z)〉$ in ways that nearly cancel out.  So a error in the discrete representation of $|h〉$ in the direction $|u_i〉$ will cause a very large error in the least squares $dz$ in the direction $v_i$.   The way to avoid such large errors is to shift the small singular values of $S$ up to a lower bound $ε$, and thus reduce the large singular values of $S^{-1}$ below an upper bound $ε^{-1}$.  There are many and varied ways of doing that. 
 
 %% convergence to the initial state
 
