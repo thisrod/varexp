@@ -11,6 +11,9 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
+
+1. Regularise the expansion problem using the norm of <A|A>c.
+
 3. In the initial state problem, monitor the deviation from a straight-line trajectory, perhaps as an angle.  Also monitor the angle between the direction of motion and the straight line, and how this changes with regularisation.
 
 0. Watch the change from the variational problem to the expansion one as the Tychonov cost of |dα|² increases.

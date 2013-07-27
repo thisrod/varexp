@@ -158,14 +158,6 @@ The following three figures show the right singular vectors, sampled versions of
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
-%% Sampling on random grids
-
-\topinsert \XeTeXpicfile gweight.pdf width \hsize 
-The weights $w_i$ required in order that the integrals of the functions $u_i(x)=e^{-(x-x_i)²}$ are given by the sums $∑_j w_j u_i(x_j)$.  The points $x_i$ are normally distributed (top), or evenly spaced (bottom).  Note how nearby points tend to cancel each others' samples.  I expect experts in Chebyshev sampling would not be surprised by this, but I am not yet such an expert.
-
-The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
-\endinsert
-
 %% Picard plots
 
 The most important issue is the Picard condition.  This restates a very basic observation: for the problem $G\dot f=H|ψ〉$ to have a solution $\dot f$, the expansion of $f$ over an orthonormal basis must have a finite norm.  If the basis is chosen as the right singular vectors $v_j$, this means that the sum of the squared moduli of the components must be finite.  For $\dot f$ to satisfy the equation, the component of $v_j$ is $〈g_j|H|ψ〉/σ_j$.  So the Picard condition is that, for the equation to have a solution, the series
@@ -292,32 +284,50 @@ Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as 
 
 The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
 
-%% Tychonov regularisation
-
-
 %% Discrete phase space
 
-We need a way to discretise the function $g$.  There are two usual ways to do this: sampling on a grid, or taking components along a fixed basis.  The size of state space rules these out, so we must sample $g$ at a set of irregularly spaced amplitudes $A=\{α₁,…,α_R\}$, corresponding to a row of kets $|A〉=\bigl(|α₁〉\ ⋯\ |α_R〉\bigr)$.  Equivalently, we take components of $f$ in function space along the set of vectors $χ_r(α)=w_rδ(α-α_r)$.  Here, $w_r$ is a real weight, intended to compensate for the irregularity of the sample set, so that the sampled vector $\vec g=\bigl(w₁g(α₁),…,w_Rg(α_R)\bigr)^{\rm T}$ has a similar norm to the function $g$.
+To compute in phase space, we need to reduce the function $g$ to a finite vector of numbers.  This is usually done in one of two ways: by a vector
+$$\vec g=\pmatrix{g(z₁) & ⋯ & g(z_R)},$$
+where the points $z_i$ form a regular grid, or by
+$$\vec g=\pmatrix{\langle u₁,g\rangle & ⋯ & \langle u_R,g\rangle},$$
+where the distributions $u_i$ are a fixed basis.  The huge dimension of state space rules out any regular approach: we must sample $g$ at a set of irregularly spaced amplitudes or on an irregular basis, adapted to the support of $g$.
 
-Since there are only $R$ weights to adjust, the condition $|\vec g|=|g|$ can be satisfied only for $R$ linearly independent functions $g_r$.  The obvious choice is $g_r(α*)=(〈α_r|G⁺)(α*)=〈α|α_r〉=\exp(-½|α|²-½|α_r|²+α*α_r)$, with $|\hat g_r^s|²=w_s²\exp(-|α_s-α_r²)$, and $|g_r|²=π$.  The condition becomes
+This makes regularisation tricky.  The goal is to represent a state $|ψ\rangle$ as a superposition of coherent states, $|ψ\rangle=|A\rangle c$.  We want the coefficients $c$ to correspond to a phase space function $g$ that is nearly analytic.  If the amplitudes $|A\rangle$ formed a regular grid , it would be obvious enough when $c$ was sampling an analytic function.  On an irregular grid, we would expect the coefficients to be larger where the grid is sparse, and smaller where it is dense.  It would be good to know if irregular coefficients are the result of sampling a smooth function on an irregular grid, or of sampling a wildly oscillating function.
+
+The obvious way to attempt this is to factor the coefficients as $|ψ\rangle=|A\rangle Wc'$, where $c'_i$ are samples that approximate $g(α_i)$, and $W$ is a matrix of weights that adapts the samples to the irregular grid.  In fact, we can do this exactly.  If we set $W=(\langle A|A\rangle)^{-1}$, then $c'=\langle A|ψ\rangle$.  We could try seeking coefficients $c$ such that the norm of $\langle A|A\rangle c$ is minimal.
+
+To avoid the complexities of Wirtinger calculus, the problem of relating the weights of gaussians to the values of a sampled function can be set up for a function of a single real variable.  It would be appealing for the weight matrix $W$ to be diagonal, so that the weight of the gaussian centred at each point was determined by the value of $f$ at that point.  This can be set up either as a Galerkin condition, or as a collocation condition: they turn out to be equivalent.  Unfortunately, the weights end up oscillating wildly.  This approach doesn't seem useful, but is presented for completeness, and because the phenomenon of adjacent weights cancelling keeps occuring, this being the simplest problem in which I've seen it.
+
+As a collocation problem, consider the case where $f(x)=1$, and we wish to approximate $f$ by a function 
+$$f'(x)=∑_i e^{-(x-x_i)²}w_ic_i$$
+that satisfies the collocation condition $f'(x_i)=f(x_i)$.  The goal is for $c_i=1$, so we need ...
+
 $$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
 	e^{-|α₂-α₁|²} & 1 &  & e^{-|α₂-α_R|²} \cr
 	& & \ddots & \cr
 	e^{-|α_R-α₁|²} & e^{-|α_R-α₂|²} & & 1}
 \pmatrix{w₁²\cr w₂²\cr\vdots\cr w_R²}
-= \pmatrix{π\cr π\cr\vdots\cr π}.
-$$
+= \pmatrix{π\cr π\cr\vdots\cr π}.$$
+
+The Galerkin condition seeks a set of weights $w$ such that, for the normalised functions $u_i=π^{-½}e^{-(x-x_i)²}$, we have
+$$1=\int u_i=∑_j w_j u_i(x_j)=∑_j w_je^{-(x_j-x_i)²}.$$
+This is the same condition as the collocation condition.  The results are shown below.
+
 Unfortunately, for random samples $A$, this tends not to have a solution: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
 
-The obvious discrete version of the problem, where the state is approximated by a finite linear combination of coherent states, doesn't relate to the continuous problem in an obvious way.  The weights of the components don't simple sample $f(α)$: they also adjust for how close the sample points are, and how much the $|α_i〉$ overlap.  The operator $G$ is probably being disceretised by some kind of Galerkin formula; I don't know what the basis functions are in phase space and Hilbert space.
+There is another way to derive coefficients of the constant function, which might be more stable.  Suppose that $D$ is a subset of the real line, large enough that the tails of the gaussians outside it are neglibible.  Then
+$$E=\|f'-1\|=\int_D\left(∑_ic_iu_i(x)-1)²=∑_{ij}c_ic_j\int_D u_iu_j-2∑_ic_i\int_D u_i+\mu(D),$$
+where $μ$ is the integration measure.  The derivative of this with respect to $c_i$ is
+$${∂E\over ∂c_i}=2∑_{j}c_j\int u_iu_j-2\int u_i,$$
+at which point we can expand the domain $D$ to the entire real line.  The condition for stationarity, and presumably best fit, is $Ac=b$, where $a_{ij}=\int u_iu_j$, and $b_i=\int u_i$.  It will be interesting to see what weights come out of this method.
 
-It would be useful to find a quadrature rule, with weights $w_i$, such that 
-$$∑_i w_if(α_i)|α_i〉≈\int f(α)|α〉d²α.$$
-Suppose we aim to be exactly right, in the case that $f(α)$ is the normalised entire function representing the left hand side, i.e.,
-$$f(β)=∑_i w_if(α_i)〈β|α_i〉.$$
-(I'm assuming we put the factor $1/π$ in $G$.)  This doesn't have a solution for general superpositions of coherent states.  Surely there's some quadrature rule for a sampled phase-space function?
+%% Sampling on random grids
 
-Using the Galerkin criterion, there doesn't seem to be one where the coefficient of $|α_i〉$ only depends on $f(α_i)$.  However, the Galerkin formula $〈A|A〉f=〈A|ψ〉$, where $〈α_i|ψ〉=f(α_i)$, seems like a good candidate for a more general rule.
+\topinsert \XeTeXpicfile gweight.pdf width \hsize 
+The weights $w_i$ required in order that the integrals of the functions $u_i(x)=e^{-(x-x_i)²}$ are given by the sums $∑_j w_j u_i(x_j)$.  The points $x_i$ are normally distributed (top), or evenly spaced (bottom).  Note how nearby points tend to cancel each others' samples.  I expect experts in Chebyshev sampling would not be surprised by this, but I am not yet such an expert.
+
+The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
+\endinsert
 
 %% Truncated Hilbert space
 
