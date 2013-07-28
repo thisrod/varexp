@@ -51,7 +51,7 @@ Bargmann showed that the Hilbert space of wavefunctions is isomorphic to the spa
 $$〈 Γ⁺|ψ〉(α)=π^{-½}〈 α|ψ〉.$$
 Being a linear operator from quantum states to phase space functions, $〈Γ⁺|$ is written as a ket.  It is a pseudoinverse of $|Γ〉$, in the sense that $|Γ〉〈 Γ⁺|$ is the identity operator in state space.  The other composition, $〈 Γ⁺|Γ〉$, projects the functions of a complex variable onto the entire functions, orthogonally under the Bargmann inner product.  It follows that $f=〈 Γ⁺|ψ〉$ is the function with least norm that satisfies $|Γ〉 f=|ψ〉$, with $‖f‖=\bigl‖ |ψ〉\bigr‖$.
 
-If, following Bargmann, we identify the quantum space with the entire functions, $|Γ\rangle$ becomes the projector $\langle Γ⁺|Γ\rangle$.  Therefore the singularity of $|Γ\rangle$ is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ\rangle$, which can be most simply done by Tychonov regularisation, we ensure that $f$ is close to $\langle Γ⁺|ψ\rangle$.  And $\langle Γ⁺|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem causes so much trouble.
+If, following Bargmann, we identify the quantum space with the entire functions, $|Γ〉$ becomes the projector $〈 Γ⁺|Γ〉$.  Therefore the singularity of $|Γ〉$ is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ〉$, which can be most simply done by Tychonov regularisation, we ensure that $f$ is close to $〈 Γ⁺|ψ〉$.  And $〈 Γ⁺|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem causes so much trouble.
 
 %% SVE lemma
 
@@ -289,12 +289,12 @@ The top line indicates that the condition number is independent of the phases of
 To compute in phase space, we need to reduce the function $g$ to a finite vector of numbers.  This is usually done in one of two ways: by a vector
 $$\vec g=\pmatrix{g(z₁) & ⋯ & g(z_R)},$$
 where the points $z_i$ form a regular grid, or by
-$$\vec g=\pmatrix{\langle u₁,g\rangle & ⋯ & \langle u_R,g\rangle},$$
+$$\vec g=\pmatrix{〈 u₁,g〉 & ⋯ & 〈 u_R,g〉},$$
 where the distributions $u_i$ are a fixed basis.  The huge dimension of state space rules out any regular approach: we must sample $g$ at a set of irregularly spaced amplitudes or on an irregular basis, adapted to the support of $g$.
 
-This makes regularisation tricky.  The goal is to represent a state $|ψ\rangle$ as a superposition of coherent states, $|ψ\rangle=|A\rangle c$.  We want the coefficients $c$ to correspond to a phase space function $g$ that is nearly analytic.  If the amplitudes $|A\rangle$ formed a regular grid , it would be obvious enough when $c$ was sampling an analytic function.  On an irregular grid, we would expect the coefficients to be larger where the grid is sparse, and smaller where it is dense.  It would be good to know if irregular coefficients are the result of sampling a smooth function on an irregular grid, or of sampling a wildly oscillating function.
+This makes regularisation tricky.  The goal is to represent a state $|ψ〉$ as a superposition of coherent states, $|ψ〉=|A〉 c$.  We want the coefficients $c$ to correspond to a phase space function $g$ that is nearly analytic.  If the amplitudes $|A〉$ formed a regular grid , it would be obvious enough when $c$ was sampling an analytic function.  On an irregular grid, we would expect the coefficients to be larger where the grid is sparse, and smaller where it is dense.  It would be good to know if irregular coefficients are the result of sampling a smooth function on an irregular grid, or of sampling a wildly oscillating function.
 
-The obvious way to attempt this is to factor the coefficients as $|ψ\rangle=|A\rangle Wc'$, where $c'_i$ are samples that approximate $g(α_i)$, and $W$ is a matrix of weights that adapts the samples to the irregular grid.  In fact, we can do this exactly.  If we set $W=(\langle A|A\rangle)^{-1}$, then $c'=\langle A|ψ\rangle$.  We could try seeking coefficients $c$ such that the norm of $\langle A|A\rangle c$ is minimal.
+The obvious way to attempt this is to factor the coefficients as $|ψ〉=|A〉 Wc'$, where $c'_i$ are samples that approximate $g(α_i)$, and $W$ is a matrix of weights that adapts the samples to the irregular grid.  In fact, we can do this exactly.  If we set $W=(〈 A|A〉)^{-1}$, then $c'=〈 A|ψ〉$.  We could try seeking coefficients $c$ such that the norm of $〈 A|A〉 c$ is minimal.
 
 To avoid the complexities of Wirtinger calculus, the problem of relating the weights of gaussians to the values of a sampled function can be set up for a function of a single real variable.  It would be appealing for the weight matrix $W$ to be diagonal, so that the weight of the gaussian centred at each point was determined by the value of $f$ at that point.  This can be set up either as a Galerkin condition, or as a collocation condition: they turn out to be equivalent.  Unfortunately, the weights end up oscillating wildly.  This approach doesn't seem useful, but is presented for completeness, and because the phenomenon of adjacent weights cancelling keeps occuring, this being the simplest problem in which I've seen it.
 
@@ -315,11 +315,17 @@ This is the same condition as the collocation condition.  The results are shown 
 
 Unfortunately, for random samples $A$, this tends not to have a solution: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
 
-There is another way to derive coefficients of the constant function, which might be more stable.  Suppose that $D$ is a subset of the real line, large enough that the tails of the gaussians outside it are neglibible.  Then
-$$E=\|f'-1\|=\int_D\left(∑_ic_iu_i(x)-1)²=∑_{ij}c_ic_j\int_D u_iu_j-2∑_ic_i\int_D u_i+\mu(D),$$
-where $μ$ is the integration measure.  The derivative of this with respect to $c_i$ is
-$${∂E\over ∂c_i}=2∑_{j}c_j\int u_iu_j-2\int u_i,$$
-at which point we can expand the domain $D$ to the entire real line.  The condition for stationarity, and presumably best fit, is $Ac=b$, where $a_{ij}=\int u_iu_j$, and $b_i=\int u_i$.  It will be interesting to see what weights come out of this method.
+There is another way to derive coefficients of the constant function, which might be more stable.  Suppose that $D$ is a subset of the real line, large enough that the tails of gaussians are neglibible outside it.  Let 
+$$U=π^{-½}\pmatrix{e^{-(x-x₁)²}&⋯&e^{-(x-x_R)²}},$$
+and $w$ be a column vector of $R$ real weights.  Then define a residual
+$$r(w)=\int_D(Uw-1)².$$
+The derivative of this with respect to the weights is
+$$Dr(w)=\int_D 2(Uw-1)U=2\int_D U^{\rm T}Uw-U.$$
+(Note that, for row vectors $a$ and $c$, and $b$ a column vector, $abc=c^{\rm T}ab$.)
+Unfortunately,
+$$\int (U^{\rm T}U)_{ij}=π^{-1}\int e^{-(x-x_i)²-(x-x_j)²}\,dx
+	={1\over\sqrt{2π}}e^{(x_i-x_j)²/2},$$
+and $\int u_i=1$, so this is the identical problem again.
 
 %% Sampling on random grids
 
@@ -351,13 +357,13 @@ As the Fock space expands with $N»2R$, there are still only $2R$ singular direc
 
 %% Why grids don't work, and variation necessary
 
-This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ\rangle$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j\rangle$ approximates $|ψ\rangle$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ\rangle$ which we want to perturb to represent $|ψ\rangle+|dψ\rangle$, is no harder.  Because $G$ is linear, we can expand $|dψ\rangle$, and add it to the expansion of $|ψ\rangle$.
+This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ〉$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j〉$ approximates $|ψ〉$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ〉$ which we want to perturb to represent $|ψ〉+|dψ〉$, is no harder.  Because $G$ is linear, we can expand $|dψ〉$, and add it to the expansion of $|ψ〉$.
 
-The second problem, the variational one, is a generalisation.  As well as the grid $α_j$, we have a set of weights $f_j$ representing some wavefunction, presumably not $|ψ\rangle$.  Instead of expanding $|ψ\rangle$ over phase space, we want to expand it over the columns of $|Dψ(f,α)\rangle$, the set of all changes we can make by slightly adjusting the original expansion, and the grid.  Obviously, we can solve this problem simply by setting the coefficients of $|∂fψ(f,a)\rangle$ to the solution of the inverse problem, and those of $|∂fψ(f,a)\rangle$ to zero.  Is this the smallest norm solution?  Probably not: if a coherent state was moving in an oscillator, it might be easier to just rotate the $α_j$.
+The second problem, the variational one, is a generalisation.  As well as the grid $α_j$, we have a set of weights $f_j$ representing some wavefunction, presumably not $|ψ〉$.  Instead of expanding $|ψ〉$ over phase space, we want to expand it over the columns of $|Dψ(f,α)〉$, the set of all changes we can make by slightly adjusting the original expansion, and the grid.  Obviously, we can solve this problem simply by setting the coefficients of $|∂fψ(f,a)〉$ to the solution of the inverse problem, and those of $|∂fψ(f,a)〉$ to zero.  Is this the smallest norm solution?  Probably not: if a coherent state was moving in an oscillator, it might be easier to just rotate the $α_j$.
 
-Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ\rangle$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ\rangle$ in the future.
+Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ〉$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ〉$ in the future.
 
-So what are the critera for adjusting the grid?  I think there are two obvious ones: firstly, that the inverse problem stays well-posed.  Otherwise, we're wasting grid points.  Secondly, when we're expanding a derivative over the tangent space $|Dψ\rangle$, we want to tilt the tangent space closer to the derivative.  That's a second order effect, and won't come naturally from a least squares adjustment of $f$ and $α$.  The first criterion seems redundant: if we could better represent the goal by shifting two sample points apart, the second criterion will do that automatically.  However, if we only care about the tangent space and not the derivative map, we might need very large adjustments of the amplitudes and weights to get to the point in the tangent space that we want.  So a condition number criterion seems sensible.  There might be other criteria that I've overlooked.
+So what are the critera for adjusting the grid?  I think there are two obvious ones: firstly, that the inverse problem stays well-posed.  Otherwise, we're wasting grid points.  Secondly, when we're expanding a derivative over the tangent space $|Dψ〉$, we want to tilt the tangent space closer to the derivative.  That's a second order effect, and won't come naturally from a least squares adjustment of $f$ and $α$.  The first criterion seems redundant: if we could better represent the goal by shifting two sample points apart, the second criterion will do that automatically.  However, if we only care about the tangent space and not the derivative map, we might need very large adjustments of the amplitudes and weights to get to the point in the tangent space that we want.  So a condition number criterion seems sensible.  There might be other criteria that I've overlooked.
 
 %% Fock space is cheating
 
@@ -410,13 +416,13 @@ The semi-implicit formula has a special property: when the trajectory of $u(t)$ 
 
 I used three discretisation formulae for ODE, with different regions of stability.  As a first step, the Hamiltonian and a coherent state with real amplitude 2 was expanded over Fock states $|0〉$ through $|10〉$, and the resulting equations for the components solved directly.  The Hamiltonian is
 $$H=\hbar a^{2\dagger}a²,$$
-so the Fock states are eigenstates, although the spacing of their energies is uneven.  The quantum state at time $t$ was expanded over a truncated Fock basis $|N〉=\pmatrix{|1\rangle & |2\rangle & ⋯ & |N\rangle}$, with a column vector of coefficients $c(t)$, as
+so the Fock states are eigenstates, although the spacing of their energies is uneven.  The quantum state at time $t$ was expanded over a truncated Fock basis $|N〉=\pmatrix{|1〉 & |2〉 & ⋯ & |N〉}$, with a column vector of coefficients $c(t)$, as
 $$|ν(c(t))〉=|N〉c(t).$$
 Schrödinger's equation expands to
 $$|N〉Dc(t)=|D(ν\circ c)(t)〉={H\over i\hbar}|ν(c(t))〉=|N〉〈N|{H\over i\hbar}|N〉c(t),$$
 whence
 $$Dc(t)=-i〈N|{H\over \hbar}|N〉c(t).$$
-Usually, these expansions would be approximate due to basis truncation.  In this case, the Fock states diagonalise $H$, so they are exact.  However, in general the initial state can only be approximately expanded over $|N\rangle$.  Time was discretised with the explicit Euler formula, which replaces the differential equation
+Usually, these expansions would be approximate due to basis truncation.  In this case, the Fock states diagonalise $H$, so they are exact.  However, in general the initial state can only be approximately expanded over $|N〉$.  Time was discretised with the explicit Euler formula, which replaces the differential equation
 $$Du(t)=f(u(t))$$
 with a difference equation
 $$v^{n+1}=vⁿ+τfⁿ,$$
