@@ -108,50 +108,41 @@ When the operator is restricted, the SVE gives more information. If $\Gx$ were o
 Before we study the singular values and vectors of $\Gx$, consider why small singular values are a problem.  The pseudoinverse of $\Gx$ with least norm is
 $$〈Γ⁺_χ|=∑_{i=1}^∞ v_iσ_i^{-1}〈u_i|.$$  Suppose this is applied to a state $|ψ〉$ that has a low expected particle number, but small components with large particle number.  Such a component will overlap some $|u_i〉$ belonging to small $σ_i$, and $〈Γ⁺_χ|$ will multiply it by $σ_i^{-1}$, generating large components of those $v_i$ in the expansion function.  In the continuous expansion, this isn't a problem: the information is still there, and the state can be recovered by applying $\Gx$ to the expansion.  When the expansion is discretised, however, the small, low particle number component of $〈Γ⁺_χ|ψ〉$ that contain the important information about $|ψ〉$ are very likely to be lost in the large components of $〈Γ⁺_χ|ψ〉$ that give minor details of high particle number components of $|ψ〉$.
 
-Let's compute some singular values and vectors.  (And the the wrong answer—try again.)  Suppose that $χ$ has circular symmetry, with $χ(z)=χ(|z|)$.  We can rewrite this
-$$\eqalign{\Gx f&=π^{-½}∑_n(n!)^{-½}|n〉\int αⁿe^{-|α|²}χ(α*)f(α*)\,d²α\cr
-	&=π^{-½}∑_n(n!)^{-½}|n〉\int_0^∞ r^{n+1}e^{-r²}χ(r)\int_0^{2π}f(re^{-iθ})e^{inθ}\,dθdr\cr
-	&=2\sqrt π∑_n(n!)^{-½}|n〉\int_0^∞ r^{n+1}e^{-r²}χ(r)f_n(r)dr,}$$
-where
-$$f(re^{iθ})=∑_{m=-∞}^∞ f_m(r)e^{imθ}.$$
-Presumably, the right singular vectors have the $f_n$ of least norm such that 
-$$2\sqrt π(n!)^{-½}\int_0^∞ r^{n+1}e^{-r²}χ(r)f_n(r)dr=1.$$
+Let's compute some singular values and vectors.  Suppose that $χ$ is the characteristic function of a disk, with
+$$χ(α*)=\cases{1 & $|α|≤b$ \cr 0 & otherwise.}$$
+From symmetry, let's guess that the singular kets are the number states—we will check this numerically later.  It can be shown by a Lagrange multiplier argument that the right singular functions are the truncations to the disk of $f_n=〈Γ⁺|n〉$.  Then the singular values are
+$$σ_n={‖\Gx f_n‖\over ‖f_n‖}.$$
+We take
+$$f_n=π^{-½}〈α|n〉e^{½|α|²}=π^{-½}∑_{n=0}^∞ {α^{n\ast}\over \sqrt{n!}}.$$
 
-What is the appropriate norm to use?  In the case that $χ$ is a characteristic function on the domain $D$, it is presumably the truncated Bargmann norm
-$$〈g,f〉=\int_D e^{-|α|²}g*(α)f(α)\,d²α=\int e^{-|α|²}χ(α)g*(α)f(α)\,d²α.$$
-Note that this is only an inner product when $g$ and $f$ are restricted to $D$.  In this case, we wish to minimise 
-$$‖f_n‖²=2π\int_0^b re^{-r²}f²_n(r)\,dr,$$
-given 
-$$2\sqrt π(n!)^{-½}\int_0^b r^{n+1}e^{-r²}f_n(r)dr=1.$$
-If one considers changing $f$ by $Δa$ in an interval around $a$, the Lagrange condition is
-$$re^{-r²}f_n(r)\propto r^{n+1}e^{-r²},$$
-or 
-$$f_n(r)\propto rⁿ.$$
-The analytic functions still win.  Let $f_n(r)=rⁿ$.  Then
-$$‖f_n‖²=2π\int_0^b r^{2n+1}e^{-r²}\,dr$$
-and
-$$‖ \Gx f_n‖=2\sqrt π(n!)^{-½}\int_0^b r^{2n+1}e^{-r²}dr,$$
-so we have
-$$σ_n={‖ \Gx f_n‖\over ‖f_n‖}=\sqrt{2\over n!}
-	\left(\int_0^b r^{2n+1}e^{-r²}dr\right)^½.$$
-According to Wolfram,
-$$\int_0^b r^{2n+1}e^{-r²}dr=½\left(Γ(n+1)-Γ(n+1,b²)\right),$$
-where $Γ$ is Mathematica's version of the incomplete gamma function.  Therefore, recalling that $n!=Γ(n+1)$,
-$$σ_n=\left(1-{Γ(n+1,b²)\over Γ(n+1)}\right)^½.$$
-Unfortunately, Matlab defines the incomplete gamma function in a different way than Mathematica does.  Fortunately, that Matlab function, {\tt gammainc}, is exactly the square of the right-hand side of the above equation.
+First evaluate $‖f_n‖$, using the Bargmann norm.  We have
+$$\eqalign{ ‖f_n‖²&={1\over π}\int_{|α|≤b} e^{-|α|²}{|α|^{2n}\over n!}\,d²α \cr
+	&={1\over π}\int_0^b e^{-r²}{r^{2n}\over n!}2πr\,dr \cr
+	&={1\over n!}\int_0^{b²} u^ne^{-u}\,du=Γ(n+1,b²),}$$
+where $Γ(n,x)$ is the incomplete gamma function, as defined in Matlab.  (Everyone defines this a different way.)  The other norm is given by
+$$\eqalign{ \Gx f_n&=π^{-½}\int_{|α|≤b} |α〉e^{-½|α|²}f_n(α*)\,d²α \cr
+	&={1\over π}∑_{m=0}^∞\int e^{-|α|²}{α^{m}\over \sqrt{m!}}|m〉{α^{n\ast}\over \sqrt{n!}}\,d²α \cr
+	&={1\over π}\int_0^b dr re^{-r²}∑_{m=0}^∞{r^{m+n}\over \sqrt{m!n!}}|m〉\int_0^{2π} dφe^{i(m-n)φ} \cr
+	&=\int_0^b dr 2re^{-r²}{r^{2n}\over n!}|n〉 \cr
+	&=Γ(n+1,b²)|n〉.}$$
 
-This all seems wrong, because the incomplete gamma function varies the wrong way with $n$.  It becomes small as $n→0$.
+The singular value comes out to 
+$$σ_n={‖ \Gx f_n‖\over ‖f_n‖}=\sqrt{Γ(n+1,b²)}.$$
 
-Numerical experiments in the script {\tt sve.m} support this.  The operator $G$ was discretised on a grid in phase space, with spacing $h=0.3$, and various extents shown in the graphs.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|10〉$.  The graph below shows the singular values of the discretised operator converging to $π^{-½}$, as the extent of the grid passes through $|α|²=10$.
+Numerical experiments in the script {\tt csve.m} support this.  The operator $\G$ was discretised on a grid in phase space, with spacing $h=0.3$, bounded by the circle about the origin of radius $b$ for $b=3$, 4 and 5.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|24〉$.  The graph below shows the singular values of the truncated operator $\Gx$.
 
 \topinsert \XeTeXpicfile svgrid.pdf width \hsize \endinsert
 
-The following three figures show the right singular vectors, sampled versions of phase space functions.  The brightness of the plots indicates $|v_n(α)|$, the colors indicate phase.  These look very much like number states; that is an artefact of the way ket space was truncated and and phase space was discretised.  In the continuous limit there is only one singular value, and the vectors are degenerate.  For the $4×4$ grid, number states 5-10 don't fit, and the error in their singular values is of order 0.1 or more.  As the grid expands, the pre-images of higher number states fit in it, and more singular values have converged.
+The contour plot shows how the analytic expression for $σ_n$ depends on $n$ and the truncation radius $b$.  The value has decayed to 0.7 when $n=b²$.  The rule of thumb is that we get one large singular value for every unit circle of phase space, with area $π$.
 
-\topinsert \hbox{\XeTeXpicfile rsv2.pdf width 0.5\hsize
-\XeTeXpicfile rsv3.pdf width 0.5\hsize}
-\XeTeXpicfile rsv4.pdf width 0.5\hsize\hfil\break
-The right singular functions $v_i$ for the truncated expansion operator $\Gx$, where phase spaces is truncated to a square about the origin, whose size varies.  These are functions of a complex variable: the brightness of the plot indicates modulus, and the color indicates phase.\endinsert
+\topinsert \XeTeXpicfile svcont.pdf width \hsize \endinsert
+
+The following three figures show the right singular vectors, sampled versions of phase space functions.  The brightness of the plots indicates $|v_n(α)|$, the colors indicate phase.  These look very much like truncated number states.  As the grid expands, the pre-images of higher number states fit in it, and more singular values have converged.
+
+\topinsert \hbox{\XeTeXpicfile rsv3.pdf width 0.5\hsize
+\XeTeXpicfile rsv4.pdf width 0.5\hsize}
+\XeTeXpicfile rsv5.pdf width 0.5\hsize\hfil\break
+The right singular functions $v_i$ for the truncated expansion operator $\Gx$, where phase space is truncated at $|α|=3$, 4 and 5.  These are functions of a complex variable: the brightness of the plot indicates modulus, and the color indicates phase.\endinsert
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
