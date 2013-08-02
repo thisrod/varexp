@@ -330,6 +330,24 @@ The weights $w_i$ required in order that the integrals of the functions $u_i(x)=
 The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
 \endinsert
 
+The goal of fiding samples of the phase space distribution $f(α_r)$ is to regularise the expansion and inverse problems.  The expansion function with the least norm is guaranteed to be a nice function: we don't know much about the finite superposition whose weights have the least norm.
+
+To the the norm of the function $f$, sampled on an irregular grid $α_r$, the obvious method is to interpolate.  Doing this might help with irregular weights due to irregular sample points, because a least-squares interpolant will average the weights at several adjacent points.  However, there is probably a better way to adjust the weights for irregular sampling.
+
+We want to interpolate a function of a complex variable, that should be nearly analytic.  To me, the obvious way to do it is a least squares fit to the monomials
+$$U=e^{-½|z|²}\pmatrix{1 & z & z* & z² & zz* & z^{2\ast} & z³ & z²z* & ⋯}.$$
+It helps to think of $z^mz^{n\ast}=r^{m+n}e^{i(m-n)φ}$.  Note that if these monomials are orthogonalised by Gramm-Schmidt, in the order they are written, the functions $e^{-½|z|²}\pmatrix{1 & z & z² & z³ &  ⋯}$ are retained as part of the orthonormal set: $z^n$ is the first monomial proportional to $e^{inφ}$, so it is orthogonal to all those before it.  The same is true for $z^{n\ast}$, the first monomial proportional to $e^{-inφ}$.  So this basis is an obvious one for projecting onto analytic functions in $z$ or $z*$.  It will have the form
+$$e^{-½|z|²}\pmatrix{1 & re^{iφ} & re^{-iφ} & r²e^{2iφ} & p_{11}(r) & r²e^{-2iφ} & r³e^{3iφ} & p_{12}(r)e^{iφ} & p_{21}(r)e^{-iφ}& ⋯},$$
+where $p_{ij}$ is a polynomial of degree $i+j$.  Someone must have investigated these orthogonal polynomials before, but they don't appear in Courant \& Hilbert or in Abramowitz \& Stegun.
+
+For least squares fitting, orthogonal polynomials are not necessary: the QR factorisation does that work for us.  To find norms, we do need to know the grammian matrix, whose elements are the Bargmann inner products of the monomials:
+$$\eqalign{a_{mnpq}&=\int (z^{m\ast}zⁿ)*(z^{p\ast}z^q)e^{-|z|²}\,d²z \cr
+	&= 2πδ_{m+n,p+q}\int_0^∞r^{m+n+p+q+1}\,dr \cr
+	&= πδ_{m+n,p+q}\int_0^∞r^{m+n+p+q}\,2r\,dr \cr
+	&= πδ_{m+n,p+q}Γ({m+n+p+q\over 2}+1)=π(n+p)!δ_{m+n,p+q}.}$$
+Some fits of these to expansions of cat and coherent states over random amplitudes are shown below.  They suffer the usual problem that polynomial fits oscillate more wildly as the degree of the polynomial increases; there are meant to be ways to avoid that, but I'm not an expert in them.
+
+
 %% Truncated Hilbert space
 
 I still haven't thought in detail about the results with truncated Fock spaces.  Obviously, when we restrict the domain of $G$ to the lowest $N$ energy levels, the restricted operator has at most $N$ singular directions.  Since the low energy levels are the ones a restricted grid tends to represent, those singular directions will have relatively large singular values.  So when we do this, we get a well-posed problem, but we lose the ability to add components with small singular values, in order to expand the states we'll get in the future.  And in fact, by solving the inverse problem, we can always get a nice solution in any case.  Numerical experiments suggest that the variational problem is quite well posed for a single step, too.

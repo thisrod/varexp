@@ -11,8 +11,11 @@ When Schrödinger's equation is discretised over Hilbert space using coherent st
 
 Tasks
 ====
+0. Average an L curve over random draws, and see how it depends on the number of sample points.
 
-1. Regularise the expansion problem using the norm of <A|A>c.
+1. Singular values of |Γ〉, when phase space measure is rescaled to look like gaussian sampling.
+
+2. L curves when envelope norm is constrained.
 
 3. In the initial state problem, monitor the deviation from a straight-line trajectory, perhaps as an angle.  Also monitor the angle between the direction of motion and the straight line, and how this changes with regularisation.
 
