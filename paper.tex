@@ -25,7 +25,7 @@ Since Heller suggested it, there have been several attempts to apply this numeri
 %% Consequence
 These attempts have aimed to solve chemistry problems, involving dozens of atoms, where the lack of convergence limited the precision that could be obtained, but superpositions with a few components, and ad-hoc methods to improve the stability, still gave useful results.  The kind of problems that people approach with phase space methods come from atom optics or condensed matter; they involve thousands or millions of atoms, and the convergence problems would prevent any useful information being obtained.  A systematic approach to regularisation is required in order to approach these problems variationally.  The prospective rewards are great: these problems include high temperature superconductivity and the dynamics of the early universe, topics on which today's physicists expend massive efforts.
 
-%% Phase space expansion as a linear operator
+\beginsection{The phase space expansion operator}
 
 Expansion over coherent states is a linear operator from functions of a complex variable to quantum states,
 $$\G f=π^{-½}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
@@ -49,45 +49,13 @@ Being a linear operator from quantum states to phase space functions, $〈Γ⁺|
 
 If, following Bargmann, we identify state space with the entire functions, $|Γ〉$ is identified with the projector $〈 Γ⁺|Γ〉$.  Therefore, although $|Γ〉$ is singular, the singularity is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ〉$, which can be done simply enough by Tychonov regularisation, we ensure that $f$ is close to $〈 Γ⁺|ψ〉$.  And $〈 Γ⁺|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem has caused so much trouble.
 
-%% SVE lemma
-
-% Hypothesis: The singular values of $|Γ〉$ are 0 and 1, and the space belonging to 1 comprises the entire functions.
-% 
-% There are two ways one could set about proving the Hypothesis.  Firstly, one could show that any function orthogonal to the Gaussian analytics annihilates $G$.  Otherwise, one could show that the norms of all Gaussian analytics are scaled by the same factor going to F
-% ock space, and that they are a pre-image of Fock space.  The second approach sounds simpler.
-% 
-% This won't be a rigourous argument: it could turn out that there's another class of expansions with half the norm, and the entire functions have components belonging to the 0 singular value.  My numerical experiment suggests otherwise; let's ignore that possibility for now.
-% 
-% Let $f$ be a normalised entire function, in Glauber's sense.  I.e., 
-% $$f(z)=∑c_n{zⁿ\over (n!)^½},$$
-% for some normalised vector $c$.
-% 
-%   Our expansion function is 
-% $$g(α)=f(α)e^{-½|α|²}.$$
-% If $f$ has the Taylor expansion
-% $$f(z)=∑_n c_n{zⁿ\over(n!)^½},$$
-% then 
-% $$Gg = ∑_n c_n|n〉.$$
-% The functions $zⁿ$ for $n≥0$ span the entire functions (or their span is a dense subset, or something like that), so let's find the norm of 
-% $$g(α)=e^{-½|α|²}{αⁿ\over(n!)^½},$$
-% the Glauber preimage of $|n〉$.  We have 
-% $$|g(α)|²={1\over n!}e^{-|α|²}|α|^{2n},$$
-% so the squared norm is
-% $$‖g‖²={1\over n!}\int ₀^∞2πr^{2n+1}e^{-r²}\,dr={2π\over n!}\int ₀^∞r^{2n+1}e^{-r²}\,dr.$$
-% According to Wolfram,
-% $$\int ₀^∞r^{2n+1}e^{-r²}\,dr={n!\over 2},$$
-% so
-% $$‖g‖=π^½.$$
-% 
-% Assuming that there is no way to expand a state with a smaller norm than an entire function, this does it.  Or at least I think so.  I should look up exactly what the uniqueness properties are for singular value expansions in infinite dimensional spaces.
-
-%% Consequences of lemma
+%% Consequences of Γ being a projection
 
 The part of $|Γ〉$ that projects functions onto entire functions can be written as follows
 $$π^{-½}〈β|Γ〉f=π^{-1}\int 〈β|α〉e^{-½|α|²}f(α*)\,d²α=π^{-1}\int 〈0|D(α-β)|0〉e^{-½|α|²}f(α*)\,d²α.$$
 This appears to be a convolution of the function $e^{-½|α|²}f(α*)$ with the kernel $〈0|D(α)|0〉$.  There are many theorems to the effect that real convolution operators are badly conditioned.  It is interesting that these results do not apply to the complex convolution $|Γ〉$: as a projector, it is as nice an operator as it could possibly be.  I think the loophole is that of real functions can only oscillate at a limited rate, so that their Fourier transforms have finite norm.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy.  And the kernel $〈0|D(α)|0〉$ does: it is a wave packet with carrier frequency proportional to the imaginary part of $α$.
 
-%% Finite phase space
+\beginsection{Truncated phase space}
 
 The operator $|Γ〉$ acts on functions defined over the whole complex plane.  For states with high particle number, the smallest preimages have support far from the origin.  We can not compute with such functions: any discretisation will sample values of $f$ on a finite subset of the plane.  Unfortunately, the conditioning of these restricted operators will be worse than that of $|Γ〉$.  We have excluded the small preimages of the states with large particle number, so they must be represented by functions with support close to the origin, but with large norms.  Hence the restricted operators will be badly conditioned.
 
@@ -146,6 +114,7 @@ The right singular functions $v_i$ for the truncated expansion operator $\Gx$, w
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
+\beginsection{Regularisation of the truncated expansion problem}
 %% Picard plots
 
 The most basic issue is the Picard condition.  This restates a simple observation: for the problem $\G \dot f=H|ψ〉$ to have a solution $\dot f$, the expansion of $\dot f$ over an orthonormal basis must have a finite norm.  If the basis is chosen as the right singular vectors $v_i$, this means that the sum of the squared moduli of their coefficients must be finite.  The component of $v_i$ is $〈u_i|H|ψ〉/σ_i$.  So the Picard condition is that, for the equation to have a solution, the series
@@ -191,7 +160,7 @@ The only other error I can think of is nonlinearity.  Tychonov parameters of ord
 
 If that's the case, it's tempting to make the weights linear instead of logarithmic, so that that part of the problem is exactly linear.  However, the function $e^φ$ is pretty nearly linear in the range we're shifting $φ$, so that can't help much.  In fact, the whole problem is quite linear.
 
-It seems that, when two amplitudes are very close, the solutions where the weights cancel out are better fits than the smooth ones—that seems to be the case in the L-curve experiments for the expansion problem.  To avoid the amplitudes clustering, I need to find out how good a fit is possible with evenly spaced ampltiudes, and set the regularisation parameter so that the residual is on that order.  In fact, I already know how large the phase space expansion should be: the function being sampled should have a norm around 1.
+To avoid the amplitudes clustering, I need to find out how good a fit is possible with evenly spaced ampltiudes, and set the regularisation parameter so that the residual is on that order.  In fact, I already know how large the phase space expansion should be: the function being sampled should have a norm around 1.
 
 The Picard condition is very obviously satisfied by the projection operator $|Γ〉$.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm as itself.  Functions in the null space of $|Γ〉$ don't have components in the left singular directions, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
 
@@ -206,7 +175,25 @@ The final graph is an L curve when the discrete problem is Tychonov regularised.
 
 \topinsert\XeTeXpicfile catl.pdf width \hsize\endinsert
 
-%% Adapting the sample points to maintain condition
+A common observation when states are expanded over an irregular grid is that, when two sample amplitudes are close together, the weights tend to be large, and cancel out.  This is not at all surprising when one considers that the coherent states $|α〉$ and $|α+h〉$ become nearly parallel in Hilbert space as $h→0$.  The angle between these vectors satisfies
+$$|〈α|α+h〉|=e^{-½|h|²}=‖|α〉‖‖|β〉‖\cos θ=\cos θ,$$
+and equating Taylor series gives
+$$θ=|h|+O(h²).$$
+Locally, phase space has the same geometry as the surface of the unit sphere.  The figure demonstrates why weights of nearly parallel (or antiparallel) vectors tend to cancel out, and the second figure shows how this looks in phase space.
+
+\topinsert \XeTeXpicfile geometry-1.pdf
+\it A 2 dimensional section through Hilbert space, where fixed vector $|Ψ〉$ is expanded as $|Ψ〉=a|α〉+b|β〉$.  As $|β〉$ becomes more parallel with $|α〉$, the components grow and cancel.  This occurs for all vectors outside the shaded segments, which shrink to nothing when $|α〉$ becomes parallel to $|β〉$.
+\endinsert
+
+\topinsert \XeTeXpicfile cancel.pdf width \hsize
+\it The vacuum state was expanded over two coherent states, with amplitudes $±h$.  The amplitudes and the entire expansion of the least-squares fit are plotted in the first row of images.  The norm of the expansion vector, and the residual of the expansion, are graphed above as black lines.  As the amplitudes converge, the residual decreases—the leftmost phase space plot is very nearly exact—while the norm of the expansion stays around 1.  This coincides with the amplitudes passing through bright areas of the images, where the entire expansion has support.
+
+The second row of images, and the red lines on the plot, show similar expansions of the normalised state parallel to $|0.1〉-|-0.1〉$.  This is almost exactly parallel to the derivative of the vacuum state with respect to the real part of its amplitude.  Again, the leftmost image is nearly an exact expansion.  This time, the entire expansion does not have support around $α=0$.  As the expansion amplitudes converge, the residual decreases, but the norm of the expansion vector explodes.  As explained in the text, the distance between two small amplitudes in phase space is very nearly the angle between the ket vectors for the corresponding coherent states.  Thus this is exactly the expansion depicted in the last figure.
+
+If the two sample amplitudes were part of an irregular expansion, and there happened to be no other sample amplitudes nearby, a small component along the direction of the second state would dominate the expansion coefficients at these points.  But, given those sample amplitudes, that would be the only way to represent such a component.
+\endinsert
+
+\beginsection{Adapting the sample amplitudes to preserve condition}
 
 I'm getting a picture of how the final algorithm will look.  At each timestep, the directions belonging to large singular values of $|Dψ〉$ will be used for variational dynamics.  This can be done by solving at Tychonov conditioned problem, for example.  At the same time, the directions with small singular values will be used to keep the discretisation stable.
 
@@ -276,7 +263,7 @@ Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as 
 
 The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
 
-%% Discrete phase space
+\beginsection{Discrete phase space}
 
 To compute in phase space, we need to reduce the function $g$ to a finite vector of numbers.  This is usually done in one of two ways: by a vector
 $$\vec g=\pmatrix{g(z₁) & ⋯ & g(z_R)},$$
@@ -356,7 +343,7 @@ Truncating Fock space has a similar effect to truncating the singular values, as
 
 As the Fock space expands with $N»2R$, there are still only $2R$ singular directions.  Presumably these converge to limits as $N$ increases.  There might be a norm on the matrices $〈N|Dψ〉$, where the truncated elements replaced by zero, that measures this.
 
-%% Why grids don't work, and variation necessary
+\beginsection{Ways the problem has been simplified for this paper}
 
 This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ〉$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j〉$ approximates $|ψ〉$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ〉$ which we want to perturb to represent $|ψ〉+|dψ〉$, is no harder.  Because $G$ is linear, we can expand $|dψ〉$, and add it to the expansion of $|ψ〉$.
 
@@ -384,7 +371,7 @@ The instability in the dynamics is caused by the near-singularity of $|Dψ〉$. 
 
 The least squares problem can be solved using the singular value decomposition: to approximate a state $|h〉≈|Dψ(z)〉dz$, we set $dz=VS^{-1}〈U|h〉$.  The first problem is that some of the $σ_i$ on the diagonal of $S$ will be small, because the $|u_i〉$ that correspond to them change different components of the superposition $|ψ(z)〉$ in ways that nearly cancel out.  So a error in the discrete representation of $|h〉$ in the direction $|u_i〉$ will cause a very large error in the least squares $dz$ in the direction $v_i$.   The way to avoid such large errors is to shift the small singular values of $S$ up to a lower bound $ε$, and thus reduce the large singular values of $S^{-1}$ below an upper bound $ε^{-1}$.  There are many and varied ways of doing that. 
 
-%% convergence to the initial state
+\beginsection{Regularising the inital fit equation}
 
 As discussed below, the time-dependent Schrödinger equation for a quartic oscillator is numerically difficult, no matter how it is discretised.  The following problem aimed to solve an intrinsically simple differential equation, 
 $$ {d\over ds}|ψ(z(s))〉=|ψ₀〉-|ψ(z(s))〉.$$
@@ -402,8 +389,7 @@ The second surprise is at large $s$, where the approximant improves, but so does
 
 There are a few things to note about the initial trajectory.  The initial weights already satisfy a least squares condition.  Therefore, the intial change in the superposition should be entirely in the amplitudes: the weights are already optimal.  If that isn't the case, the regularisation of the expansion problem would have to be inconsistent with that of the variational problem, so that we're accepting variational changes that we previously rejected when we found the initial state.
 
-
-%% Shape of Hilbert space trajectories
+\beginsection{Quantum dynamics in Hilbert space}
 
 If Hilbert space is considered as a real vector space, complex multiples of the eigenstates of the Hamiltonian form planes instead of lines.  The eigenstates evolve as $e^{iωt}$, so, when the dynamics are projected onto an eigenplane, the state traces out a circle, with radius equal to the absolute value of the the coefficient of the eigenstate when the initial state is expanded.  Different eigenstates circle the origin with different frequencies.
 
@@ -447,6 +433,8 @@ With the Hamiltonian, this becomes
 $$c^{n+1}=cⁿ-iτH\biggl(1+{iτ\over 2}H\biggr)^{-1}cⁿ.$$
 
 The solutions from method 3 provide a test of the stiffness of the ODEs defined in parameter space by the least squares problem.  The step in Hilbert space is very nearly the same from one time step to the next.  If the step in parameter space changes dramatically, this would suggest that the variational solution is very sensitive to the state, and thus to some of the parameters.  This would indicate that the ODEs are stiff.
+
+\beginsection{Quantum dynamics in phase space}
 
 The following graphs show a coherent state, with real amplitude 2, propagating in a quartic oscillator potential.  The propagation was done exactly, in a Fock space truncated at $|19〉$; at times $π/10, π/5, 3π/10,\ldots,π$, a 10 component superposition was fit to the state by the routine {\tt cohfit5}.  The SVD of $|Dψ〉$ was computed for each of these superpositions, and the Picard condition investigated.  It appears that this discretisation is inherently ill-posed.
 
