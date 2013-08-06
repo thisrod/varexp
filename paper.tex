@@ -271,6 +271,11 @@ where the points $z_i$ form a regular grid, or by
 $$\vec g=\pmatrix{〈 u₁,g〉 & ⋯ & 〈 u_R,g〉},$$
 where the distributions $u_i$ are a fixed basis.  The huge dimension of state space rules out any regular approach: we must sample $g$ at a set of irregularly spaced amplitudes or on an irregular basis, adapted to the support of $g$.
 
+However, in these single mode numerical experiments, it is often useful to expand over a regular grid.  For example, this allows us to plot phase space functions.  It is convenient to normalise the samples so that $‖\vec g‖=‖A\vec g‖$.  If the sample amplitudes $α_r$ form a square gird with spacing $h$, the condition $\vec g_r=cg(α_r)$ is satisfied when
+$$∑_r|\vec g_r|²=c²∑_r|g(α_r)|²=\int |g|²\,d²α≈h²∑_r|g(α_r)|²,$$
+whence $c=h$, and the discretisation is
+$$\vec g_r=hg(α_r).$$
+
 This makes regularisation tricky.  The goal is to represent a state $|ψ〉$ as a superposition of coherent states, $|ψ〉=|A〉 c$.  We want the coefficients $c$ to correspond to a phase space function $g$ that is nearly analytic.  If the amplitudes $|A〉$ formed a regular grid , it would be obvious enough when $c$ was sampling an analytic function.  On an irregular grid, we would expect the coefficients to be larger where the grid is sparse, and smaller where it is dense.  It would be good to know if irregular coefficients are the result of sampling a smooth function on an irregular grid, or of sampling a wildly oscillating function.
 
 The obvious way to attempt this is to factor the coefficients as $|ψ〉=|A〉 Wc'$, where $c'_i$ are samples that approximate $g(α_i)$, and $W$ is a matrix of weights that adapts the samples to the irregular grid.  In fact, we can do this exactly.  If we set $W=(〈 A|A〉)^{-1}$, then $c'=〈 A|ψ〉$.  We could try seeking coefficients $c$ such that the norm of $〈 A|A〉 c$ is minimal.
