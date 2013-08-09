@@ -15,7 +15,7 @@ When they realised that positions and momenta are essentially uncertain, the fir
 
 The simplest mechanical systems allow Schrödinger's law of motion to be solved in closed form, but most quantum problems must be solved approximately.  This can be done variationally, specifying a class of approximants that can be manipulated exactly, then finding one of them that most nearly solves the problem.  To test how well a wave function approximates the dynamics of a system, the difference between the two sides of Schrödinger's equation can be measured by the Hilbert space norm.  It remains to choose a class of approximants.  The gaussian wave packets are an common choice, because they differ in their scale and their central position and momentum, useful properties to determine for any quantum state.
 
-The invention of the laser called for a quantum theory of intense radiation.  It is difficult to analyse laser beams because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When atomic Bose-Einstein condensates were made, and very coherent matter became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
+The invention of the laser called for a quantum theory of intense radiation.  Laser beams are hard to analyse because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When very coherent matter, in the form of atomic Bose-Einstein condensates, became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
 
 In the 1970s, Heller put the two ideas together, proposing to simulate quantum dynamics variationally, using finite superpositions of coherent states as the approximants.  This is an appealing approach.  Every quantum state can be approximated arbitrarily well as the number of components in the superposition increases.  The experience of quantum optics shows that, in many systems, the approximation converges with a reasonable number of components.  Also, variational dynamics should avoid the covergence problems that limit the Monte-Carlo methods.
 
@@ -32,13 +32,19 @@ $$\G f=π^{-½}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
 The notation $\int f(α)\,d²α$ means $\int_{-∞}^{∞}\int_{-∞}^{∞} f(x+iy)\,dx\,dy$.  The function $f$ is such that $e^{-½|α|²}f(α)$ is square-integrable.  Bargmann\cite{pam-14-187} showed that these functions form a Hilbert space under the inner product $〈g,f〉=\int e^{-|α|²}g*(α)f(α)\,d²α$; this paper refers to it as the space of phase space distributions, or just distributions.  When norms of functions are written below, the norm is the one derived from this inner product.  In this paper, $\G f$ denotes the ket that results from applying the linear operator $\G$ to the phase space distribution $f$; application and composition of linear operators is shown by juxtaposition, and functions whose values are quantum states are written as kets, usually with a greek letter.
 
 The state $|α〉$ is a coherent state with complex amplitude $α$.  These can be defined in a number of ways, perhaps most simply in second quantisation, as eigenstates of a boson annihilation operator $a$, with $a|α〉=α|α〉$.  The annihilation operator is not hermitian, so the eigenvalues $α$ are complex numbers.  In first quantisation, such an operator is the complex amplitude
-$$a=?(λx+ip/λ),\qquad\hbox{Get constants from Cahill}$$
-where $x$ and $p$ are the position and momentum operators; the bosons in this case are vibrational quanta in a notional harmonic potential, centred at the origin, with frequency ?.
+$$a=(2\hbar)^{-½}(λx+ip/λ),$$
+where $x$ and $p$ are the position and momentum operators for a particle with mass $m$.  The bosons in this case are vibrational quanta in a notional harmonic potential, centred at the origin, with frequency $ω=λ²/m$.
 
 Coherent states are not orthogonal, but their brackets follow the law
 $$〈β|α〉=e^{-½|β|²-½|α|²+β*α},$$
 whence
 $$\bigl|〈β|α〉\bigr|²=e^{-|β-α|²}.$$
+When kets are considered as vectors, the angle between coherent states satisfies
+$$\cos θ=‖|α〉‖‖|β〉‖\cos θ=|〈β|α〉|=e^{-½|β-α|²},$$
+and comparing Taylor series gives
+$$θ=|β-α|+O(|β-α|²).$$
+This has a simple geometric analogy where phase space is mapped locally onto the surface of the unit sphere, the coherent states are vectors from the origin to the surface, and $|α-β|$ is a spherical angle.  The analogy fails when the angles between vectors are no longer small; for example, it is misleading in regard to the relation between $|α〉$ and $∂_α|α〉$.
+
 The projector satisfies
 $$\int |α〉〈α|\,d²α=π.$$
 This is similar to the law for an orthonormal basis, except that the right hand side is $π$ instead of 1.  Further properties of the coherent states will be stated as required.  Glauber's summary of them\cite{prx-131-2766} is paraphrased in every quantum optics textbook ever written.
@@ -175,11 +181,7 @@ The final graph is an L curve when the discrete problem is Tychonov regularised.
 
 \topinsert\XeTeXpicfile catl.pdf width \hsize\endinsert
 
-A common observation when states are expanded over an irregular grid is that, when two sample amplitudes are close together, the weights tend to be large, and cancel out.  This is not at all surprising when one considers that the coherent states $|α〉$ and $|α+h〉$ become nearly parallel in Hilbert space as $h→0$.  The angle between these vectors satisfies
-$$|〈α|α+h〉|=e^{-½|h|²}=‖|α〉‖‖|β〉‖\cos θ=\cos θ,$$
-and equating Taylor series gives
-$$θ=|h|+O(h²).$$
-Locally, phase space has the same geometry as the surface of the unit sphere.  The figure demonstrates why weights of nearly parallel (or antiparallel) vectors tend to cancel out, and the second figure shows how this looks in phase space.
+A common observation when states are expanded over an irregular grid is that, when two sample amplitudes are close together, the weights tend to be large, and cancel out.  This is not at all surprising when one considers that the coherent states $|α〉$ and $|α+h〉$ become nearly parallel in Hilbert space as $h→0$.  The figure demonstrates why weights of nearly parallel (or antiparallel) vectors tend to cancel out, and the second figure shows how this looks in phase space.
 
 \topinsert \XeTeXpicfile geometry-1.pdf
 \it A 2 dimensional section through Hilbert space, where fixed vector $|Ψ〉$ is expanded as $|Ψ〉=a|α〉+b|β〉$.  As $|β〉$ becomes more parallel with $|α〉$, the components grow and cancel.  This occurs for all vectors outside the shaded segments, which shrink to nothing when $|α〉$ becomes parallel to $|β〉$.
