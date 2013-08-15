@@ -25,6 +25,12 @@ Since Heller suggested it, there have been several attempts to apply this numeri
 %% Consequence
 These attempts have aimed to solve chemistry problems, involving dozens of atoms, where the lack of convergence limited the precision that could be obtained, but superpositions with a few components, and ad-hoc methods to improve the stability, still gave useful results.  The kind of problems that people approach with phase space methods come from atom optics or condensed matter; they involve thousands or millions of atoms, and the convergence problems would prevent any useful information being obtained.  A systematic approach to regularisation is required in order to approach these problems variationally.  The prospective rewards are great: these problems include high temperature superconductivity and the dynamics of the early universe, topics on which today's physicists expend massive efforts.
 
+%% Overview
+
+There appear to be two sorts of instabilities.  The first, static, sort occurs when a quantum state is expanded over a finite set of coherent states, and those states have irregular amplitudes.  This is similar to the kind that numerical analysts call ill-posed problems, and the methods they use to analyse and resolve them can be applied here.  However, the cause of ill-posedness in our problem differs from those usually studied, and the usual methods of resolution don't work as well as they usually do.  There is one advantage of the expansion problem: because it is iterated at each timestep, the dynamics of the amplitudes can be exploited to so that they posed better expansion problems as the simulation progresses.
+
+The second type of instability is a dynamical one.  This occurs whenever Schrödinger's equation is integrated with a quartic hamiltonian, over discrete timesteps.  In the second quantised picture, it occurs because the repulsion between particles causes components where many particles occupy the mode to oscillate very rapidly.  The simulation becomes stable when these components are removed, but that changes the dynamics.  Integrating Schrödinger's equation with repulsive particles either requires very short timesteps, or special integration formulae that exploit features of Hamiltonian dynamics.  Applying these formulae to the variational dynamics of the coherent states, which are not Hamiltonian, is somewhat subtle.
+
 \beginsection{The phase space expansion operator}
 
 Expansion over coherent states is a linear operator from functions of a complex variable to quantum states,
@@ -50,7 +56,7 @@ $$\int |α〉〈α|\,d²α=π.$$
 This is similar to the law for an orthonormal basis, except that the right hand side is $π$ instead of 1.  Further properties of the coherent states will be stated as required.  Glauber's summary of them\cite{prx-131-2766} is paraphrased in every quantum optics textbook ever written.
 
 Bargmann showed that the Hilbert space of wavefunctions is isomorphic to the space of phase space distributions, under the isometry $〈Γ⁺|$, where
-$$〈 Γ⁺|ψ〉(α)=π^{-½}〈 α|ψ〉.$$
+$$〈 Γ⁺|ψ〉(α)=π^{-½}e^{½|α|²}〈 α|ψ〉.$$
 Being a linear operator from quantum states to phase space functions, $〈Γ⁺|$ is written as a ket.  It is a pseudoinverse of $|Γ〉$, in the sense that $|Γ〉〈 Γ⁺|$ is the identity operator in state space.  The other composition, $〈 Γ⁺|Γ〉$, projects the functions of a complex variable onto the entire functions, orthogonally under the Bargmann inner product.  (Prove that, or find Bargmann's proof.)  It follows that $f=〈 Γ⁺|ψ〉$ is the function with least norm that satisfies $|Γ〉 f=|ψ〉$, with $‖f‖=\bigl‖ |ψ〉\bigr‖$.
 
 If, following Bargmann, we identify state space with the entire functions, $|Γ〉$ is identified with the projector $〈 Γ⁺|Γ〉$.  Therefore, although $|Γ〉$ is singular, the singularity is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ〉$, which can be done simply enough by Tychonov regularisation, we ensure that $f$ is close to $〈 Γ⁺|ψ〉$.  And $〈 Γ⁺|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem has caused so much trouble.
@@ -119,6 +125,24 @@ The following three figures show the right singular vectors, sampled versions of
 The right singular functions $v_i$ for the truncated expansion operator $\Gx$, where phase space is truncated at $|α|=3$, 4 and 5.  These are functions of a complex variable: the brightness of the plot indicates modulus, and the color indicates phase.\endinsert
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
+
+\beginsection{Convergence of discretely sampled expansions}
+
+To get a sense of what residuals to expect from optimised expansions, the expansion of a state as an entire function, $f=〈Γ⁺|ψ〉$, can be sampled at discrete amplitudes, and the integral $|Γ〉f$ evaluated as a sum.  In the limit of many amplitudes, this should converge to $|Ψ〉$.  I chose the vacuum state as $|Ψ〉$.  I evaluated the integral in two ways, supposed to be extreme cases.
+
+The first way used a grid, restricted to the disk $|α|<2.5$.  The pitch of the grid, $h$, was varied, and $f(α_r)=π^{-½}e^{½|α_r|²}〈α_r|ψ〉$ evaluated at each point.  The integral was discretised in the obvious way, to give approximations
+$$|ψ_R〉={1\over πh²} ∑_{r=1}^R |α_r〉〈α_r|ψ〉.$$
+A residual $‖|ψ〉-|ψ_R〉‖$ was found for each $R$; these are plotted as the solid line in the figure.  As the components increase, the residual asymptotes to the phase space truncation error $‖|Γ_χ〉〈Γ⁺|ψ〉-|ψ〉‖$.  (Calculate that precisely.)  The gaussian function $f$ is very smooth, so this converges rapidly as $R$ increases.
+
+The second way was a type of stochastic integration.  The samples $α_r$ were drawn randomly, from the normal distribution $|〈α|ψ〉|$.  The integral was approximated by 
+$$|ψ'_R〉=∑_{r=1}^R |α_r〉{〈α_r|ψ〉\over |〈α_r|ψ〉|},\qquad |ψ_R〉={|ψ'_R〉\over||ψ'_R〉|}.$$
+The phase of $f$ is integrated by sampling, but the modulus is integrated stochastically.  The residuals are plotted as the broken line.  In principle, this will converge exactly as $R$ increases.  However, the convergence is $R^{-½}$, as seen on the graph, and expected from the laws of large numbers.
+
+These two lines set bounds on how well we can reasonably expect to solve the expansion problem on an irregular grid.  A least squares method that does no better than sampling the argument of $f(α)$ at random $α$ is worthless: we need to do better than the dashed line.  On the other hand, it seems unreasonable to expect samples on an irregular grid to fit $|Ψ〉$ better than samples on a square grid.  If we try to match the solid line, we should expect the expansion coefficients to be very sensitive to the grid, and not to resemble $f(α_r)$.  If we try to do better than the truncation error, we will have to represent large number components, and the expansion coefficients will become very large.
+
+\topinsert\XeTeXpicfile converge.pdf width \hsize
+Convergence of a sampled vacuum state, as a function of the number of sample amplitudes.  The solid line shows sampling on a regular grid, the dashed one at random amplitudes.  Details in text.
+\endinsert
 
 \beginsection{Regularisation of the truncated expansion problem}
 %% Picard plots
