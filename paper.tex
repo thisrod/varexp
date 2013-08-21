@@ -39,7 +39,7 @@ The notation $\int f(α)\,d²α$ means $\int_{-∞}^{∞}\int_{-∞}^{∞} f(x+i
 
 The state $|α〉$ is a coherent state with complex amplitude $α$.  These can be defined in a number of ways, perhaps most simply in second quantisation, as eigenstates of a boson annihilation operator $a$, with $a|α〉=α|α〉$.  The annihilation operator is not hermitian, so the eigenvalues $α$ are complex numbers.  In first quantisation, such an operator is the complex amplitude
 $$a=(2\hbar)^{-½}(λx+ip/λ),$$
-where $x$ and $p$ are the position and momentum operators for a particle with mass $m$.  The bosons in this case are vibrational quanta in a notional harmonic potential, centred at the origin, with frequency $ω=λ²/m$.
+where $x$ and $p$ are the position and momentum operators for a particle with mass $m$.  (The dimensions don't work: $λ²$ is an action, but then $a$ has dimensions.)  The bosons in this case are vibrational quanta in a notional harmonic potential, centred at the origin, with frequency $ω=λ²/m$.
 
 Coherent states are not orthogonal, but their brackets follow the law
 $$〈β|α〉=e^{-½|β|²-½|α|²+β*α},$$
@@ -86,7 +86,7 @@ In the case where $χ(z)=1$, and $\Gx=\G$, the expansion is quite arbitrary.  Th
 When the operator is restricted, the SVE gives more information. If $\Gx$ were one to one, each $v_i$ would be the unique preimage of $|g_i〉$; since $\Gx$ is singular, $v_i$ is the preimage with least norm.  The singular values are the ratios of $‖\Gx v_i‖=‖σ_i|u_i〉‖$ to $‖v_i‖$.  If $|u_i〉$ has a low particle number, it can be expanded efficiently: $v_i$ will be close to $〈Γ⁺|u_i〉$, and $σ_i$ will be close to 1.  If $|u_i〉$ includes components with large particle number, its expansion will have a larger norm than itself.  In this case, $v_i$ will be a truncation of $〈Γ⁺|u_i〉$ to small amplitudes, multiplied by a large constant to maintain normalisation, and $σ_i$ will be small.
 
 Before we study the singular values and vectors of $\Gx$, consider why small singular values are a problem.  The pseudoinverse of $\Gx$ with least norm is
-$$〈Γ⁺_χ|=∑_{i=1}^∞ v_iσ_i^{-1}〈u_i|.$$  Suppose this is applied to a state $|ψ〉$ that has a low expected particle number, but small components with large particle number.  Such a component will overlap some $|u_i〉$ belonging to small $σ_i$, and $〈Γ⁺_χ|$ will multiply it by $σ_i^{-1}$, generating large components of those $v_i$ in the expansion function.  In the continuous expansion, this isn't a problem: the information is still there, and the state can be recovered by applying $\Gx$ to the expansion.  When the expansion is discretised, however, the small, low particle number component of $〈Γ⁺_χ|ψ〉$ that contain the important information about $|ψ〉$ are very likely to be lost in the large components of $〈Γ⁺_χ|ψ〉$ that give minor details of high particle number components of $|ψ〉$.
+$$〈Γ⁺_χ|=∑_{i=1}^∞ v_iσ_i^{-1}〈u_i|.$$  Suppose this is applied to a state $|ψ〉$ that has a low expected particle number, but small components with large particle number.  Such a component will overlap some $|u_i〉$ belonging to small $σ_i$, and $〈Γ⁺_χ|$ will multiply it by $σ_i^{-1}$, generating large components of those $v_i$ in the expansion function.  In the continuous expansion, this isn't a problem: the information is still there, and the state can be recovered by applying $\Gx$ to the expansion.  When the expansion is discretised, however, the small, low particle number component of $〈Γ⁺_χ|ψ〉$ that contains the important information about $|ψ〉$ is likely to be lost in the large component of $〈Γ⁺_χ|ψ〉$ that gives minor details of high particle number components of $|ψ〉$.
 
 Let's compute some singular values and vectors.  Suppose that $χ$ is the characteristic function of a disk, with
 $$χ(α*)=\cases{1 & $|α|≤b$ \cr 0 & otherwise.}$$
@@ -141,7 +141,7 @@ The phase of $f$ is integrated by sampling, but the modulus is integrated stocha
 These two lines set bounds on how well we can reasonably expect to solve the expansion problem on an irregular grid.  A least squares method that does no better than sampling the argument of $f(α)$ at random $α$ is worthless: we need to do better than the dashed line.  On the other hand, it seems unreasonable to expect samples on an irregular grid to fit $|Ψ〉$ better than samples on a square grid.  If we try to match the solid line, we should expect the expansion coefficients to be very sensitive to the grid, and not to resemble $f(α_r)$.  If we try to do better than the truncation error, we will have to represent large number components, and the expansion coefficients will become very large.
 
 \topinsert\XeTeXpicfile converge.pdf width \hsize
-Convergence of a sampled vacuum state, as a function of the number of sample amplitudes.  The solid line shows sampling on a regular grid, the dashed one at random amplitudes.  Details in text.
+Convergence of a sampled vacuum state, as a function of the number of sample amplitudes.  The solid line shows sampling on a regular grid, the dashed one at random amplitudes.  Details in text.  The dotted line shows the difference between the expanded state and a vacuum state truncated to the extent of the grid; the norm of the truncation error is around $10^{-3}$.
 \endinsert
 
 \beginsection{Regularisation of the truncated expansion problem}
@@ -152,6 +152,12 @@ $$∑_{i=1}^∞{\bigl|〈g_i|H|ψ〉\bigr|²\over σ_i²}$$
 must converge.  The singular values reduce with $j$, by definition; this requires that the components of the left singular vectors reduce somewhat faster.
 
 The variational problem seems to be pretty well-posed: if the initial superposition is the phase space function sampled on a grid, then the state that comes from a variational change in the amplitudes matches $H|ψ〉$ very closely.
+
+%% Expansion tension
+
+To capture the concept of a smooth expansion over an irregular set of nonorthogonal vectors, we'll define a quantity called the sampling tension.  Suppose that $|u〉$ and $|v〉$ are nearly parallel vectors, and the state $|ψ〉$ is expanded over a set that includes them, as $|ψ〉≈c_u|u〉+c_v|v〉+⋯$.  A relaxed expansion is one where $c_u|u〉$ and $c_v|v〉$ are as similar as possible; this can be ensured, regardless whether the $c$ are complex numbers of whether $|u〉$ and $|v〉$ are parallel or antiparallel, by requiring that the component of $c_u|u〉$ along $|v〉$ is equal to the component of $c_v|v〉$ along $|u〉$.  The difference between these components is
+$$T_{uv}=\left| {c_v〈u|v〉\over ‖|u〉‖²} - {c_u〈v|u〉\over ‖|v〉‖²}\right|.$$
+These differences form a tension matrix.  In the case that $|u〉$ and $|v〉$ are nearly orthogonal, their components should be independent.  In this case, the $T_{uv}$ will be small, because of the proportionality to $〈u|v〉$.  The tension matrix is a reasonable measure of the smoothness of an expansion: its Frobenius norm, the sum in quadrature of the components, would be a good summary.
 
 %% Tychonov conditioning
 
