@@ -126,7 +126,19 @@ The right singular functions $v_i$ for the truncated expansion operator $\Gx$, w
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
-\beginsection{Convergence of discretely sampled expansions}
+
+\beginsection{Discretely sampled expansions}
+
+On a computer, the expansion in phase space must be discretised.  The obvious way to do so is to replace the integral with a sum, so that
+$$|ψ〉=d₁|α₁〉+⋯+d_R|α_R〉=|A〉d,$$
+where $|A〉=\pmatrix{|α₁〉&⋯&|α_R〉}$, and $d$ is a column vector of the coefficients.
+In this paper, $c$ will usually denote the coefficients of expansion over orthogonal bases, and $d$ will represent coefficients of nonorthogonal expansions.  If the system has only a few modes, so that $α$ is a low-dimensional vector, the set of sampled amplitudes $A=\{α₁, …,α_R\}$ could be a regular grid; this makes many things easier.  When there are many modes, and $α$ is a large vector, the storage required for grids becomes exponentially large, and the sample points will have to be irregular.
+
+This expansion is formally equivalent to the continuous one, in that
+$$∑_r d_r|α_r〉=|Γ〉f_A,$$
+where
+$$f_A(β)=π^½∑_rd_re^{½|α_r|²}δ(β-α_r).$$
+I don't know enough about generalised functions to be comfortable working with these forms; in particular, the norm of $f_A$ is a bit mysterious.  If this could be clarified, it might provide some useful insights, for example how the norm of $f_A$ compares to that of $〈Γ⁺|ψ〉$.
 
 To get a sense of what residuals to expect from optimised expansions, the expansion of a state as an entire function, $f=〈Γ⁺|ψ〉$, can be sampled at discrete amplitudes, and the integral $|Γ〉f$ evaluated as a sum.  In the limit of many amplitudes, this should converge to $|Ψ〉$.  I chose the vacuum state as $|Ψ〉$.  I evaluated the integral in two ways, supposed to be extreme cases.
 
@@ -141,10 +153,91 @@ The phase of $f$ is integrated by sampling, but the modulus is integrated stocha
 These two lines set bounds on how well we can reasonably expect to solve the expansion problem on an irregular grid.  A least squares method that does no better than sampling the argument of $f(α)$ at random $α$ is worthless: we need to do better than the dashed line.  On the other hand, it seems unreasonable to expect samples on an irregular grid to fit $|Ψ〉$ better than samples on a square grid.  If we try to match the solid line, we should expect the expansion coefficients to be very sensitive to the grid, and not to resemble $f(α_r)$.  If we try to do better than the truncation error, we will have to represent large number components, and the expansion coefficients will become very large.
 
 \topinsert\XeTeXpicfile converge.pdf width \hsize
-Convergence of a sampled vacuum state, as a function of the number of sample amplitudes.  The solid line shows sampling on a regular grid, the dashed one at random amplitudes.  Details in text.  The dotted line shows the difference between the expanded state and a vacuum state truncated to the extent of the grid; the norm of the truncation error is around $10^{-3}$.
+Convergence of a sampled vacuum state, as a function of the number of sample amplitudes.  The solid line shows sampling on a regular grid, the dashed one at random amplitudes.  Details in text.  The dotted line shows the difference between the expanded state and a vacuum state truncated to the extent of the grid; the norm of the truncation error is around $10^{-3}$.  The tension is the Frobenius norm of the matrix $T$ defined in the text.
 \endinsert
 
-\beginsection{Regularisation of the truncated expansion problem}
+The problem of expanding a state over coherent states is similar to expanding a vector over an overcomplete basis in the plane.  The main difference is that large sets of vectors in the plane are linearly dependent, while sets of coherent states are not.  The two approaches are illustrated below, with an expansion of the vector marked $+$ along the indicated directions.  The black lines show the expansion
+$$ \vec x = π^{-1}∑_{r=1}^R (\vec u_r\cdot\vec x)\vec u.$$
+As can be seen, this is a very good approximation even with five vectors; in fact, it is hard to visually distinguish the approximate point from $\vec x$ even with 3 directions.  The red lines show $\vec x$ expanded over the two directions closest to it.  The interesting thing is the size of the change of the expansion coefficients when $\vec x$ moves perpendicular to $\vec x$.
+
+\topinsert\XeTeXpicfile circle-1.pdf 
+\endinsert
+
+To compute in phase space, we need to reduce the function $g$ to a finite vector of numbers.  This is usually done in one of two ways: by a vector
+$$\vec g=\pmatrix{g(z₁) & ⋯ & g(z_R)},$$
+where the points $z_i$ form a regular grid, or by
+$$\vec g=\pmatrix{〈 u₁,g〉 & ⋯ & 〈 u_R,g〉},$$
+where the distributions $u_i$ are a fixed basis.  The huge dimension of state space rules out any regular approach: we must sample $g$ at a set of irregularly spaced amplitudes or on an irregular basis, adapted to the support of $g$.
+
+However, in these single mode numerical experiments, it is often useful to expand over a regular grid.  For example, this allows us to plot phase space functions.  It is convenient to normalise the samples so that $‖\vec g‖=‖A\vec g‖$.  If the sample amplitudes $α_r$ form a square gird with spacing $h$, the condition $\vec g_r=cg(α_r)$ is satisfied when
+$$∑_r|\vec g_r|²=c²∑_r|g(α_r)|²=\int |g|²\,d²α≈h²∑_r|g(α_r)|²,$$
+whence $c=h$, and the discretisation is
+$$\vec g_r=hg(α_r).$$
+
+This makes regularisation tricky.  The goal is to represent a state $|ψ〉$ as a superposition of coherent states, $|ψ〉=|A〉 c$.  We want the coefficients $c$ to correspond to a phase space function $g$ that is nearly analytic.  If the amplitudes $|A〉$ formed a regular grid , it would be obvious enough when $c$ was sampling an analytic function.  On an irregular grid, we would expect the coefficients to be larger where the grid is sparse, and smaller where it is dense.  It would be good to know if irregular coefficients are the result of sampling a smooth function on an irregular grid, or of sampling a wildly oscillating function.
+
+The obvious way to attempt this is to factor the coefficients as $|ψ〉=|A〉 Wc'$, where $c'_i$ are samples that approximate $g(α_i)$, and $W$ is a matrix of weights that adapts the samples to the irregular grid.  In fact, we can do this exactly.  If we set $W=(〈 A|A〉)^{-1}$, then $c'=〈 A|ψ〉$.  We could try seeking coefficients $c$ such that the norm of $〈 A|A〉 c$ is minimal.
+
+To avoid the complexities of Wirtinger calculus, the problem of relating the weights of gaussians to the values of a sampled function can be set up for a function of a single real variable.  It would be appealing for the weight matrix $W$ to be diagonal, so that the weight of the gaussian centred at each point was determined by the value of $f$ at that point.  This can be set up either as a Galerkin condition, or as a collocation condition: they turn out to be equivalent.  Unfortunately, the weights end up oscillating wildly.  This approach doesn't seem useful, but is presented for completeness, and because the phenomenon of adjacent weights cancelling keeps occuring, this being the simplest problem in which I've seen it.
+
+As a collocation problem, consider the case where $f(x)=1$, and we wish to approximate $f$ by a function 
+$$f'(x)=∑_i e^{-(x-x_i)²}w_ic_i$$
+that satisfies the collocation condition $f'(x_i)=f(x_i)$.  The goal is for $c_i=1$, so we need ...
+
+$$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
+	e^{-|α₂-α₁|²} & 1 &  & e^{-|α₂-α_R|²} \cr
+	& & \ddots & \cr
+	e^{-|α_R-α₁|²} & e^{-|α_R-α₂|²} & & 1}
+\pmatrix{w₁²\cr w₂²\cr\vdots\cr w_R²}
+= \pmatrix{π\cr π\cr\vdots\cr π}.$$
+
+The Galerkin condition seeks a set of weights $w$ such that, for the normalised functions $u_i=π^{-½}e^{-(x-x_i)²}$, we have
+$$1=\int u_i=∑_j w_j u_i(x_j)=∑_j w_je^{-(x_j-x_i)²}.$$
+This is the same condition as the collocation condition.  The results are shown below.
+
+Unfortunately, for random samples $A$, this tends not to have a solution: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
+
+There is another way to derive coefficients of the constant function, which might be more stable.  Suppose that $D$ is a subset of the real line, large enough that the tails of gaussians are neglibible outside it.  Let 
+$$U=π^{-½}\pmatrix{e^{-(x-x₁)²}&⋯&e^{-(x-x_R)²}},$$
+and $w$ be a column vector of $R$ real weights.  Then define a residual
+$$r(w)=\int_D(Uw-1)².$$
+The derivative of this with respect to the weights is
+$$Dr(w)=\int_D 2(Uw-1)U=2\int_D U^{\rm T}Uw-U.$$
+(Note that, for row vectors $a$ and $c$, and $b$ a column vector, $abc=c^{\rm T}ab$.)
+Unfortunately,
+$$\int (U^{\rm T}U)_{ij}=π^{-1}\int e^{-(x-x_i)²-(x-x_j)²}\,dx
+	={1\over\sqrt{2π}}e^{(x_i-x_j)²/2},$$
+and $\int u_i=1$, so this is the identical problem again.
+
+An obvious way would be to assign amplitudes to the nearest sample.  That makes the volume for each sample a quite irregular prism; maybe there is a simple way to calculate the volumes of those, but I don't know it.  What if we assign a value to each point as an average over the sampled values, weighted, say, in proportion to the squared distances?  There would need to be some extra condition to ensure the function tends to zero at points remote from the samples.  Something like $x^{-2}e^{-|x|²}$ sounds plausible: it's quadratic at sort range, where the gaussian is flat, but outside the support of the samples, it decays in the right way for a phase space expansion.  I think the short range part needs to be a power law, so that it doesn't have a length scale built in when the distances between samples are random.  What's the best exponent?  I expect it depends on the dimension of the phase space, which would determine how many samples we expect to find close to a given one.
+
+
+%% Sampling on random grids
+
+\topinsert \XeTeXpicfile gweight.pdf width \hsize 
+The weights $w_i$ required in order that the integrals of the functions $u_i(x)=e^{-(x-x_i)²}$ are given by the sums $∑_j w_j u_i(x_j)$.  The points $x_i$ are normally distributed (top), or evenly spaced (bottom).  Note how nearby points tend to cancel each others' samples.  I expect experts in Chebyshev sampling would not be surprised by this, but I am not yet such an expert.
+
+The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
+\endinsert
+
+The goal of fiding samples of the phase space distribution $f(α_r)$ is to regularise the expansion and inverse problems.  The expansion function with the least norm is guaranteed to be a nice function: we don't know much about the finite superposition whose weights have the least norm.
+
+To the the norm of the function $f$, sampled on an irregular grid $α_r$, the obvious method is to interpolate.  Doing this might help with irregular weights due to irregular sample points, because a least-squares interpolant will average the weights at several adjacent points.  However, there is probably a better way to adjust the weights for irregular sampling.
+
+We want to interpolate a function of a complex variable, that should be nearly analytic.  To me, the obvious way to do it is a least squares fit to the monomials
+$$U=e^{-½|z|²}\pmatrix{1 & z & z* & z² & zz* & z^{2\ast} & z³ & z²z* & ⋯}.$$
+It helps to think of $z^mz^{n\ast}=r^{m+n}e^{i(m-n)φ}$.  Note that if these monomials are orthogonalised by Gramm-Schmidt, in the order they are written, the functions $e^{-½|z|²}\pmatrix{1 & z & z² & z³ &  ⋯}$ are retained as part of the orthonormal set: $z^n$ is the first monomial proportional to $e^{inφ}$, so it is orthogonal to all those before it.  The same is true for $z^{n\ast}$, the first monomial proportional to $e^{-inφ}$.  So this basis is an obvious one for projecting onto analytic functions in $z$ or $z*$.  It will have the form
+$$e^{-½|z|²}\pmatrix{1 & re^{iφ} & re^{-iφ} & r²e^{2iφ} & p_{11}(r) & r²e^{-2iφ} & r³e^{3iφ} & p_{12}(r)e^{iφ} & p_{21}(r)e^{-iφ}& ⋯},$$
+where $p_{ij}$ is a polynomial of degree $i+j$.  Someone must have investigated these orthogonal polynomials before, but they don't appear in Courant \& Hilbert or in Abramowitz \& Stegun.
+
+For least squares fitting, orthogonal polynomials are not necessary: the QR factorisation does that work for us.  To find norms, we do need to know the grammian matrix, whose elements are the Bargmann inner products of the monomials:
+$$\eqalign{a_{mnpq}&=\int (z^{m\ast}zⁿ)*(z^{p\ast}z^q)e^{-|z|²}\,d²z \cr
+	&= 2πδ_{m+n,p+q}\int_0^∞r^{m+n+p+q+1}\,dr \cr
+	&= πδ_{m+n,p+q}\int_0^∞r^{m+n+p+q}\,2r\,dr \cr
+	&= πδ_{m+n,p+q}Γ({m+n+p+q\over 2}+1)=π(n+p)!δ_{m+n,p+q}.}$$
+Some fits of these to expansions of cat and coherent states over random amplitudes are shown below.  They suffer the usual problem that polynomial fits oscillate more wildly as the degree of the polynomial increases; there are meant to be ways to avoid that, but I'm not an expert in them.
+
+\beginsection{Regularisation of the discrete expansion problem}
 %% Picard plots
 
 The most basic issue is the Picard condition.  This restates a simple observation: for the problem $\G \dot f=H|ψ〉$ to have a solution $\dot f$, the expansion of $\dot f$ over an orthonormal basis must have a finite norm.  If the basis is chosen as the right singular vectors $v_i$, this means that the sum of the squared moduli of their coefficients must be finite.  The component of $v_i$ is $〈u_i|H|ψ〉/σ_i$.  So the Picard condition is that, for the equation to have a solution, the series
@@ -156,8 +249,12 @@ The variational problem seems to be pretty well-posed: if the initial superposit
 %% Expansion tension
 
 To capture the concept of a smooth expansion over an irregular set of nonorthogonal vectors, we'll define a quantity called the sampling tension.  Suppose that $|u〉$ and $|v〉$ are nearly parallel vectors, and the state $|ψ〉$ is expanded over a set that includes them, as $|ψ〉≈c_u|u〉+c_v|v〉+⋯$.  A relaxed expansion is one where $c_u|u〉$ and $c_v|v〉$ are as similar as possible; this can be ensured, regardless whether the $c$ are complex numbers of whether $|u〉$ and $|v〉$ are parallel or antiparallel, by requiring that the component of $c_u|u〉$ along $|v〉$ is equal to the component of $c_v|v〉$ along $|u〉$.  The difference between these components is
-$$T_{uv}=\left| {c_v〈u|v〉\over ‖|u〉‖²} - {c_u〈v|u〉\over ‖|v〉‖²}\right|.$$
+$$T_{uv}=\left| {c_v〈u|v〉\over ‖|u〉‖} - {c_u〈v|u〉\over ‖|v〉‖}\right|.$$
 These differences form a tension matrix.  In the case that $|u〉$ and $|v〉$ are nearly orthogonal, their components should be independent.  In this case, the $T_{uv}$ will be small, because of the proportionality to $〈u|v〉$.  The tension matrix is a reasonable measure of the smoothness of an expansion: its Frobenius norm, the sum in quadrature of the components, would be a good summary.
+
+The idea is that a relaxed expansion has all the coefficients pulling in the same direction, but an expansion with large tension is a tug-of-war, with adjacent coefficients pulling the expanded state in opposite ways.
+
+The tensions were calculated for the grid and irregular expansions above, and plotted in the second graph.  Despite the much worse convergence of random sampling, the weights have very nearly the same tension as the regular grid.  
 
 %% Tychonov conditioning
 
@@ -294,91 +391,6 @@ Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as 
 \centerline{\XeTeXpicfile j2.pdf width \hsize}
 
 The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
-
-\beginsection{Discrete phase space}
-
-To compute in phase space, we need to reduce the function $g$ to a finite vector of numbers.  This is usually done in one of two ways: by a vector
-$$\vec g=\pmatrix{g(z₁) & ⋯ & g(z_R)},$$
-where the points $z_i$ form a regular grid, or by
-$$\vec g=\pmatrix{〈 u₁,g〉 & ⋯ & 〈 u_R,g〉},$$
-where the distributions $u_i$ are a fixed basis.  The huge dimension of state space rules out any regular approach: we must sample $g$ at a set of irregularly spaced amplitudes or on an irregular basis, adapted to the support of $g$.
-
-However, in these single mode numerical experiments, it is often useful to expand over a regular grid.  For example, this allows us to plot phase space functions.  It is convenient to normalise the samples so that $‖\vec g‖=‖A\vec g‖$.  If the sample amplitudes $α_r$ form a square gird with spacing $h$, the condition $\vec g_r=cg(α_r)$ is satisfied when
-$$∑_r|\vec g_r|²=c²∑_r|g(α_r)|²=\int |g|²\,d²α≈h²∑_r|g(α_r)|²,$$
-whence $c=h$, and the discretisation is
-$$\vec g_r=hg(α_r).$$
-
-This makes regularisation tricky.  The goal is to represent a state $|ψ〉$ as a superposition of coherent states, $|ψ〉=|A〉 c$.  We want the coefficients $c$ to correspond to a phase space function $g$ that is nearly analytic.  If the amplitudes $|A〉$ formed a regular grid , it would be obvious enough when $c$ was sampling an analytic function.  On an irregular grid, we would expect the coefficients to be larger where the grid is sparse, and smaller where it is dense.  It would be good to know if irregular coefficients are the result of sampling a smooth function on an irregular grid, or of sampling a wildly oscillating function.
-
-The obvious way to attempt this is to factor the coefficients as $|ψ〉=|A〉 Wc'$, where $c'_i$ are samples that approximate $g(α_i)$, and $W$ is a matrix of weights that adapts the samples to the irregular grid.  In fact, we can do this exactly.  If we set $W=(〈 A|A〉)^{-1}$, then $c'=〈 A|ψ〉$.  We could try seeking coefficients $c$ such that the norm of $〈 A|A〉 c$ is minimal.
-
-To avoid the complexities of Wirtinger calculus, the problem of relating the weights of gaussians to the values of a sampled function can be set up for a function of a single real variable.  It would be appealing for the weight matrix $W$ to be diagonal, so that the weight of the gaussian centred at each point was determined by the value of $f$ at that point.  This can be set up either as a Galerkin condition, or as a collocation condition: they turn out to be equivalent.  Unfortunately, the weights end up oscillating wildly.  This approach doesn't seem useful, but is presented for completeness, and because the phenomenon of adjacent weights cancelling keeps occuring, this being the simplest problem in which I've seen it.
-
-As a collocation problem, consider the case where $f(x)=1$, and we wish to approximate $f$ by a function 
-$$f'(x)=∑_i e^{-(x-x_i)²}w_ic_i$$
-that satisfies the collocation condition $f'(x_i)=f(x_i)$.  The goal is for $c_i=1$, so we need ...
-
-$$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
-	e^{-|α₂-α₁|²} & 1 &  & e^{-|α₂-α_R|²} \cr
-	& & \ddots & \cr
-	e^{-|α_R-α₁|²} & e^{-|α_R-α₂|²} & & 1}
-\pmatrix{w₁²\cr w₂²\cr\vdots\cr w_R²}
-= \pmatrix{π\cr π\cr\vdots\cr π}.$$
-
-The Galerkin condition seeks a set of weights $w$ such that, for the normalised functions $u_i=π^{-½}e^{-(x-x_i)²}$, we have
-$$1=\int u_i=∑_j w_j u_i(x_j)=∑_j w_je^{-(x_j-x_i)²}.$$
-This is the same condition as the collocation condition.  The results are shown below.
-
-Unfortunately, for random samples $A$, this tends not to have a solution: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
-
-There is another way to derive coefficients of the constant function, which might be more stable.  Suppose that $D$ is a subset of the real line, large enough that the tails of gaussians are neglibible outside it.  Let 
-$$U=π^{-½}\pmatrix{e^{-(x-x₁)²}&⋯&e^{-(x-x_R)²}},$$
-and $w$ be a column vector of $R$ real weights.  Then define a residual
-$$r(w)=\int_D(Uw-1)².$$
-The derivative of this with respect to the weights is
-$$Dr(w)=\int_D 2(Uw-1)U=2\int_D U^{\rm T}Uw-U.$$
-(Note that, for row vectors $a$ and $c$, and $b$ a column vector, $abc=c^{\rm T}ab$.)
-Unfortunately,
-$$\int (U^{\rm T}U)_{ij}=π^{-1}\int e^{-(x-x_i)²-(x-x_j)²}\,dx
-	={1\over\sqrt{2π}}e^{(x_i-x_j)²/2},$$
-and $\int u_i=1$, so this is the identical problem again.
-
-An obvious way would be to assign amplitudes to the nearest sample.  That makes the volume for each sample a quite irregular prism; maybe there is a simple way to calculate the volumes of those, but I don't know it.  What if we assign a value to each point as an average over the sampled values, weighted, say, in proportion to the squared distances?  There would need to be some extra condition to ensure the function tends to zero at points remote from the samples.  Something like $x^{-2}e^{-|x|²}$ sounds plausible: it's quadratic at sort range, where the gaussian is flat, but outside the support of the samples, it decays in the right way for a phase space expansion.  I think the short range part needs to be a power law, so that it doesn't have a length scale built in when the distances between samples are random.  What's the best exponent?  I expect it depends on the dimension of the phase space, which would determine how many samples we expect to find close to a given one.
-
-
-%% Sampling on random grids
-
-\topinsert \XeTeXpicfile gweight.pdf width \hsize 
-The weights $w_i$ required in order that the integrals of the functions $u_i(x)=e^{-(x-x_i)²}$ are given by the sums $∑_j w_j u_i(x_j)$.  The points $x_i$ are normally distributed (top), or evenly spaced (bottom).  Note how nearby points tend to cancel each others' samples.  I expect experts in Chebyshev sampling would not be surprised by this, but I am not yet such an expert.
-
-The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
-\endinsert
-
-The goal of fiding samples of the phase space distribution $f(α_r)$ is to regularise the expansion and inverse problems.  The expansion function with the least norm is guaranteed to be a nice function: we don't know much about the finite superposition whose weights have the least norm.
-
-To the the norm of the function $f$, sampled on an irregular grid $α_r$, the obvious method is to interpolate.  Doing this might help with irregular weights due to irregular sample points, because a least-squares interpolant will average the weights at several adjacent points.  However, there is probably a better way to adjust the weights for irregular sampling.
-
-We want to interpolate a function of a complex variable, that should be nearly analytic.  To me, the obvious way to do it is a least squares fit to the monomials
-$$U=e^{-½|z|²}\pmatrix{1 & z & z* & z² & zz* & z^{2\ast} & z³ & z²z* & ⋯}.$$
-It helps to think of $z^mz^{n\ast}=r^{m+n}e^{i(m-n)φ}$.  Note that if these monomials are orthogonalised by Gramm-Schmidt, in the order they are written, the functions $e^{-½|z|²}\pmatrix{1 & z & z² & z³ &  ⋯}$ are retained as part of the orthonormal set: $z^n$ is the first monomial proportional to $e^{inφ}$, so it is orthogonal to all those before it.  The same is true for $z^{n\ast}$, the first monomial proportional to $e^{-inφ}$.  So this basis is an obvious one for projecting onto analytic functions in $z$ or $z*$.  It will have the form
-$$e^{-½|z|²}\pmatrix{1 & re^{iφ} & re^{-iφ} & r²e^{2iφ} & p_{11}(r) & r²e^{-2iφ} & r³e^{3iφ} & p_{12}(r)e^{iφ} & p_{21}(r)e^{-iφ}& ⋯},$$
-where $p_{ij}$ is a polynomial of degree $i+j$.  Someone must have investigated these orthogonal polynomials before, but they don't appear in Courant \& Hilbert or in Abramowitz \& Stegun.
-
-For least squares fitting, orthogonal polynomials are not necessary: the QR factorisation does that work for us.  To find norms, we do need to know the grammian matrix, whose elements are the Bargmann inner products of the monomials:
-$$\eqalign{a_{mnpq}&=\int (z^{m\ast}zⁿ)*(z^{p\ast}z^q)e^{-|z|²}\,d²z \cr
-	&= 2πδ_{m+n,p+q}\int_0^∞r^{m+n+p+q+1}\,dr \cr
-	&= πδ_{m+n,p+q}\int_0^∞r^{m+n+p+q}\,2r\,dr \cr
-	&= πδ_{m+n,p+q}Γ({m+n+p+q\over 2}+1)=π(n+p)!δ_{m+n,p+q}.}$$
-Some fits of these to expansions of cat and coherent states over random amplitudes are shown below.  They suffer the usual problem that polynomial fits oscillate more wildly as the degree of the polynomial increases; there are meant to be ways to avoid that, but I'm not an expert in them.
-
-
-%% Truncated Hilbert space
-
-I still haven't thought in detail about the results with truncated Fock spaces.  Obviously, when we restrict the domain of $G$ to the lowest $N$ energy levels, the restricted operator has at most $N$ singular directions.  Since the low energy levels are the ones a restricted grid tends to represent, those singular directions will have relatively large singular values.  So when we do this, we get a well-posed problem, but we lose the ability to add components with small singular values, in order to expand the states we'll get in the future.  And in fact, by solving the inverse problem, we can always get a nice solution in any case.  Numerical experiments suggest that the variational problem is quite well posed for a single step, too.
-
-Truncating Fock space has a similar effect to truncating the singular values, assuming the singular directions belonging to small values have large particle numbers.  And indeed, the trajectories for the average amplitude change in similar ways due to truncation: they pick up an extra loop in the complex plane.
-
-As the Fock space expands with $N»2R$, there are still only $2R$ singular directions.  Presumably these converge to limits as $N$ increases.  There might be a norm on the matrices $〈N|Dψ〉$, where the truncated elements replaced by zero, that measures this.
 
 \beginsection{Ways the problem has been simplified for this paper}
 
