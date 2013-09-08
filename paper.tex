@@ -27,11 +27,51 @@ These attempts have aimed to solve chemistry problems, involving dozens of atoms
 
 %% Overview
 
-There appear to be two sorts of instabilities.  The first, static, sort occurs when a quantum state is expanded over a finite set of coherent states, and those states have irregular amplitudes.  This is similar to the kind that numerical analysts call ill-posed problems, and the methods they use to analyse and resolve them can be applied here.  However, the cause of ill-posedness in our problem differs from those usually studied, and the usual methods of resolution don't work as well as they usually do.  There is one advantage of the expansion problem: because it is iterated at each timestep, the dynamics of the amplitudes can be exploited to so that they posed better expansion problems as the simulation progresses.
+The instability appears to have two major causes.  The first problem occurs when quantum states are expanded over a finite set of coherent states.  There is a natural way to expand a state as an integral over the coherent states, with a weight function that varies smoothly with the coherent amplitude.  When this function is sampled at a discrete set of coherent amplitudes and the integral approximated by a sum, the state is approximated to some precision.  Part of the error in this appoximation is due to the finite set of coherent states having bounded amplitude, wheras the state being approximated might have components with arbitrarily large particle number—for instance, it might be a coherent state.  When expansion weights for the finite set of coherent states are set by least squares, components with large particle number are approximated by adjacent amplitudes having large weights, with opposite signs so that components with low particle numbers cancel.  This causes the expansion weights to be large, to not resemble samples of any smooth function, and to change sharply as the state changes.  All these properties make it difficult to numerically integrate a rate of change that has been expanded by least squares.  The problems are exacerbated when the amplitudes are spaced irregularly, instead of on a grid.
+
+The behaviour of the discrete expansion weights is similar to that observed in discrete ill-posed problems, and the methods used to analyse and resolve these can be applied to expansions over coherent states.  However, the cause of ill-posedness in our problem differs from those usually studied—the large number components of the state are real, while the high-frequency components that play the same role in ill-posed problems are spurious ones introduced by errors in measured data.  Therefore the standard methods of resolution don't work as well as usual.  The expansion problem is easier in one way: it is iterated at each timestep, so the dynamics of the coherent amplitudes can be modified so that the expansion problem becomes better posed as the simulation progresses.
 
 The second type of instability is a dynamical one.  This occurs whenever Schrödinger's equation is integrated with a quartic hamiltonian, over discrete timesteps.  In the second quantised picture, it occurs because the repulsion between particles causes components where many particles occupy the mode to oscillate very rapidly.  The simulation becomes stable when these components are removed, but that changes the dynamics.  Integrating Schrödinger's equation with repulsive particles either requires very short timesteps, or special integration formulae that exploit features of Hamiltonian dynamics.  Applying these formulae to the variational dynamics of the coherent states, which are not Hamiltonian, is somewhat subtle.
 
+\beginsection{Variational dynamics}
+
+Schrödinger's equation, the quantum law of motion, is
+$$i\hbar |DΨ(t)〉=H|Ψ(t)〉.$$
+I will discuss many details of mappings from complex numbers to quantum states, so some notation used in this paper is traditionally used more in mathematics than in physics.  The symbol $|Ψ〉$ denotes a ket-valued function of a real number; $|Ψ(t)〉$ is the ket that this function evaluates to at time $t$.  The Hamiltonian $H$, a Hilbert space operator, acts on this ket, not on the function $|Ψ〉$.  Therefore it is written outside the ket.  The total derivative $D$ acts on the function, so it is written inside the ket.  Because $|Ψ〉$ is a function of a single variable, $|DΨ〉$ is simply another ket-valued function, and $|DΨ(t)〉$ is the ket that would traditionally be written ${∂\over ∂t}|Ψ〉\big|_{t=t}$.  This could alternatively be written as a partial derivative $|DΨ〉=|∂₀Ψ〉$.  If $|Ψ〉$ were a function of several variables, the total derivative function $|DΨ〉$ would evaluate to a row vector $|DΨ(t)〉=\pmatrix{|∂₀Ψ(t)〉&⋯&|∂_RΨ(t)〉}$.  One can regard the kets as column vectors and read this as a Jacobian matrix with infinitely many rows and $R$ columns.  The notation will be elaborated below as needed.
+
+Schrödinger's equation could even be abbreviated to
+$$i\hbar |DΨ〉=H|Ψ〉.$$
+This is a very simple equation.  The challenge of solving it numerically lies in representing the ket $|Ψ(t)〉$—as is well known, the storage required to expand it over a grid grows exponentially with the number of particles being simulated, and exceeds the number of atoms in the known universe when the system includes merely thousands of particles.  In order to compute dynamics by propagating a quantum state, we must restrict the form of $|Ψ〉$, and require that
+$$|Ψ(t)〉=|ψ(z(t))〉,$$
+or $|Ψ〉=|ψ\circ z〉$, where $z(t)=\left(z₁(t),…,z_R(t)\right)$ is a vector of complex parameters.  This imposes two challenges: to find a form $|ψ〉$ that can approximate the states $|Ψ(t)〉$ with a reasonable number of parameters $R$, and to stably and efficiently compute $z(t)$ to accomplish that approximation.
+
+Some methods of computing dynamics, such as those involving Green's functions, derive the expectation values of certain observables without storing data from which the quantum state of the system could be derived.  The above model does not apply to these.  There are also methods, such as phase-space Monte-Carlo ones, that have the above form in principle, but which can compute different parameters $z_r(t)$ independently, and find expectation values of observables without having to store all the parameters at once.
+
+The next sections will discuss the approximant $|ψ(z)〉$ analysed in this paper.  Before that, I'll outline the method that will be used to compute the dynamical $z(t)$.  The final part of the paper discusses the details—and there are many—of making this computation numerically stable.
+
+If the approximant $|Ψ(t)〉=|ψ(z(t))〉$ is substituted in Schrödinger's equation, and the chain rule applied, the result is
+$$i\hbar|Dψ(z(t))〉Dz(t)=H|ψ(z(t))〉.$$
+On the left hand side, the kets in the row vector $|Dψ(z(t))〉$ are combined with coefficients from the column vector $Dz(t)=\pmatrix{Dz₁(t)&…&Dz_R(t)}^{\rm T}$.  This is unlikely to have an exact a solution: the kets $|∂_rψ(z(t))〉$ span an $R$-dimensional subspace of Hilbert space, and the ket $H|ψ(z(t))〉$ is likely to have components outside this subspace.  This is a consequence of the restricted form of the approximation.  We can, however, look for a vector $\dot z(z)$ that minimises the residual
+$$\left\|i\hbar|Dψ(z)〉\dot z(z)-H|ψ(z)〉\right\|²,\eqno{(4)}$$
+and solve the ordinary differential equation
+$${dz\over dt}=\dot z(z),\tag\ode$$
+giving a state $|ψ(z(t))〉$ that hopefully approximates the solution to Schrödinger's equation.  When the norm used is the one derived from the inner product of Hilbert space, this is called the Dirac-Frenkel method.
+
+The Dirac-Frenkel solution is only optimised locally.  There might be some $w(t)$ such that, at large times, $|ψ(w(t))〉$ approximates $|Ψ(t)〉$ better that the Dirac-Frenkey solution $|ψ(w(t))〉$ does.  This would require that, at early times, $i\hbar|Dψ(z(t))〉$ is closer to $H|ψ(z(t))〉$ than $i\hbar|Dψ(w(t))〉$ is to $H|ψ(w(t))〉$, but that $z(t)$ loses the ability to track the dynamics at later times.  When we discuss regularisation below, we will see that this is in fact the usual case.  However, global optimisation of $z$ is not practical: even computing the local approximation stretches computers to their limits.
+
+The residual above can be defined using any norm one wishes.  The aim of computing quantum dynamics is usually to find some expectation values that could be compared to observed quantities, and one could consider using a norm that magnified the discrepencies in these observables, so that the solution with the least residual would correspond closely to the exact solution in the directions of interest.  On the other hand, we are computing quantum dynamics: these are unitary in the usual norm, so that a small error introduced at an early time is guaranteed to stay small when the state is propagated to later times.  No other norm guarantees this: they all introduce uncontrolled errors regarding how much early errors are magnified by later dynamics.
+
+Equation~\ode\ will be integrated numerically.  For this to be done stably and efficiently, $\dot z$ must be a reasonably smooth function of $z$.  This is formally expressed in terms of the eigenvalues of the Jacobian $D\dot z$; different integration formulae place different bounds on the magnitudes and phases of these, but they all have limited regions of stability.  Moreover, as we will see below, a technically stable integration formula might still not produce a useful solution.
+
+This complicates the solution of the problem in Formula~4.  It does not suffice to find a $\dot z$ with the smallest residual, for a given value of $z$.  In order for Equation~5 to be numerically solvable, the properties of $\dot z$ under perturbation of $z$ are equally important.  Under the usual Hilbert space norm, Formula~4 is a least squares problem; the pertubation properties of such problems are reasonably well understood.  We will examine ways to modify the problem, by introducing extra least-squares constraints, that might improve its perturbation properties.
+
 \beginsection{The phase space expansion operator}
+
+The approximant studied in this paper has the form
+$$|ψ(φ₁,α₁,⋯,φ_R,α_R)〉=∑_{r=1}^R e^{φ_r+α_ra†}|0〉
+	=\pmatrix{|α₁〉&⋯&|α_R〉}\pmatrix{e^{φ₁+½|α₁|²}\cr\vdots\cr e^{φ_R+½|α_R|²}}
+	=|A〉d,$$
+where $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  In the limit of large $R$, where the sum approximates an integral over the amplitude $α$, any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of the next section, followed by a discussion of the discrete expansion $|A〉$.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
 
 Expansion over coherent states is a linear operator from functions of a complex variable to quantum states,
 $$\G f=π^{-½}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
@@ -111,18 +151,18 @@ $$σ_n={‖ \Gx f_n‖\over ‖f_n‖}=\sqrt{Γ(n+1,b²)}.$$
 
 Numerical experiments in the script {\tt csve.m} support this.  The operator $\G$ was discretised on a grid in phase space, with spacing $h=0.3$, bounded by the circle about the origin of radius $b$ for $b=3$, 4 and 5.  Ket space was discretised by taking inner products with the number states $|0〉$ through $|24〉$.  The graph below shows the singular values of the truncated operator $\Gx$.
 
-\topinsert \XeTeXpicfile svgrid.pdf width \hsize \endinsert
+%\topinsert \XeTeXpicfile svgrid.pdf width \hsize \endinsert
 
 The contour plot shows how the analytic expression for $σ_n$ depends on $n$ and the truncation radius $b$.  The value has decayed to 0.7 when $n=b²$.  The rule of thumb is that we get one large singular value for every unit circle of phase space, with area $π$.
 
-\topinsert \XeTeXpicfile svcont.pdf width \hsize \endinsert
+%\topinsert \XeTeXpicfile svcont.pdf width \hsize \endinsert
 
 The following three figures show the right singular vectors, sampled versions of phase space functions.  The brightness of the plots indicates $|v_n(α)|$, the colors indicate phase.  These look very much like truncated number states.  As the grid expands, the pre-images of higher number states fit in it, and more singular values have converged.
 
-\topinsert \hbox{\XeTeXpicfile rsv3.pdf width 0.5\hsize
-\XeTeXpicfile rsv4.pdf width 0.5\hsize}
-\XeTeXpicfile rsv5.pdf width 0.5\hsize\hfil\break
-The right singular functions $v_i$ for the truncated expansion operator $\Gx$, where phase space is truncated at $|α|=3$, 4 and 5.  These are functions of a complex variable: the brightness of the plot indicates modulus, and the color indicates phase.\endinsert
+%\topinsert \hbox{\XeTeXpicfile rsv3.pdf width 0.5\hsize
+%\XeTeXpicfile rsv4.pdf width 0.5\hsize}
+%\XeTeXpicfile rsv5.pdf width 0.5\hsize\hfil\break
+%The right singular functions $v_i$ for the truncated expansion operator $\Gx$, where phase space is truncated at $|α|=3$, 4 and 5.  These are functions of a complex variable: the brightness of the plot indicates modulus, and the color indicates phase.\endinsert
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
@@ -152,16 +192,15 @@ The phase of $f$ is integrated by sampling, but the modulus is integrated stocha
 
 These two lines set bounds on how well we can reasonably expect to solve the expansion problem on an irregular grid.  A least squares method that does no better than sampling the argument of $f(α)$ at random $α$ is worthless: we need to do better than the dashed line.  On the other hand, it seems unreasonable to expect samples on an irregular grid to fit $|Ψ〉$ better than samples on a square grid.  If we try to match the solid line, we should expect the expansion coefficients to be very sensitive to the grid, and not to resemble $f(α_r)$.  If we try to do better than the truncation error, we will have to represent large number components, and the expansion coefficients will become very large.
 
-\topinsert\XeTeXpicfile converge.pdf width \hsize
+%\topinsert\XeTeXpicfile converge.pdf width \hsize
 Convergence of a sampled vacuum state, as a function of the number of sample amplitudes.  The solid line shows sampling on a regular grid, the dashed one at random amplitudes.  Details in text.  The dotted line shows the difference between the expanded state and a vacuum state truncated to the extent of the grid; the norm of the truncation error is around $10^{-3}$.  The tension is the Frobenius norm of the matrix $T$ defined in the text.
-\endinsert
+%\endinsert
 
 The problem of expanding a state over coherent states is similar to expanding a vector over an overcomplete basis in the plane.  The main difference is that large sets of vectors in the plane are linearly dependent, while sets of coherent states are not.  The two approaches are illustrated below, with an expansion of the vector marked $+$ along the indicated directions.  The black lines show the expansion
 $$ \vec x = π^{-1}∑_{r=1}^R (\vec u_r\cdot\vec x)\vec u.$$
 As can be seen, this is a very good approximation even with five vectors; in fact, it is hard to visually distinguish the approximate point from $\vec x$ even with 3 directions.  The red lines show $\vec x$ expanded over the two directions closest to it.  The interesting thing is the size of the change of the expansion coefficients when $\vec x$ moves perpendicular to $\vec x$.
 
-\topinsert\XeTeXpicfile circle-1.pdf 
-\endinsert
+%\topinsert\XeTeXpicfile circle-1.pdf \endinsert
 
 To compute in phase space, we need to reduce the function $g$ to a finite vector of numbers.  This is usually done in one of two ways: by a vector
 $$\vec g=\pmatrix{g(z₁) & ⋯ & g(z_R)},$$
@@ -214,11 +253,11 @@ An obvious way would be to assign amplitudes to the nearest sample.  That makes 
 
 %% Sampling on random grids
 
-\topinsert \XeTeXpicfile gweight.pdf width \hsize 
+%\topinsert \XeTeXpicfile gweight.pdf width \hsize 
 The weights $w_i$ required in order that the integrals of the functions $u_i(x)=e^{-(x-x_i)²}$ are given by the sums $∑_j w_j u_i(x_j)$.  The points $x_i$ are normally distributed (top), or evenly spaced (bottom).  Note how nearby points tend to cancel each others' samples.  I expect experts in Chebyshev sampling would not be surprised by this, but I am not yet such an expert.
 
 The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
-\endinsert
+%\endinsert
 
 The goal of fiding samples of the phase space distribution $f(α_r)$ is to regularise the expansion and inverse problems.  The expansion function with the least norm is guaranteed to be a nice function: we don't know much about the finite superposition whose weights have the least norm.
 
@@ -266,7 +305,7 @@ Therefore, it can be solved stably by the usual least squares methods.  Secondly
 
 Solving the Tychonov problem for various values of $λ$ generates a family of solutions.  These can be plotted on a graph of residual against solution norm, where they mark the edge of the space of possible solutions.  Above and to the right of the curve, a solution can be found with the given norm and residual: below and to the left, it can't.
 
-\topinsert\XeTeXpicfile lcurve-1.pdf\vskip 5mm\noindent\it L curve for a typical application of Tychonov conditioning\endinsert
+%\topinsert\XeTeXpicfile lcurve-1.pdf\vskip 5mm\noindent\it L curve for a typical application of Tychonov conditioning\endinsert
 
 An example for a typical application is shown above.  The context in which Tychonov regularisation is usually applied is that some observations $b$ are predicted by a physical state $x$, according to the linear law $Ax=b$.  The real state is $x₀$, and the observed data are $b=Ax₀+e$, where $e$ consists of measurement error.  The problem $Ax=b$ is solved for $x$, and regularised with various Lagrange parameters.  At the top left, the norm of $x$ is constrained to be zero, so the solution is $x=0$, and the residual is the norm of $b$.  As the constraint on the norm is relaxed, the solution becomes closer to $x₀$, and the residual decreases.  At the elbow of the curve, the norm of the solution is constrained to be close to the norm of the real state $x₀$, the solution is close to $x₀$, and the residual is the norm of the measurement error.  Relaxing the constraint further allows spurious solutions $x$ that fit the measurements better than the real state $x₀$ does.  Typically, they won't fit much better, so the residual doesn't decrease much below $‖e‖$.  However, the solution now includes components belonging to small singular values, and the norm of the solution will increase as far as it is allowed to.
 
@@ -284,8 +323,8 @@ A numerical example is shown below.  The state $|ψ〉$ is the Schrödinger cat 
 
 The state $|ψ〉$ was expanded in the form $|ψ〉=|A〉\vec f$, where $|A〉=\pmatrix{|α₁〉&⋯&|α_R〉}$, and $\vec f$ is a column vector of $R$ complex weights.  This was done with Tychonov regularisation, for various Lagrange parameters: these and the residuals are shown with the graphs.  The complex weights $c$ are indicated by brightness and color as above.  Note that least norm regularisation has the desirable property that nearby $α_r$ have similar $c_r$: the least norm solution to $a+b+c=X$ is $a=b=c=X/3$.
 
-\topinsert\XeTeXpicfile cats.pdf width \hsize
-\vskip 5mm\it A cat state expanded over a random set of 40 amplitudes, as described in the text.\endinsert
+%\topinsert\XeTeXpicfile cats.pdf width \hsize
+%\vskip 5mm\it A cat state expanded over a random set of 40 amplitudes, as described in the text.\endinsert
 
 A basic question is why regularisation helps.  Usually, it's applied to the inversion of measured data, where the right hand side of the least squares problem includes noise.  The aim is to prevent amplified noise from dominating the solution.  In our problem, the right hand side is calculated instead of measured, and the only noise is rounding errors.  Those are 16 orders of magnitude smaller than the exact right hand side, so rounding the small singular values up to $10^{-10}$ should be more than adequate.  We've needed much stronger regularisation than that: therefore, rounding errors aren't the problem.
 
@@ -297,30 +336,30 @@ To avoid the amplitudes clustering, I need to find out how good a fit is possibl
 
 The Picard condition is very obviously satisfied by the projection operator $|Γ〉$.  The left singular vectors can be any orthonormal basis of ket space; the singular values are all 1, so they don't reduce at all, and any ket has a preimage with the same norm as itself.  Functions in the null space of $|Γ〉$ don't have components in the left singular directions, so, if the problem is solved by expanding over singular vectors, they will not be present in the solution. 
 
-\topinsert\XeTeXpicfile catpicard.pdf width \hsize\vskip 5mm\it
-Picard plot for cat expansion. \endinsert
+%\topinsert\XeTeXpicfile catpicard.pdf width \hsize\vskip 5mm\it
+%Picard plot for cat expansion. \endinsert
 
 The next Figure is a Picard plot for the Galerkin discretisation $〈A|A〉\vec f=〈A|ψ〉$, where $\hat f$ is a vector of weights such that $|A〉\vec f$ approximates $|ψ〉$.  The singular value decomposition is $|A〉=|U〉SV$.  For the kets to be orthogonal, $|u_r〉$ must have support close to $n=r$.  The components of the cat have coherent amplitude 2, so their largest number component is $n=4$, and the components drop quickly as $n$ increases further.  Above $r=15$, the singular ket $|u_r〉$ has very small components on these number states, so it hardly overlaps $|ψ〉$.  At the same time, the singular kets start to have particle numbers too large to be consistent with the sample amplitudes $α_r$, so the singular values decrease.  This is shown in the plot of Fock state components of the singular kets.  In fact, they decrease more rapidly than the components of $|ψ〉$, and the discrete Picard condition is not satisfied: the discrete doesn't have a finite solution.  Seeing that the continuous operator $\G$ is perfectly conditioned, this is a very bad discretisation.
 
 The final graph is an L curve when the discrete problem is Tychonov regularised.  It shows the expected shape, with minimum residual around $2×10^{-8}$.
 
-\topinsert\XeTeXpicfile catsws.pdf width \hsize\endinsert
+%\topinsert\XeTeXpicfile catsws.pdf width \hsize\endinsert
 
-\topinsert\XeTeXpicfile catl.pdf width \hsize\endinsert
+%\topinsert\XeTeXpicfile catl.pdf width \hsize\endinsert
 
 A common observation when states are expanded over an irregular grid is that, when two sample amplitudes are close together, the weights tend to be large, and cancel out.  This is not at all surprising when one considers that the coherent states $|α〉$ and $|α+h〉$ become nearly parallel in Hilbert space as $h→0$.  The figure demonstrates why weights of nearly parallel (or antiparallel) vectors tend to cancel out, and the second figure shows how this looks in phase space.
 
-\topinsert \XeTeXpicfile geometry-1.pdf
-\it A 2 dimensional section through Hilbert space, where fixed vector $|Ψ〉$ is expanded as $|Ψ〉=a|α〉+b|β〉$.  As $|β〉$ becomes more parallel with $|α〉$, the components grow and cancel.  This occurs for all vectors outside the shaded segments, which shrink to nothing when $|α〉$ becomes parallel to $|β〉$.
-\endinsert
+%\topinsert \XeTeXpicfile geometry-1.pdf
+A 2 dimensional section through Hilbert space, where fixed vector $|Ψ〉$ is expanded as $|Ψ〉=a|α〉+b|β〉$.  As $|β〉$ becomes more parallel with $|α〉$, the components grow and cancel.  This occurs for all vectors outside the shaded segments, which shrink to nothing when $|α〉$ becomes parallel to $|β〉$.
+%\endinsert
 
-\topinsert \XeTeXpicfile cancel.pdf width \hsize
-\it The vacuum state was expanded over two coherent states, with amplitudes $±h$.  The amplitudes and the entire expansion of the least-squares fit are plotted in the first row of images.  The norm of the expansion vector, and the residual of the expansion, are graphed above as black lines.  As the amplitudes converge, the residual decreases—the leftmost phase space plot is very nearly exact—while the norm of the expansion stays around 1.  This coincides with the amplitudes passing through bright areas of the images, where the entire expansion has support.
+%\topinsert \XeTeXpicfile cancel.pdf width \hsize
+The vacuum state was expanded over two coherent states, with amplitudes $±h$.  The amplitudes and the entire expansion of the least-squares fit are plotted in the first row of images.  The norm of the expansion vector, and the residual of the expansion, are graphed above as black lines.  As the amplitudes converge, the residual decreases—the leftmost phase space plot is very nearly exact—while the norm of the expansion stays around 1.  This coincides with the amplitudes passing through bright areas of the images, where the entire expansion has support.
 
 The second row of images, and the red lines on the plot, show similar expansions of the normalised state parallel to $|0.1〉-|-0.1〉$.  This is almost exactly parallel to the derivative of the vacuum state with respect to the real part of its amplitude.  Again, the leftmost image is nearly an exact expansion.  This time, the entire expansion does not have support around $α=0$.  As the expansion amplitudes converge, the residual decreases, but the norm of the expansion vector explodes.  As explained in the text, the distance between two small amplitudes in phase space is very nearly the angle between the ket vectors for the corresponding coherent states.  Thus this is exactly the expansion depicted in the last figure.
 
 If the two sample amplitudes were part of an irregular expansion, and there happened to be no other sample amplitudes nearby, a small component along the direction of the second state would dominate the expansion coefficients at these points.  But, given those sample amplitudes, that would be the only way to represent such a component.
-\endinsert
+%\endinsert
 
 \beginsection{Adapting the sample amplitudes to preserve condition}
 
@@ -346,18 +385,18 @@ Here, $|A(x,y)〉$ maps weight vectors in $C^R$ to kets, while $〈A(x,y)|=VS〈
 $$x={1\over \sqrt2}\pmatrix{|u_R〉 \cr v_R}$$
 is a normalised eigenvector  of $M$, belonging to the eigenvalue $σ_R(x,y)$.  As is well known in first-order pertubation theory, the derivative of this eigenvalue with respect to $x$ and $y$ is given by
 $$∂_rσ_R=x†(∂_rM)x
-	=½\pmatrix{〈u_R| & v†_R}\pmatrix{0 & |∂_rA'(x,y)〉\cr 〈∂_rA'(x,y)| & 0}\pmatrix{|u_R〉 \cr v_R}=\Re\left(〈u_R|∂_rA〉v_R\right).$$
+	=½\pmatrix{〈u_R| & v†_R}\pmatrix{0 & |∂_rA'(x,y)〉\cr 〈∂_rA'(x,y)| & 0}\pmatrix{|u_R〉 \cr v_R}=\Re\left(〈u_R|∂_rA'〉v_R\right).$$
 Substituting the partial derivatives gives
 $$∂_rσ_R=\cases{\Re\left(〈u_R|(-x_r+a†)|α_r〉v_R^r\right) &  $1≤ r≤ R$, \cr
 	\Re\left(〈u_R|(-y_r+ia†)|α_r〉v_R^r\right) & $R<r≤ 2R$.}$$
 
 The accuracy of the pertubation method is shown below.  A vector of 5 amplitudes was drawn from a normal distribution around amplitude 2, shown in the upper plot.  The lower plots show how the smallest singular value of $|A〉$ varies as the amplitudes shift.  The five columns show changes in the five amplitudes.  The black lines show how $σ_R(x,y)$ varies with the real part $x$, the red lines how it varies with $y$.  The dotted lines show the linear approximation derived above by pertubation theory, and the second row of plots show the error in the approximation.  The linear approximation is good; presumably it holds for changes small compared to the separation of the amplitudes.
 
-\topinsert 
-\vskip -40mm
-\XeTeXpicfile psfa.pdf width \hsize
-\vskip -90mm
-\XeTeXpicfile psv.pdf width \hsize\endinsert
+%\topinsert 
+%\vskip -40mm
+%\XeTeXpicfile psfa.pdf width \hsize
+%\vskip -90mm
+%\XeTeXpicfile psv.pdf width \hsize\endinsert
 
 Given the gradient $Dσ_R$, we wish to find a direction where $σ_R$ increases most rapidly for a given change in $|ψ〉$.  Given a small change $|dψ〉$ lying in the tangent plane, the corresponding change in $z$ is given by $dz=〈Dψ^{+}|dψ〉$, where $〈Dψ^{+}|$ is the pseudoinverse of $|Dψ〉$.  The change in $σ_R$ is $dσ_R=Dσ_Rdz=Dσ_R〈Dψ^{+}|dψ〉$.  So the gradient direction in Hilbert space is $|Dψ^{+}〉Dσ_R†$; the corresponding direction in $z$ space is $〈Dψ^{+}|Dψ^{+}〉Dσ_R†$.  In terms of the SVD $|Dψ〉=|U〉SV†$, this is $〈U|S^{-2}|U〉Dσ_R†$.  Here, $|ψ〉$ is considered a function of $4R$ real variables instead of $2R$ complex ones.
 
@@ -386,9 +425,9 @@ $$\pmatrix{\Re (A+B) & \Re(iA-iB)\cr\Im(A+B) & \Im(iA-iB)}\pmatrix{x\cr y}
 
 Below is a plot of the condition number of $|Dψ(z)〉$ for a superposition, as the value of $z$ varies by $0.1$ in every direction.  The top line shows the effects of changing $φ$, the bottom line $α$, components are shown left to right.  Changes to real parts are black, imaginary parts red.  There are a few things to note.  The condition is very bad, with number $1.4×10^{11}$.  This is entirely due to the similar amplitudes of components 1 and 3: those graphs are on a different scale to the others, and it's logarithmic.  As they move closer and become identical, the condition number increases $10^{14}$.  No doubt it would go higher if we sampled the graphs more finely, but this is huge—reciprocal floating point epsilon is $5×10^{15}$.  If the separation between these components is doubled, the condition number improves by an order of magnitude.
 
-\centerline{\XeTeXpicfile j1.pdf width \hsize}
+%\centerline{\XeTeXpicfile j1.pdf width \hsize}
 
-\centerline{\XeTeXpicfile j2.pdf width \hsize}
+%\centerline{\XeTeXpicfile j2.pdf width \hsize}
 
 The top line indicates that the condition number is independent of the phases of the components.  I didn't forsee that, but it isn't too surprising: we can change the coefficients of the superposition in any direction we like, regardless of their current values, and the derivative is only sensitive to changes.
 
@@ -426,7 +465,7 @@ As discussed below, the time-dependent Schrödinger equation for a quartic oscil
 $$ {d\over ds}|ψ(z(s))〉=|ψ₀〉-|ψ(z(s))〉.$$
 Here, $|ψ₀〉$ was the half cycle cat state; $|ψ(z)〉$ had 15 components, and was initialised by sampling random, and linearly fitting weights.  The result is shown on the left below.  The clusters of complementary colours indicate components that nearly cancel each other out; these should not be present when the condition of $|A〉$ is constrained, but are expected from random sampling.  They might also indicate too small a Tychonov parameter: large parameters will tend to give nearby points equal weights.
 
-\topinsert \XeTeXpicfile expens.pdf width \hsize \endinsert
+%\topinsert \XeTeXpicfile expens.pdf width \hsize \endinsert
 
 The equation was solved, in the script {\tt hzero.m}.  The results are shown below, and the final superposition is plotted on the right above.  The second graph below isthe smallest singular value of $|A〉$.  Many draws of initial samples give the exponential decay one would expect.  This one gave two surprises: initially, the distance between $|ψ〉$ and $|ψ₀〉$ increases with time.  This is entirely wrong, according to the differential equation.  The initial state was a good approximation to $|ψ₀〉$, so there might not be much scope to improve the approximant.  However, it should certainly not move away from the target.
 
@@ -434,7 +473,7 @@ The variational method was the least distance in Hilbert space, with Tychonov re
 
 The second surprise is at large $s$, where the approximant improves, but so does the condition of $|A〉$.  In most draws of initial samples, the approximant improves by clustering the amplitudes towards the states $|2i〉$ and $|-2i〉$, which makes the conditioning worse.
 
-\topinsert \XeTeXpicfile exp.pdf width \hsize \endinsert
+%\topinsert \XeTeXpicfile exp.pdf width \hsize \endinsert
 
 There are a few things to note about the initial trajectory.  The initial weights already satisfy a least squares condition.  Therefore, the intial change in the superposition should be entirely in the amplitudes: the weights are already optimal.  If that isn't the case, the regularisation of the expansion problem would have to be inconsistent with that of the variational problem, so that we're accepting variational changes that we previously rejected when we found the initial state.
 
@@ -487,17 +526,17 @@ The solutions from method 3 provide a test of the stiffness of the ODEs defined 
 
 The following graphs show a coherent state, with real amplitude 2, propagating in a quartic oscillator potential.  The propagation was done exactly, in a Fock space truncated at $|19〉$; at times $π/10, π/5, 3π/10,\ldots,π$, a 10 component superposition was fit to the state by the routine {\tt cohfit5}.  The SVD of $|Dψ〉$ was computed for each of these superpositions, and the Picard condition investigated.  It appears that this discretisation is inherently ill-posed.
 
-\topinsert \XeTeXpicfile spsns.pdf width \hsize
-Amplitudes of components \endinsert
+%\topinsert \XeTeXpicfile spsns.pdf width \hsize
+%Amplitudes of components \endinsert
 
-\topinsert \XeTeXpicfile traj.pdf width \hsize
-Left: expectation value $〈a〉$ at sampled times.  Right: residual of fit by superposition (solid) and condition number of Jacobian of fitted superposition (dotted) \endinsert
+%\topinsert \XeTeXpicfile traj.pdf width \hsize
+%Left: expectation value $〈a〉$ at sampled times.  Right: residual of fit by superposition (solid) and condition number of Jacobian of fitted superposition (dotted) \endinsert
 
-\topinsert \XeTeXpicfile picard.pdf width \hsize
-Picard plots at fitted times.  Circles are singular values, crosses components of LSVs, red stars components of RSVs.  The discrete Picard condition is clearly not satisfied. \endinsert
+%\topinsert \XeTeXpicfile picard.pdf width \hsize
+%Picard plots at fitted times.  Circles are singular values, crosses components of LSVs, red stars components of RSVs.  The discrete Picard condition is clearly not satisfied. \endinsert
 
-\topinsert \XeTeXpicfile svnum.pdf width \hsize
-Expected particle number for left singular vectors.  The svs with small sws have large particle number.  When $H$ is quartic, these have large components in $H|ψ〉$.  In order for the svs to be orthogonal, the points are likely to lie around the line ${\rm sv}=n$. \endinsert
+%\topinsert \XeTeXpicfile svnum.pdf width \hsize
+%Expected particle number for left singular vectors.  The svs with small sws have large particle number.  When $H$ is quartic, these have large components in $H|ψ〉$.  In order for the svs to be orthogonal, the points are likely to lie around the line ${\rm sv}=n$. \endinsert
 
 In the second choice, the state is approximated as a superposition of coherent states,
 $$|ψ(z(t))〉=∑_{φ,α∈z(t)}e^{φ+αa†}|0〉=∑_{φ,α∈z(t)}e^{φ+½|α|²}|α〉.$$
@@ -515,9 +554,9 @@ The midpoint formula is used exactly, and $fⁿ$ satisfies the least squares pro
 $$〈N|Dψ(zⁿ)〉fⁿ≈-i〈N|Dψ(zⁿ)〉{H\over \hbar}|ψ(zⁿ)〉.$$
 Usually, this would be expanded over $〈Dψ(zⁿ)|$ to give a set of normal equations.  However, when $|Dψ(zⁿ)〉$ is near singular, the numerical stability of the normal equations is suspect.  Expanding over an orthonormal basis removes this confounding instability.
 
-\topinsert \XeTeXpicfile flwc0n10.pdf width \hsize \endinsert
+%\topinsert \XeTeXpicfile flwc0n10.pdf width \hsize \endinsert
 
-\topinsert \XeTeXpicfile flwc0n5.pdf width \hsize \endinsert
+%\topinsert \XeTeXpicfile flwc0n5.pdf width \hsize \endinsert
 
 The above plots show my first attempt at this.  The initial state was coherent, with real amplitude 2.  A superposition of 5 coherent states was initialised with amplitudes normally distributed around 2, the norm of the superposition being 1, and the components having equal norms.  This superposition was fit to the coherent state by minimising their distance in Hilbert space; for stability, the weights were constrained so that no component had a norm less than 0.1.  This was done by the Matlab routine {\tt fmincon}.  The initial state was truncated to Fock states $|0〉$ to $|10〉$, and propagated exactly in a Hamiltonian $\hbar a^{2\dagger}a²$ with timestep 0.03.  After each step, the fitting of the superposition to the exact state was repeated.
 
@@ -525,9 +564,9 @@ The results are shown in the first Figure.  The left hand plot shows the complex
 
 The second Figure shows the same simulation, with the states expanded over Fock states $|0〉$ to $|5〉$.  This has a significant effect on the truncated exact solution, adding an extra loop to the amplitude.  The fitting works a bit longer, but still fails at a very short time.
 
-\centerline{\XeTeXpicfile flwc2n10.pdf width \hsize}
+%\centerline{\XeTeXpicfile flwc2n10.pdf width \hsize}
 
-\centerline{\XeTeXpicfile flwc2n5.pdf width \hsize}
+%\centerline{\XeTeXpicfile flwc2n5.pdf width \hsize}
 
 The next two plots show a different fitting strategy.  Instead of constraining the weights, a cost term was added in quadrature to the Hilbert space distance, proportional to the logarithm of the condition number of $|Dψ(z)〉$ for the fitted $z$.  The constant of proportionality was $10^{-5}$; this was adjusted until a good fit was obtained.  The most apparent thing is that the fit is much more stable: this is being done with timestep 0.1 instead of 0.3, but the fit stays stable for the whole period.  (I had to redraw the initial amplitudes a few times before that happened.)  It isn't a very good fit through the middle of the period: the residual increases to order 1.  The really interesting thing is what happened when, by accident, I truncated the Fock basis at $N=5$.  As before, this perturbs the trajectory in Hilbert space.  However, the perturbed trajectory can be fit very well: the residual is between $10^{-2}$ and $10^{-5}$, and this is done with quite well conditioned superpositions.
 
