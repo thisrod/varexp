@@ -70,7 +70,7 @@ This complicates the solution of the problem in Formula~4.  It does not suffice 
 The approximant studied in this paper has the form
 $$|ψ(φ₁,α₁,⋯,φ_R,α_R)〉=∑_{r=1}^R e^{φ_r+α_ra†}|0〉
 	=\pmatrix{|α₁〉&⋯&|α_R〉}\pmatrix{e^{φ₁+½|α₁|²}\cr\vdots\cr e^{φ_R+½|α_R|²}}
-	=|A〉d,$$
+	=|A〉d,\tag\Ad$$
 where $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  In the limit of large $R$, where the sum approximates an integral over the amplitude $α$, any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of the next section, followed by a discussion of the discrete expansion $|A〉$.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
 
 Expansion over coherent states is a linear operator from functions of a complex variable to quantum states,
@@ -169,16 +169,16 @@ Reducing the dimension of Fock space so that the problem is underdetermined mean
 
 \beginsection{Discretely sampled expansions}
 
-On a computer, the expansion in phase space must be discretised.  The obvious way to do so is to replace the integral with a sum, so that
+As mentioned above, the computer must actually manipulate a discrete expansion with the form of Equation~\Ad,
 $$|ψ〉=d₁|α₁〉+⋯+d_R|α_R〉=|A〉d,$$
 where $|A〉=\pmatrix{|α₁〉&⋯&|α_R〉}$, and $d$ is a column vector of the coefficients.
-In this paper, $c$ will usually denote the coefficients of expansion over orthogonal bases, and $d$ will represent coefficients of nonorthogonal expansions.  If the system has only a few modes, so that $α$ is a low-dimensional vector, the set of sampled amplitudes $A=\{α₁, …,α_R\}$ could be a regular grid; this makes many things easier.  When there are many modes, and $α$ is a large vector, the storage required for grids becomes exponentially large, and the sample points will have to be irregular.
+In this paper, $c$ will usually denote the coefficients of expansion over orthogonal bases, and $d$ will represent coefficients of nonorthogonal expansions.  If the system has only a few modes, so that $α$ is a low-dimensional vector, the set of sampled amplitudes $A=\{α₁, …,α_R\}$ could be a regular grid; this makes many things easier.  When there are many modes, and $α$ is a large vector, the storage required for grids becomes exponentially large, and the sample points will have to be irregular, most likely drawn at random.
 
 This expansion is formally equivalent to the continuous one, in that
 $$∑_r d_r|α_r〉=|Γ〉f_A,$$
 where
 $$f_A(β)=π^½∑_rd_re^{½|α_r|²}δ(β-α_r).$$
-I don't know enough about generalised functions to be comfortable working with these forms; in particular, the norm of $f_A$ is a bit mysterious.  If this could be clarified, it might provide some useful insights, for example how the norm of $f_A$ compares to that of $〈Γ⁺|ψ〉$.
+I don't know enough about generalised functions to reliably manipulate these forms; in particular, the norm of $f_A$ is a bit mysterious.  If this could be clarified, it might provide some useful insights, for example how the norm of $f_A$ compares to that of $〈Γ⁺|ψ〉$.
 
 To get a sense of what residuals to expect from optimised expansions, the expansion of a state as an entire function, $f=〈Γ⁺|ψ〉$, can be sampled at discrete amplitudes, and the integral $|Γ〉f$ evaluated as a sum.  In the limit of many amplitudes, this should converge to $|Ψ〉$.  I chose the vacuum state as $|Ψ〉$.  I evaluated the integral in two ways, supposed to be extreme cases.
 
@@ -234,7 +234,7 @@ The Galerkin condition seeks a set of weights $w$ such that, for the normalised 
 $$1=\int u_i=∑_j w_j u_i(x_j)=∑_j w_je^{-(x_j-x_i)²}.$$
 This is the same condition as the collocation condition.  The results are shown below.
 
-Unfortunately, for random samples $A$, this tends not to have a solution: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
+Unfortunately, for random samples $A$, there tends not to be a solution where the weight matrix is diagonal: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
 
 There is another way to derive coefficients of the constant function, which might be more stable.  Suppose that $D$ is a subset of the real line, large enough that the tails of gaussians are neglibible outside it.  Let 
 $$U=π^{-½}\pmatrix{e^{-(x-x₁)²}&⋯&e^{-(x-x_R)²}},$$
@@ -256,7 +256,7 @@ An obvious way would be to assign amplitudes to the nearest sample.  That makes 
 %\topinsert \XeTeXpicfile gweight.pdf width \hsize 
 The weights $w_i$ required in order that the integrals of the functions $u_i(x)=e^{-(x-x_i)²}$ are given by the sums $∑_j w_j u_i(x_j)$.  The points $x_i$ are normally distributed (top), or evenly spaced (bottom).  Note how nearby points tend to cancel each others' samples.  I expect experts in Chebyshev sampling would not be surprised by this, but I am not yet such an expert.
 
-The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.
+The problem with the evenly spaced points is the gaussians at the edge of the grid: only half their support is covered by the grid, so that half needs to be doubly weighted.  This would overweight the gaussians just inside the grid, so the only solution is an oscillating one.  Similar things happen in the random ensemble, at the edges of a subgrid of closely spaced points.  Nearly the same thing happens when sampling with coherent states: the extreme amplitudes need extra weight, which must be cancelled by the interior ones.  When states are sampled on regular grids of coherent states, the outside amplitudes have very little weight in any case, and don't affect the solution much.  This only happens when the cloud of sampling amplitudes extends beyond the support of the distribution, and the outer amplitudes have very small weights.  So one solution  would be to find the best expansion of $e^{-x²}$, instead of 1, then adjust the weight for $x_i$ by either $e^{-x_i²}$ or $〈e^{-(x-x_i)²},e^{-x²}〉$.
 %\endinsert
 
 The goal of fiding samples of the phase space distribution $f(α_r)$ is to regularise the expansion and inverse problems.  The expansion function with the least norm is guaranteed to be a nice function: we don't know much about the finite superposition whose weights have the least norm.
