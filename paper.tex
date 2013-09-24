@@ -45,9 +45,9 @@ This is a very simple equation.  The challenge of solving it numerically lies in
 $$|Ψ(t)〉=|ψ(z(t))〉,$$
 or $|Ψ〉=|ψ\circ z〉$, where $z(t)=\left(z₁(t),…,z_R(t)\right)$ is a vector of complex parameters.  This imposes two challenges: to find a form $|ψ〉$ that can approximate the states $|Ψ(t)〉$ with a reasonable number of parameters $R$, and to stably and efficiently compute $z(t)$ to accomplish that approximation.
 
-Some methods of computing dynamics, such as those involving Green's functions, derive the expectation values of certain observables without storing data from which the quantum state of the system could be derived.  The above model does not apply to these.  There are also methods, such as phase-space Monte-Carlo ones, that have the above form in principle, but which can compute different parameters $z_r(t)$ independently, and find expectation values of observables without having to store all the parameters at once.
+Some methods of computing dynamics, such as those involving single-particle Green's functions, derive the expectation values of certain observables without storing data from which the quantum state of the system could be derived.  The above model does not apply to these.  There are also methods, such as phase-space Monte-Carlo ones, that have the above form in principle, but which can compute different parameters $z_r(t)$ independently, and find expectation values of observables without having to store all the parameters at once.
 
-The next sections will discuss the approximant $|ψ(z)〉$ analysed in this paper.  Before that, I'll outline the method that will be used to compute the dynamical $z(t)$.  The final part of the paper discusses the details—and there are many—of making this computation numerically stable.
+The next sections will discuss the approximant $|ψ(z)〉$ analysed in this paper.  Before that, I'll outline the method that will be used to compute the dynamical $z(t)$.  The final part of the paper discusses the many details of making this computation numerically stable.
 
 If the approximant $|Ψ(t)〉=|ψ(z(t))〉$ is substituted in Schrödinger's equation, and the chain rule applied, the result is
 $$i\hbar|Dψ(z(t))〉Dz(t)=H|ψ(z(t))〉.$$
@@ -57,7 +57,7 @@ and solve the ordinary differential equation
 $${dz\over dt}=\dot z(z),\tag\ode$$
 giving a state $|ψ(z(t))〉$ that hopefully approximates the solution to Schrödinger's equation.  When the norm used is the one derived from the inner product of Hilbert space, this is called the Dirac-Frenkel method.
 
-The Dirac-Frenkel solution is only optimised locally.  There might be some $w(t)$ such that, at large times, $|ψ(w(t))〉$ approximates $|Ψ(t)〉$ better that the Dirac-Frenkey solution $|ψ(w(t))〉$ does.  This would require that, at early times, $i\hbar|Dψ(z(t))〉$ is closer to $H|ψ(z(t))〉$ than $i\hbar|Dψ(w(t))〉$ is to $H|ψ(w(t))〉$, but that $z(t)$ loses the ability to track the dynamics at later times.  When we discuss regularisation below, we will see that this is in fact the usual case.  However, global optimisation of $z$ is not practical: even computing the local approximation stretches computers to their limits.
+The Dirac-Frenkel solution is only optimised locally.  There might be some $w(t)$ such that, at large times, $|ψ(w(t))〉$ approximates $|Ψ(t)〉$ better that the Dirac-Frenkey solution $|ψ(w(t))〉$ does.  This would require that, at early times, $i\hbar|Dψ(z(t))〉$ is closer to $H|ψ(z(t))〉$ than $i\hbar|Dψ(w(t))〉$ is to $H|ψ(w(t))〉$, but that $z(t)$ loses the ability to track the dynamics at later times.  When we discuss regularisation below, we will see that this is in fact the usual case.  Global optimisation of $z$ is not practical: even computing the local approximation stretches computers to their limits.
 
 The residual above can be defined using any norm one wishes.  The aim of computing quantum dynamics is usually to find some expectation values that could be compared to observed quantities, and one could consider using a norm that magnified the discrepencies in these observables, so that the solution with the least residual would correspond closely to the exact solution in the directions of interest.  On the other hand, we are computing quantum dynamics: these are unitary in the usual norm, so that a small error introduced at an early time is guaranteed to stay small when the state is propagated to later times.  No other norm guarantees this: they all introduce uncontrolled errors regarding how much early errors are magnified by later dynamics.
 
@@ -79,10 +79,10 @@ The notation $\int f(α)\,d²α$ means $\int_{-∞}^{∞}\int_{-∞}^{∞} f(x+i
 
 The state $|α〉$ is a coherent state with complex amplitude $α$.  These can be defined in a number of ways, perhaps most simply in second quantisation, as eigenstates of a boson annihilation operator $a$, with $a|α〉=α|α〉$.  The annihilation operator is not hermitian, so the eigenvalues $α$ are complex numbers.  In first quantisation, such an operator is the complex amplitude
 $$a=(2\hbar)^{-½}(λx+ip/λ),$$
-where $x$ and $p$ are the position and momentum operators for a particle with mass $m$.  The bosons in this case are vibrational quanta in a notional harmonic potential, centred at the origin, with frequency $ω=λ²/m$.
+where $x$ and $p$ are the position and momentum operators for a particle with mass $m$.  The bosons in this case are vibrational quanta in a notional harmonic potential, centred at the origin, with frequency $ω=λ²/m$.  The coherent state $|α〉$ is a gaussian wave packet, with central position \dots and momentum \dots
 
 Coherent states are not orthogonal, but their brackets follow the law
-$$〈β|α〉=e^{-½|β|²-½|α|²+β*α},$$
+$$〈β|α〉=e^{-½|β|²-½|α|²+β*α}=e^{-½|β-α|²+i\Im α*β},\tag\csip$$
 whence
 $$\bigl|〈β|α〉\bigr|²=e^{-|β-α|²}.$$
 When kets are considered as vectors, the angle between coherent states satisfies
@@ -92,14 +92,16 @@ $$θ=|β-α|+O(|β-α|²).$$
 This has a simple geometric analogy where phase space is mapped locally onto the surface of the unit sphere, the coherent states are vectors from the origin to the surface, and $|α-β|$ is a spherical angle.  The analogy fails when the angles between vectors are no longer small; for example, it is misleading in regard to the relation between $|α〉$ and $∂_α|α〉$.
 
 The projector satisfies
-$$\int |α〉〈α|\,d²α=π.$$
-This is similar to the law for an orthonormal basis, except that the right hand side is $π$ instead of 1.  Further properties of the coherent states will be stated as required.  Glauber's summary of them\cite{prx-131-2766} is paraphrased in every quantum optics textbook ever written.
+$$π^{-1}\int |α〉〈α|\,d²α=1.$$
+This is similar to the law for an orthonormal basis, except that the left hand side must be scaled by $π$.  Therefore, any state can be expanded as a sum over coherent states, in the form
+$$|ψ〉=π^{-1}\int |α〉〈α|ψ〉\,d²α.\tag\csproj$$
+However, this expansion is not unique: a coherent state $|β〉$ has the trivial expansion $|β〉=|α〉$, but the expansion given by Equations~\csproj\ and~\csip\ is a gaussian function of $α$.  A set of states like this is known as a frame, in distinction from a basis, whose elements are linearly independent, and whose expansions are unique.  Further properties of the coherent states will be stated as required.  Glauber's summary of them\cite{prx-131-2766} is paraphrased in every quantum optics textbook ever written.
 
 Bargmann showed that the Hilbert space of wavefunctions is isomorphic to the space of phase space distributions, under the isometry $〈Γ⁺|$, where
 $$〈 Γ⁺|ψ〉(α)=π^{-½}e^{½|α|²}〈 α|ψ〉.$$
 Being a linear operator from quantum states to phase space functions, $〈Γ⁺|$ is written as a ket.  It is a pseudoinverse of $|Γ〉$, in the sense that $|Γ〉〈 Γ⁺|$ is the identity operator in state space.  The other composition, $〈 Γ⁺|Γ〉$, projects the functions of a complex variable onto the entire functions, orthogonally under the Bargmann inner product.  (Prove that, or find Bargmann's proof.)  It follows that $f=〈 Γ⁺|ψ〉$ is the function with least norm that satisfies $|Γ〉 f=|ψ〉$, with $‖f‖=\bigl‖ |ψ〉\bigr‖$.
 
-If, following Bargmann, we identify state space with the entire functions, $|Γ〉$ is identified with the projector $〈 Γ⁺|Γ〉$.  Therefore, although $|Γ〉$ is singular, the singularity is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ〉$, which can be done simply enough by Tychonov regularisation, we ensure that $f$ is close to $〈 Γ⁺|ψ〉$.  And $〈 Γ⁺|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem has caused so much trouble.
+If, following Bargmann, we identify state space with the entire functions, $|Γ〉$ is identified with the projector $〈 Γ⁺|Γ〉$.  Therefore, although $|Γ〉$ is singular, the singularity is easily resolved.  If we constrain the norm of $f$ to be not much greater than the norm of $|ψ〉$, which can be done simply enough by Tychonov regularisation, we ensure that $f$ is close to $〈 Γ⁺|ψ〉$.  And $〈 Γ⁺|$, an isometry, is as nice a function as could possibly be desired.  So it is curious that the discrete version of this problem has caused so much trouble when solved by least squares.
 
 %% Consequences of Γ being a projection
 
@@ -109,19 +111,19 @@ This appears to be a convolution of the function $e^{-½|α|²}f(α*)$ with the 
 
 \beginsection{Truncated phase space}
 
-The operator $|Γ〉$ acts on functions defined over the whole complex plane.  For states with high particle number, the smallest preimages have support far from the origin.  We can not compute with such functions: any discretisation will sample values of $f$ on a finite subset of the plane.  Unfortunately, the conditioning of these restricted operators will be worse than that of $|Γ〉$.  We have excluded the small preimages of the states with large particle number, so they must be represented by functions with support close to the origin, but with large norms.  Hence the restricted operators will be badly conditioned.
+The operator $\G $ represents kets by phase space distributions, functions defined on the whole complex plane.  When the ket $|ψ〉$ has many particles, its smallest representation, the distribution $〈Γ⁺|ψ〉$, is concentrated far from the origin.  Such kets will occur when interacting particles are simulated, the interaction energy is proportional to the square of the number of particles, and the Hamiltonian operator amplifies many-particle components of the kets on which it acts.  In order to represent kets on a computer, the distribution functions must be sampled on a finite region of the complex plane.  If $〈Γ⁺|ψ〉$ extends beyond the sampled region, the ket can still be represented by another distribution, because $\G $ is not one-to-one.  However, this distribution will take larger values and vary more rapidly.  Therefore, if the simulation is to be numerically stable, it will have to be sampled carefully.
 
 %% The SVE
 
-The above paragraph can be stated quantitatively.  Define a restricted operator
+This can be made quantitative.  Define a restricted operator
 $$\Gx f=π^{-½}\int |α〉e^{-½|α|²}χ(α*)f(α*)\,d²α.$$
-Most obviously, $χ$ could be a characteristic function, with $χ(z)$ being 1 for $|z|≤b$ and 0 outside this disk.  The formalism allows gradual truncation too.
+For example, $χ$ could be a characteristic function, with $χ(z)$ being 1 for $|z|≤b$ and 0 outside this disk.  For functions $f$ with support outside this disk, part of $f$ will be multiplied by zero, and the norm of $\Gx f$ will be reduced when compared to the norm of $f$.  This reduction would cause $\Gx$ to have some small eigenvalues, if it mapped functions onto functions or kets onto kets.  Because its domain and range are different spaces, it is necessary to use a generalisation, the singular values.
 
-The sizes of states and their expansions can be read from the singular value expansion of $\Gx $.   If the domain and range of $\G$ were the same space, it would have an eigenvalue decomposition; the SVE is a generalisation of that.  It has the form
+The idea of an eigenvalue expansion is to expand vectors over a carefully chosen basis, so that the effect of an operator is merely to rescale the components.  For the operator $\Gx$, there will need to be two bases, one in function space and one in ket space.  If it is required that the bases be orthonormal, and that $\Gx$ has the effect of rescaling the coefficients of vectors and replacing the function basis with the ket basis, the basis vectors are unique under similar conditions to those needed for uniqueness of eigenvalues.  The scaling factors are known as singular values; the singular value expansion of $\Gx $ has the form
 $$\Gx f = ∑_{i=1}^∞ |u_i〉σ_i〈v_i,f〉.$$
 The kets $|u_i〉$ are an orthonormal basis of state space, known as the left singular vectors of $\Gx$.  The $σ_i$ are positive real numbers, called singular values.  The functions $v_i$ are are orthonormal under the Bargmann inner product, and are called right singular vectors.
 
-In the case where $χ(z)=1$, and $\Gx=\G$, the expansion is quite arbitrary.  The left singular kets can be any orthonormal basis, the right singular vector $v_i$ is the unique entire function for which $\G v_i=|u_i〉$, and every singular value is 1.  If the domain and range of $\G$ were the same, this would indicate that it was a projector.  The component of $|ψ〉$ in the null space of $\G$ is discarded, being orthogonal to every $v_i$, while the other component retains its expansion coefficients as the basis $v_i$ is replaced by $|u_i〉$.
+In the case where $χ(z)=1$, and $\Gx=\G$, all the singular values are 1, and the expansion is arbitrary.  The left singular kets $|u_i〉$ can be any orthonormal basis, and the right singular vectors are  $v_i=〈Γ⁺|u_i〉$.  This indicates that $\G$ is an incomplete projector.  The component of $|ψ〉$ in the null space of $\G$ is discarded, being orthogonal to every $v_i$, while the other component retains its expansion coefficients as the basis $v_i$ is replaced by $|u_i〉$.
 
 When the operator is restricted, the SVE gives more information. If $\Gx$ were one to one, each $v_i$ would be the unique preimage of $|g_i〉$; since $\Gx$ is singular, $v_i$ is the preimage with least norm.  The singular values are the ratios of $‖\Gx v_i‖=‖σ_i|u_i〉‖$ to $‖v_i‖$.  If $|u_i〉$ has a low particle number, it can be expanded efficiently: $v_i$ will be close to $〈Γ⁺|u_i〉$, and $σ_i$ will be close to 1.  If $|u_i〉$ includes components with large particle number, its expansion will have a larger norm than itself.  In this case, $v_i$ will be a truncation of $〈Γ⁺|u_i〉$ to small amplitudes, multiplied by a large constant to maintain normalisation, and $σ_i$ will be small.
 
@@ -169,10 +171,28 @@ Reducing the dimension of Fock space so that the problem is underdetermined mean
 
 \beginsection{Discretely sampled expansions}
 
-As mentioned above, the computer must actually manipulate a discrete expansion with the form of Equation~\Ad,
-$$|ψ〉=d₁|α₁〉+⋯+d_R|α_R〉=|A〉d,$$
-where $|A〉=\pmatrix{|α₁〉&⋯&|α_R〉}$, and $d$ is a column vector of the coefficients.
-In this paper, $c$ will usually denote the coefficients of expansion over orthogonal bases, and $d$ will represent coefficients of nonorthogonal expansions.  If the system has only a few modes, so that $α$ is a low-dimensional vector, the set of sampled amplitudes $A=\{α₁, …,α_R\}$ could be a regular grid; this makes many things easier.  When there are many modes, and $α$ is a large vector, the storage required for grids becomes exponentially large, and the sample points will have to be irregular, most likely drawn at random.
+As mentioned above, the computer manipulates a discrete expansion with the form of Equation~\Ad,
+$$|ψ〉=d₁|α₁〉+⋯+d_R|α_R〉=|A〉d.$$
+This kind of expansion has been studied for a long time.  An early question was how dense the amplitudes $α_r$ must be in order for the set to span all kets, and $|A〉$ to be a frame.  In the case that the amplidues are a rectangular grid, with $α_r=ma+inb$ Von~Neumann conjectured in 193? that the condition is one amplitude per area $π$ of phase space, which corresponds to an area $\hbar$ of the $x-p$ plane.  This was proved in 19?.  The conditioning of expansions as the density of sampled amplitudes approaches this limit appears to be an open question.  Another open question is how much this limit can be relaxed if squeezed states are included in the expansion.
+
+In recent decades, these expansions have been studied intensely by engineers involved in signal processing, who call the set of coherent states a Moyal~frame.  These researchers regard gaussian wavepackets as a kind of time-limited Fourier transform, with a gaussian window function, following on from the work of Hamming and others at Bell Labs.  Moyal frames were investigated by the same community that developed wavelets; the latter became of very wide interest, and obscured the earlier work on Moyal frames.
+
+If the system has only a few modes, so that $α$ is a low-dimensional vector, the set of sampled amplitudes $A=\{α₁, …,α_R\}$ could be a regular grid, with $α_r=(m+in)h$, $m$ and $n$ being integers.  This makes many things easier.  In particular, it is straightforward to relate the weights $d$ to the values of a continuous distribution $f$ at the points $α_r$.  It is convenient to normalise so that $‖d‖=‖f‖$.  If the $α_r$ form a grid with spacing $h$, as specified above, and we set $d_r=cf(α_r)$, $c$ being constant, this normalisation condition is satisfied when
+$$∑_r|d_r|²=c²∑_r|f(α_r)|²=\int |f|²\,d²α≈h²∑_r|f(α_r)|².$$
+So the proportionality constant is $c=h$, and the discretisation is
+$$d_r=hf(α_r).$$
+
+Relating $d$ to a continuous function is harder when the amplitudes $A$ are irregular.  The amplitudes will not generally be drawn from a uniform distribution—if they were, we would no doubt be better off using a sparse grid—and if amplitudes distributed with probability $P(α)$ are assigned weights proportional to $d_r=f(α_r)$, then, in the limit of many samples, the state $|ψ〉$ will converge to a multiple of $|Γ〉Pf$, with the continuous distribution $f$ scaled by the distribution $P$ of the sample amplitudes.   This convergence will be slow, presumably with the square root of $R$, and we might hope to speed it up by compensating for the random spacing of the sample amplitudes.  If many coherent states overlap $|α_r〉$, then values close to $f(α_r)$ will be counted many times in the sum of Equation~\Ad.  In order for the sampling to remain even, the ratio of $d_r$ to $f(α_r)$ ought to depend on the density of $A$ around $α_r$, with smaller $d_r$ where the amplitude samples turn out to be dense.
+
+The normal way to discretise a linear operator such as $|Γ〉$ is to select a set of functions $u_r$ over which to expand $f$, and a set of kets $|v_r〉$ over which to expand $|ψ〉$.  Given a set of sample amplitudes $A$, the only obvious choice for $|v_r〉$ is the set $|A〉$.  There are two apparent choices for $u_r$: delta functions $δ(α-α_r)$, or the gaussian functions $〈Γ⁺|α_r〉$.  Operators are usually discretised by the Galerkin condition, where $f$ is approximated by $Ub$, the orthogonal projection of $f$ onto the span of the $u_r$, the discrete approximation to $|ψ〉$ is $|V〉d=|V〉Tb$, for some matrix $T$, and it is required that $|V〉d$ is the orthogonal projection of $|Γ〉Ub$ onto the span of the kets $|v_r〉$.  If we choose delta functions, the projections are trivial: we're sampling $f$ at the points $α_r$, and adding up coherent states with the resultant weights.  The expansion of $f$ over Gaussians is more complicated: we are effectively setting $|ψ〉$ to the projection of $|Γ〉f$ onto the span of the $|α_r〉$.  So it seems that orthogonal projections onto sets of Gaussian functions are an essential part of this discretisation.
+
+There are two usual ways to relate a continuous function $f$ to a discrete set of samples $d$.  This is usually done in one of two ways: by a vector
+$$\vec g=\pmatrix{g(z₁) & ⋯ & g(z_R)},$$
+where the points $z_i$ form a regular grid, or by
+$$\vec g=\pmatrix{〈 u₁,g〉 & ⋯ & 〈 u_R,g〉},$$
+where the distributions $u_i$ are a fixed basis.  The huge dimension of state space rules out any regular approach: we must sample $g$ at a set of irregularly spaced amplitudes or on an irregular basis, adapted to the support of $g$.
+
+\hrule
 
 This expansion is formally equivalent to the continuous one, in that
 $$∑_r d_r|α_r〉=|Γ〉f_A,$$
@@ -202,18 +222,7 @@ As can be seen, this is a very good approximation even with five vectors; in fac
 
 %\topinsert\XeTeXpicfile circle-1.pdf \endinsert
 
-To compute in phase space, we need to reduce the function $g$ to a finite vector of numbers.  This is usually done in one of two ways: by a vector
-$$\vec g=\pmatrix{g(z₁) & ⋯ & g(z_R)},$$
-where the points $z_i$ form a regular grid, or by
-$$\vec g=\pmatrix{〈 u₁,g〉 & ⋯ & 〈 u_R,g〉},$$
-where the distributions $u_i$ are a fixed basis.  The huge dimension of state space rules out any regular approach: we must sample $g$ at a set of irregularly spaced amplitudes or on an irregular basis, adapted to the support of $g$.
-
-However, in these single mode numerical experiments, it is often useful to expand over a regular grid.  For example, this allows us to plot phase space functions.  It is convenient to normalise the samples so that $‖\vec g‖=‖A\vec g‖$.  If the sample amplitudes $α_r$ form a square gird with spacing $h$, the condition $\vec g_r=cg(α_r)$ is satisfied when
-$$∑_r|\vec g_r|²=c²∑_r|g(α_r)|²=\int |g|²\,d²α≈h²∑_r|g(α_r)|²,$$
-whence $c=h$, and the discretisation is
-$$\vec g_r=hg(α_r).$$
-
-This makes regularisation tricky.  The goal is to represent a state $|ψ〉$ as a superposition of coherent states, $|ψ〉=|A〉 c$.  We want the coefficients $c$ to correspond to a phase space function $g$ that is nearly analytic.  If the amplitudes $|A〉$ formed a regular grid , it would be obvious enough when $c$ was sampling an analytic function.  On an irregular grid, we would expect the coefficients to be larger where the grid is sparse, and smaller where it is dense.  It would be good to know if irregular coefficients are the result of sampling a smooth function on an irregular grid, or of sampling a wildly oscillating function.
+\hrule
 
 The obvious way to attempt this is to factor the coefficients as $|ψ〉=|A〉 Wc'$, where $c'_i$ are samples that approximate $g(α_i)$, and $W$ is a matrix of weights that adapts the samples to the irregular grid.  In fact, we can do this exactly.  If we set $W=(〈 A|A〉)^{-1}$, then $c'=〈 A|ψ〉$.  We could try seeking coefficients $c$ such that the norm of $〈 A|A〉 c$ is minimal.
 
@@ -231,7 +240,7 @@ $$\pmatrix{1 & e^{-|α₁-α₂|²} &  & e^{-|α₁-α_R|²} \cr
 = \pmatrix{π\cr π\cr\vdots\cr π}.$$
 
 The Galerkin condition seeks a set of weights $w$ such that, for the normalised functions $u_i=π^{-½}e^{-(x-x_i)²}$, we have
-$$1=\int u_i=∑_j w_j u_i(x_j)=∑_j w_je^{-(x_j-x_i)²}.$$
+$$1=\int f\cdot u_i=∑_j w_j u_i(x_j)=∑_j w_je^{-(x_j-x_i)²}.$$
 This is the same condition as the collocation condition.  The results are shown below.
 
 Unfortunately, for random samples $A$, there tends not to be a solution where the weight matrix is diagonal: some of the $w_r²$ would have to be negative.  It looks like the amplitudes on the edges of the grid need large weights, because half of their corresponding gaussian lies outside the grid, and isn't sampled.  The gaussians centred inside the grid are sampled at all these points, and need negative weights at the inside points to compensate.  This sounds like the problem that Chebyshev points solve, where the function is sampled more closely at the edges of the domain.
@@ -249,6 +258,18 @@ $$\int (U^{\rm T}U)_{ij}=π^{-1}\int e^{-(x-x_i)²-(x-x_j)²}\,dx
 and $\int u_i=1$, so this is the identical problem again.
 
 An obvious way would be to assign amplitudes to the nearest sample.  That makes the volume for each sample a quite irregular prism; maybe there is a simple way to calculate the volumes of those, but I don't know it.  What if we assign a value to each point as an average over the sampled values, weighted, say, in proportion to the squared distances?  There would need to be some extra condition to ensure the function tends to zero at points remote from the samples.  Something like $x^{-2}e^{-|x|²}$ sounds plausible: it's quadratic at sort range, where the gaussian is flat, but outside the support of the samples, it decays in the right way for a phase space expansion.  I think the short range part needs to be a power law, so that it doesn't have a length scale built in when the distances between samples are random.  What's the best exponent?  I expect it depends on the dimension of the phase space, which would determine how many samples we expect to find close to a given one.
+
+To prevent the weights from oscillating in order to fit the edges of the samples, it is tempting to do a weighted least squares fit, which emphasises fitting the centre of the cluster over fitting the edges.  There are two ways to do this.  Firstly, instead of expanding the constant function $f(x)=1$, we can expand a peaked function such as $f(x)=e^{-x²}$, then divide the coefficient of $e^{-(x-x_r)²}$ by $e^{-(x_r)²}$ to get a weight.  This mimics the expansions we need to do in practice, where the sample points cover the region where the expanded function has large values.  The residual in this case is
+$${\cal E} = \int\left(e^{-x²}-∑_rd_re^{(x-x_r)²}\right)²;$$
+the only change to the normal equations is that the right hand side $\pmatrix{1&⋯&1}^{\rm T}$ is replaced by a constant multiple of 
+$$b=\pmatrix{e^{-x₁²/2}&⋯&e^{-x_R²/2}}.\tag\rhs$$
+For now, I'm ignoring factors of 2, $\sqrt π $ and so on: how the weights oscillate is more interesting than their size.  This seems to work: with random sample points, the weights still oscillate, but remain within an order of magnitude or two, where the weights from expanding the constant function vary by a factor of a million.
+
+The other approach is a weighted least squares fit of the constant function, where the residual is 
+$${\cal E} = \int e^{-x²}\left(1-∑_rd_re^{(x-x_r)²}\right)².$$
+The right hand side of the normal equations remains that of Equation~\rhs, and the matrix becomes
+$$a_{ij}=e^{-(x_i²+x_j²-6x_ix_j)/4}.$$
+(I'm still ignoring constants of order 1.)  Surprisingly, this doesn't seem to work any better than the unweighted problem.
 
 
 %% Sampling on random grids
