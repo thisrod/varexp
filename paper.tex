@@ -92,10 +92,10 @@ $$θ=|β-α|+O(|β-α|²).$$
 This has a simple geometric analogy where phase space is mapped locally onto the surface of the unit sphere, the coherent states are vectors from the origin to the surface, and $|α-β|$ is a spherical angle.  The analogy fails when the angles between vectors are no longer small; for example, it is misleading in regard to the relation between $|α〉$ and $∂_α|α〉$.
 
 The projector satisfies
-$$π^{-1}\int |α〉〈α|\,d²α=1.$$
-This is similar to the law for an orthonormal basis, except that the left hand side must be scaled by $π$.  Therefore, any state can be expanded as a sum over coherent states, in the form
+$$\int |α〉〈α|\,d²α=π.$$
+If the right hand side were 1, this would indicate that the coherent states were an orthonormal basis of ket space.  As it is, any state can be expanded as a combination of coherent states, in the form
 $$|ψ〉=π^{-1}\int |α〉〈α|ψ〉\,d²α.\tag\csproj$$
-However, this expansion is not unique: a coherent state $|β〉$ has the trivial expansion $|β〉=|α〉$, but the expansion given by Equations~\csproj\ and~\csip\ is a gaussian function of $α$.  A set of states like this is known as a frame, in distinction from a basis, whose elements are linearly independent, and whose expansions are unique.  Further properties of the coherent states will be stated as required.  Glauber's summary of them\cite{prx-131-2766} is paraphrased in every quantum optics textbook ever written.
+However, this expansion is not unique: a coherent state $|β〉$ has the trivial expansion $|β〉=|α〉$, but the expansion given by Equations~\csproj\ and~\csip\ is a gaussian function of $α$.  A set of states like this is known as a frame, in distinction from a basis, whose elements are linearly independent, and whose expansions are unique.  Sets such as the coherent states are known as a Gabor frame.  Further properties of the coherent states will be stated as required.  Glauber's summary of them\cite{prx-131-2766} is paraphrased in every quantum optics textbook ever written.
 
 Bargmann showed that the Hilbert space of wavefunctions is isomorphic to the space of phase space distributions, under the isometry $〈Γ⁺|$, where
 $$〈 Γ⁺|ψ〉(α)=π^{-½}e^{½|α|²}〈 α|ψ〉.$$
