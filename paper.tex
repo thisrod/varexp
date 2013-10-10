@@ -15,7 +15,7 @@ When they realised that positions and momenta are essentially uncertain, the fir
 
 The simplest mechanical systems allow Schrödinger's law of motion to be solved in closed form, but most quantum problems must be solved approximately.  This can be done variationally, specifying a class of approximants that can be manipulated exactly, then finding one of them that most nearly solves the problem.  To test how well a wave function approximates the dynamics of a system, the difference between the two sides of Schrödinger's equation can be measured by the Hilbert space norm.  It remains to choose a class of approximants.  The gaussian wave packets are an common choice, because they differ in their scale and their central position and momentum, useful properties to determine for any quantum state.
 
-The invention of the laser called for a quantum theory of intense radiation.  Laser beams are hard to analyse because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When very coherent matter, in the form of atomic Bose-Einstein condensates, became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
+The invention of the laser in 1963 called for a quantum theory of intense radiation.  Laser beams are hard to analyse because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When very coherent matter, in the form of atomic Bose-Einstein condensates, became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
 
 In the 1970s, Heller put the two ideas together, proposing to simulate quantum dynamics variationally, using finite superpositions of coherent states as the approximants.  This is an appealing approach.  Every quantum state can be approximated arbitrarily well as the number of components in the superposition increases.  The experience of quantum optics shows that, in many systems, the approximation converges with a reasonable number of components.  Also, variational dynamics should avoid the covergence problems that limit the Monte-Carlo methods.
 
@@ -28,6 +28,8 @@ These attempts have aimed to solve chemistry problems, involving dozens of atoms
 %% Overview
 
 The instability appears to have two major causes.  The first problem occurs when quantum states are expanded over a finite set of coherent states.  There is a natural way to expand a state as an integral over the coherent states, with a weight function that varies smoothly with the coherent amplitude.  When this function is sampled at a discrete set of coherent amplitudes and the integral approximated by a sum, the state is approximated to some precision.  Part of the error in this appoximation is due to the finite set of coherent states having bounded amplitude, wheras the state being approximated might have components with arbitrarily large particle number—for instance, it might be a coherent state.  When expansion weights for the finite set of coherent states are set by least squares, components with large particle number are approximated by adjacent amplitudes having large weights, with opposite signs so that components with low particle numbers cancel.  This causes the expansion weights to be large, to not resemble samples of any smooth function, and to change sharply as the state changes.  All these properties make it difficult to numerically integrate a rate of change that has been expanded by least squares.  The problems are exacerbated when the amplitudes are spaced irregularly, instead of on a grid.
+
+Expanding a field over Gaussian functions is a rather obvious idea, and physicists are not the only people to have thought of it.  The mathematicians and signal theorists who developed wavelet expansions have also analysed Gaussians.  They call this type of expansion a Gabor frame, or a windowed Fourier transform.  They have prooved several results that are not well known in physics: for example, that discrete sets of coherent states are complete, not just the continuum.  They have also studied overcomplete sets of vectors in general, under the field of frame theory.  Many of these general ideas insight into the specific case of coherent state frames.
 
 The behaviour of the discrete expansion weights is similar to that observed in discrete ill-posed problems, and the methods used to analyse and resolve these can be applied to expansions over coherent states.  However, the cause of ill-posedness in our problem differs from those usually studied—the large number components of the state are real, while the high-frequency components that play the same role in ill-posed problems are spurious ones introduced by errors in measured data.  Therefore the standard methods of resolution don't work as well as usual.  The expansion problem is easier in one way: it is iterated at each timestep, so the dynamics of the coherent amplitudes can be modified so that the expansion problem becomes better posed as the simulation progresses.
 
@@ -65,13 +67,13 @@ Equation~\ode\ will be integrated numerically.  For this to be done stably and e
 
 This complicates the solution of the problem in Formula~4.  It does not suffice to find a $\dot z$ with the smallest residual, for a given value of $z$.  In order for Equation~5 to be numerically solvable, the properties of $\dot z$ under perturbation of $z$ are equally important.  Under the usual Hilbert space norm, Formula~4 is a least squares problem; the pertubation properties of such problems are reasonably well understood.  We will examine ways to modify the problem, by introducing extra least-squares constraints, that might improve its perturbation properties.
 
-\beginsection{The phase space expansion operator}
+\beginsection{Continuous phase space expansions}
 
 The approximant studied in this paper has the form
 $$|ψ(φ₁,α₁,⋯,φ_R,α_R)〉=∑_{r=1}^R e^{φ_r+α_ra†}|0〉
 	=\pmatrix{|α₁〉&⋯&|α_R〉}\pmatrix{e^{φ₁+½|α₁|²}\cr\vdots\cr e^{φ_R+½|α_R|²}}
 	=|A〉d,\tag\Ad$$
-where $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  In the limit of large $R$, where the sum approximates an integral over the amplitude $α$, any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of the next section, followed by a discussion of the discrete expansion $|A〉$.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
+where $A=\pmatrix{α₁&⋯$α_R}^{\rm T}$ is a vector of complex amplitudes, $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  In the limit of large $R$, where the sum approximates an integral over the amplitude $α$, any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of the next section, followed by a discussion of the discrete expansion operator $|A〉$.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
 
 Expansion over coherent states is a linear operator from functions of a complex variable to quantum states,
 $$\G f=π^{-½}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
@@ -171,14 +173,16 @@ Reducing the dimension of Fock space so that the problem is underdetermined mean
 
 \beginsection{Gabor frames}
 
+The methods will consider to approximate $|ψ〉=|A〉d$ set $d$ to a linear function of $|ψ〉$.  We will sometimes denote this mapping $d=〈A⁺|ψ〉$, because we intend that $|ψ〉≈|A〉d=|A〉〈A⁺|ψ〉$, whence $〈A⁺|$ is a pseudoinverse of the expansion operator $|A〉$.  We can then define an error operator $E=\bigl(1-|A〉〈A⁺|\bigr)$, so that $|ψ〉-|A〉d=E|ψ〉$.  Because $〈A⁺|$ is linear, it is equivalent to a column vector of bras $〈A⁺|=\pmatrix{〈φ₁|&⋯&〈φ_R|}^{\rm T},$
+such that $d_r=〈φ_r|ψ〉$.  We will call $|φ_r〉$ the dual ket of the component $|α_r〉$.  Note that the dual kets are not normalised.
 
-\beginsection{Discretely sampled expansions}
+\beginsection{Discrete phase space expansions}
 
 As mentioned above, the computer manipulates a discrete expansion with the form of Equation~\Ad,
 $$|ψ〉=d₁|α₁〉+⋯+d_R|α_R〉=|A〉d.$$
 This kind of expansion has been studied for a long time.  An early question was how dense the amplitudes $α_r$ must be in order for the set to span all kets, and $|A〉$ to be a frame.  In the case that the amplidues are a rectangular grid, with $α_r=ma+inb$ Von~Neumann conjectured in 193? that the condition is one amplitude per area $π$ of phase space, which corresponds to an area $\hbar$ of the $x-p$ plane.  This was proved in 19?.  The conditioning of expansions as the density of sampled amplitudes approaches this limit appears to be an open question.  Another open question is how much this limit can be relaxed if squeezed states are included in the expansion.
 
-In recent decades, these expansions have been studied intensely by engineers involved in signal processing, who call the set of coherent states a Moyal~frame.  These researchers regard gaussian wavepackets as a kind of time-limited Fourier transform, with a gaussian window function, following on from the work of Hamming and others at Bell Labs.  Moyal frames were investigated by the same community that developed wavelets; the latter became of very wide interest, and obscured the earlier work on Moyal frames.
+In recent decades, these expansions have been studied intensely by engineers involved in signal processing, who call the set of coherent states a Gabor~frame.  These researchers regard gaussian wavepackets as a kind of time-limited Fourier transform, with a gaussian window function, following on from the work of Hamming and others at Bell Labs.  Gabor frames were investigated by the same community that developed wavelets; the latter became of very wide interest, and obscured the earlier work.
 
 If the system has only a few modes, so that $α$ is a low-dimensional vector, the set of sampled amplitudes $A=\{α₁, …,α_R\}$ could be a regular grid, with $α_r=(m+in)h$, $m$ and $n$ being integers.  This makes many things easier.  In particular, it is straightforward to relate the weights $d$ to the values of a continuous distribution $f$ at the points $α_r$.  It is convenient to normalise so that $‖d‖=‖f‖$.  If the $α_r$ form a grid with spacing $h$, as specified above, and we set $d_r=cf(α_r)$, $c$ being constant, this normalisation condition is satisfied when
 $$∑_r|d_r|²=c²∑_r|f(α_r)|²=\int |f|²\,d²α≈h²∑_r|f(α_r)|².$$
@@ -319,7 +323,37 @@ The idea is that a relaxed expansion has all the coefficients pulling in the sam
 
 The tensions were calculated for the grid and irregular expansions above, and plotted in the second graph.  Despite the much worse convergence of random sampling, the weights have very nearly the same tension as the regular grid.  
 
-%% Tychonov conditioning
+\beginsection{Tychonov conditioning}
+
+The simplest approximation method is Tychonoff regularised least squares, with different values of the regularisation parameter $λ$.  This assigns expansion coefficients $d$ in order that
+$$\pmatrix{|A〉\cr λI}d≈\pmatrix{|ψ〉\cr 0},$$
+this equation being satisfied in a least-squares sense.  The solution minimises the residual $‖|ψ〉-|A〉d‖²+λ²‖d‖²$.  It is given by
+$$d=〈A⁺|ψ〉=\pmatrix{|A〉\cr λI}⁺\pmatrix{1\cr 0_R}|ψ〉,$$
+where $()⁺$ denotes the Moore-Penrose pseudoinverse of a matrix, $I$ is the $R×R$ unit matrix, and $0_R$ is a $R×1$ zero vector.  I.e., the vector $〈A⁺|$ is the leftmost column of the pseudoinverse matrix.
+
+Suppose $|A〉$ has the singular-value decomposition $|A〉=|U〉SV†$, so that
+$$\pmatrix{|A〉\cr λI}v_r=\pmatrix{σ_r|u_r〉\cr λv_r}=\sqrt{σ_r²+λ²}w_r.$$
+The orthonormality of the $w_r$ follows from that of the $|u_r〉$ and $v_r$, so we have a singular-value decomposition
+$$\pmatrix{|A〉\cr λI}=WTV†,$$
+where $τ_r=\sqrt{σ_r²+λ²}$.  Then 
+$$〈A⁺|=\pmatrix{|A〉\cr λI}⁺\pmatrix{1\cr 0_R}=VT^{-1}W†\pmatrix{1\cr 0_R},$$
+where the last two factors are the first column of $W†$,
+$$W†\pmatrix{1\cr 0_R}=\pmatrix{{σ₁\over\sqrt{σ₁²+λ²}}〈u₁|\cr\vdots\cr 
+	{σ_R\over\sqrt{σ_R²+λ²}}〈u_R|}.$$
+It follows that the right singular vectors of $〈A⁺|$ are the bras $〈u_r|$, and the singular values are 
+$$σ⁺_r={σ_r\over τ_r\sqrt{σ_r²+λ²}}={σ_r\over σ_r²+λ²}.$$
+Tychonov regularisation divides the singular values of $|A〉$ into large ones and small ones, as compared to $λ$.  For large $σ_r$, the inverse is very close to the unregularised problem, with $σ⁺_r≈1/σ_r$.  For small $σ_r$, the component in that singular direction is nearly discarded by $|Α⁺〉$, with $σ⁺_r≈σ_r/λ²$.  Note that, in this limit, $|Α⁺〉=λ^{-2}|A〉$!  In between, there is a maximum at $σ_r=λ$, with $σ_r=1/2λ$, half the unregularised value.
+
+This has dramatic consequences for the conditioning of the regularised problem, and how that varies with $λ$.  When $λ<σ_R$, regularisation has very little effect: the condition of $〈Α⁺|$ is the same as that of $|A〉$, which, for dense sets of coherent states, is usually dreadful.  As $λ$ increases, so that $σ₁<λ<σ_R$, the singular values lie on either side of the $σ_r=λ$ peak; the condition of $〈Α⁺|$ is determined by how far below this peak $σ₁$ and $σ_R$ fall, and the condition number has a sharp minimum when $σ⁺₁=σ⁺_R$.  When $λ$ dominates the singular values, and $|Α⁺〉=λ^{-2}|A〉$, it is again the case that their condition is the same.
+
+\midinsert \XeTeXpicfile tysv.pdf width \hsize
+Figure 3 \endinsert
+
+This is illustrated in Figure~3, which plots the logarithms of the singular values of $|A〉$ against those of $|A⁺〉$, both scaled to the regularisation parameter $λ$.  In the right hand plot, $λ$ is small compared the the singular values, so these lie very close to the line $σ⁺=1/σ$.  In the left hand plot, $λ$ is large, $|A⁺〉$ is nearly $λ^{-2}|A〉$, and the singular values lie on $λσ⁺=σ/λ$.  The singular values have been inverted, but this does not change the ratio of the smallest to the largest, so in both cases the condition numbers of $|A〉$ and $|A⁺〉$ are the same.
+
+In the middle plot, $λ$ is of the same order as the singular values, which is the usual case in well-regularised problems.  In the illustrated case, where the singular values span several orders of magnitude, the condition number of $|A⁺〉$ is about the square root of that of $|A〉$.  If the singular values were more even to begin with, and all fit in the curve at the top of the peak, the improvement would be greater.  However, in this case it is unlikely that the problem would need to be regularised, so the square root improvement is likely the best that can be expected.
+
+The leftmost column of the figure illustrates a large regularisation parameter.  The norm of $d$ is constrained to be small, so the approximation is very bad.  However, the approximation coefficients are very well behaved: they are brackets of $|ψ〉$ with coherent states.  The rightmost column illustrates a small regularisation parameter, where $d$ is essentially the least squares solution to $|A〉d=|ψ〉$.  This approximation is good, and the plot of the error operator is mostly black.  In fact, it is surprisingly good: the largest component amplitude is around 2, but the approximation is nearly exact up to $n=11$.  There is a price to pay for this.  The dual kets have large norms, and they are close to the number state $|n=14〉$.  This means that approximations of states with small amplitudes not be stable: perturbing such a state by adding a small component of $|n=14〉$ will wreak havoc with its expansion coefficients.  Using the approximation method of the leftmost column, this component would have very little effect on the coefficients.  This type of instability is very common in least squares problems, and the purpose of regularisation methods such as Tychonov's is to avoid it by trading off the ability to represent large number states.  The middle columns show some intermediate values of $λ$.  In the third column, the dual kets are close to 1, and number states up to $n=4$ or 5 are approximated well, as would be expected for an expansion over amplitude 2 coherent states.  This seems to achieve the right tradeoff.
 
 There is a family of methods for inverting operators with small singular values, known as regularisation methods.  A very useful idea is due to Tychonov.  The problem
 $$\Gx f=|ψ〉$$
@@ -457,9 +491,20 @@ The top line indicates that the condition number is independent of the phases of
 
 \beginsection{Ways the problem has been simplified for this paper}
 
-This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ〉$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j〉$ approximates $|ψ〉$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ〉$ which we want to perturb to represent $|ψ〉+|dψ〉$, is no harder.  Because $G$ is linear, we can expand $|dψ〉$, and add it to the expansion of $|ψ〉$.
+The problem we have discussed so far is to expand a state $|ψ〉$ over a set of coherent states, in the form $|ψ〉=|A〉d$.  In order for a this state to be represented on a computer, the coherent amplitudes $A$ and the coefficients $d$ would all have to be stored in memory.  In a simulation, we will have an expansion $d$ for $|ψ〉$, which we want to perturb to represent $|ψ〉+|δψ〉$.  The expansion operator $|A〉$ is linear, so we could expand $|δψ〉=|A〉δd$ and add $δd$ to $d$  However, if the simulation is to represent a many-mode state efficiently, the amplitudes will likely have to vary over time as well as the coefficients.  Also, it might sometimes be more efficient to vary the ampltiudes.  For example, if a coherent state was rotating in an oscillator, it might be simpler to rotate the $α_j$ than to vary the weights.
 
-The second problem, the variational one, is a generalisation.  As well as the grid $α_j$, we have a set of weights $f_j$ representing some wavefunction, presumably not $|ψ〉$.  Instead of expanding $|ψ〉$ over phase space, we want to expand it over the columns of $|Dψ(f,α)〉$, the set of all changes we can make by slightly adjusting the original expansion, and the grid.  Obviously, we can solve this problem simply by setting the coefficients of $|∂fψ(f,a)〉$ to the solution of the inverse problem, and those of $|∂fψ(f,a)〉$ to zero.  Is this the smallest norm solution?  Probably not: if a coherent state was moving in an oscillator, it might be easier to just rotate the $α_j$.
+We then have a variational problem $|\dot ψ〉=|Dψ(z)〉\dot z$, where
+$$z=\pmatrix{A\cr d},$$
+and the expansion operator $|Dψ(z)〉$ includes the derivatives of the coherent states with respect to their amplitudes (notation?).
+
+These two problems are closely related.  In fact,
+$$|Dψ(z)〉=
+	\lim_{h→0}\pmatrix{|A+½h〉&|A-½h〉}
+	\pmatrix{{I\over 2}&{Id\over h}\cr{I\over 2}&-{Id\over h}}.
+$$
+The variational problem is equivalent to expanding the state over a frame of $2R$ coherent states, clustered in tight pairs, then taking sums and differences of the expansion coefficients.  In fact, the vector $d$ could be absorbed into the shifts $+½h$ and $-½h$, so that the transformation matrix was even simpler.  This offers other approaches to regularisation: we could expand with regularised coefficients, and apply the transformation to the result.
+
+When two amplitudes $α_r$ and $α_s$ are close together, three linearly independent $d$ cause $|Dψ(z)〉d$ become parallel.  These being $|∂_rψ〉- $|∂_sψ〉$, |∂_{R+r}ψ〉$, and $|∂_{R+s}ψ〉$.  Two nearby points effectively become one, as far as the variational problem is concerned!
 
 Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ〉$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ〉$ in the future.
 
