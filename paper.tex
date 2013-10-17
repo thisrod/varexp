@@ -35,6 +35,24 @@ The behaviour of the discrete expansion weights is similar to that observed in d
 
 The second type of instability is a dynamical one.  This occurs whenever Schrödinger's equation is integrated with a quartic hamiltonian, over discrete timesteps.  In the second quantised picture, it occurs because the repulsion between particles causes components where many particles occupy the mode to oscillate very rapidly.  The simulation becomes stable when these components are removed, but that changes the dynamics.  Integrating Schrödinger's equation with repulsive particles either requires very short timesteps, or special integration formulae that exploit features of Hamiltonian dynamics.  Applying these formulae to the variational dynamics of the coherent states, which are not Hamiltonian, is somewhat subtle.
 
+
+\beginsection{Notational preliminaries}
+
+Numerical analysis and quantum mechanics are both founded in vector spaces and linear algebra.  In numerical analysis, the vectors and operators have finitely many dimensions, and are usually represented as matrices.  In quantum mechanics, they usually come from infinite dimensional spaces, and are written as bras an d kets.  This paper is about computational quantum mechanics, and it combines both notations.
+
+Let's start with ket expanded as a linear combination, 
+$$|ψ〉=c₁|a₁〉+c₂|a₂〉+⋯+c_R|a_R〉.$$
+This can be written $|ψ〉=|A〉c$, where $c=\pmatrix{c₁&⋯&c_R}^{\rm T}$ is a column vector of coefficients, and $|A〉=\pmatrix{|a₁〉&⋯&|a_R〉}$ is a row vector of kets.  There are other ways to picture the object $|A〉$.  It can be seen as a linear operator from ${\bf C}^R$ into ket space, or as a matrix representation of that operator, whose columns $|a₁〉$ through $|a_R〉$ are infinite dimensional.  This operator has an adjoint, $〈A|=\pmatrix{〈a₁|&⋯&〈a_R|}^{\rm T}$, that maps kets to complex column vectors.  The products
+$$〈A|A〉=\pmatrix{〈a₁|a₁〉&&〈a₁|a_R〉\cr &\ddots&\cr 〈a_R|a₁〉&&〈a_R|a_R〉}$$
+and $|A〉〈A|=|a₁〉〈a₁|+⋯+|a_R〉〈a_R|$ both follow the usual rules of matrix multiplication.  Matrix products work too: for instance, the kets $|a_r〉$ are linearly independent, then $|A〉$ has a singular value decomposition $|A〉=|U〉SV†$, where $|U〉$ is a row of $R$ kets, $S$ is an $R×R$ diagonal matrix of complex numbers, and $V$ is an orthogonal $R×R$ complex matrix.  In general, things written as kets have infinite dimensional columns and finitely many rows, while bras are the other way around.
+
+Even more general matrices are sometimes useful.  For instance, the operator
+$$M=\pmatrix{0&〈A|\cr |A〉&0}$$
+can be applied to columns of the form $\pmatrix{|ψ〉&z₁&⋯&z_R}^{\rm T}$, giving objects of the same form.  The top left zero is an operator on Hilbert space, while the bottom right one is an $R×R$ matrix.  The general rule is that the things in each row must have the same column dimension, and visa-versa.  Things that have finite dimensional rows and columns will be written as matrices, and things that are infinite in both directions as Hilbert space operators.  These are both just written as letters.
+
+So far, the operator $|A〉$ has been a linear function from vectors into ket space.  General functions will be written $|A〉$ as well, but their applications will be written $|A(c)〉$ instead of $|A〉c$.  The derivatives of these functions are explained below.
+
+
 \beginsection{Variational dynamics}
 
 Schrödinger's equation, the quantum law of motion, is
@@ -54,18 +72,35 @@ The next sections will discuss the approximant $|ψ(z)〉$ analysed in this pape
 If the approximant $|Ψ(t)〉=|ψ(z(t))〉$ is substituted in Schrödinger's equation, and the chain rule applied, the result is
 $$i\hbar|Dψ(z(t))〉Dz(t)=H|ψ(z(t))〉.$$
 On the left hand side, the kets in the row vector $|Dψ(z(t))〉$ are combined with coefficients from the column vector $Dz(t)=\pmatrix{Dz₁(t)&…&Dz_R(t)}^{\rm T}$.  This is unlikely to have an exact a solution: the kets $|∂_rψ(z(t))〉$ span an $R$-dimensional subspace of Hilbert space, and the ket $H|ψ(z(t))〉$ is likely to have components outside this subspace.  This is a consequence of the restricted form of the approximation.  We can, however, look for a vector $\dot z(z)$ that minimises the residual
-$$\left\|i\hbar|Dψ(z)〉\dot z(z)-H|ψ(z)〉\right\|²,\eqno{(4)}$$
+$$\left\|i\hbar|Dψ(z)〉\dot z(z)-H|ψ(z)〉\right\|²,\tag\residual$$
 and solve the ordinary differential equation
 $${dz\over dt}=\dot z(z),\tag\ode$$
 giving a state $|ψ(z(t))〉$ that hopefully approximates the solution to Schrödinger's equation.  When the norm used is the one derived from the inner product of Hilbert space, this is called the Dirac-Frenkel method.
 
 The Dirac-Frenkel solution is only optimised locally.  There might be some $w(t)$ such that, at large times, $|ψ(w(t))〉$ approximates $|Ψ(t)〉$ better that the Dirac-Frenkey solution $|ψ(w(t))〉$ does.  This would require that, at early times, $i\hbar|Dψ(z(t))〉$ is closer to $H|ψ(z(t))〉$ than $i\hbar|Dψ(w(t))〉$ is to $H|ψ(w(t))〉$, but that $z(t)$ loses the ability to track the dynamics at later times.  When we discuss regularisation below, we will see that this is in fact the usual case.  Global optimisation of $z$ is not practical: even computing the local approximation stretches computers to their limits.
 
+The kind of ansatz considered in this paper has the form 
+$$|ψ(z₁,…,z_R)〉=|ψ'(z₁)〉+⋯+|ψ'(z_R)〉.$$
+In fact, this form is very general: the DMRG approximants are the only ones I know of that are not a sum of similar terms.  Here, $z_r$ may be a vector of complex numbers, perhaps a weight and the amplitudes of several modes.  In this case, the derivative has the form
+$$|Dψ(z₁,…,z_R)〉=\pmatrix{|Dψ'(z₁)〉&…&|Dψ'(z_R)〉}.$$
+
+I will refer to the kets $|ψ'(z_r)〉$ as the components of $|ψ(z)〉$.  It is interesting to consider the case where these lie in orthogonal subspaces.  This will very nearly be the case, for instance, if the components are coherent states, with sparsely distributed amplitudes.  In this case, the component derivatives $|Dψ'(z_r)〉$ also lie in the orthogonal subspaces, and the total derivative has a block diagonal structure,
+$$|Dψ(z₁,…,z_R)〉=\pmatrix{|Dψ'(z₁)〉&&\cr&\ddots&\cr&&|Dψ'(z_R)〉},$$
+where the empty elements in row $r$ are null kets in the subspace of the component $|ψ'(z_r)〉$.
+The residual ket thus becomes
+$$i\hbar|Dψ(z)〉\dot z(z)-H|ψ(z)〉=
+	\pmatrix{|Dψ'(z₁)〉-H|ψ'(z₁)〉\cr\vdots\cr |Dψ'(z_R)〉-H|ψ'(z_R)〉},$$
+where the rows are mutually orthogonal.  Therefore, the least squares problem can be solved separately for each component, independently minimising 
+$$\left‖|Dψ'(z_r)〉-H|ψ'(z_r)〉\right‖².$$
+If the system is a BEC, and the components are coherent states, this problem is equivalent solving the Gross-Pitaevskii Equation.  Heller and others have investigated it for general systems with coherent state components, and found that the amplitudes obey something very like classical dynamics.  Therefore variational dynamics with sparse components is a waste of time: its results should be very similar to truncated Wigner, and, if they differ, there won't be much reason to believe one rather than the other.
+
+It is interesting to compare this to positive P simulations for the quartic oscillator.  These have predicted revivals, and have been done for large enough systems that the amplitudes of the coherent states must have been sparse.  I don't know whether both conditions were ever satisfied in the same simulation: it would be interesting to find out.
+
 The residual above can be defined using any norm one wishes.  The aim of computing quantum dynamics is usually to find some expectation values that could be compared to observed quantities, and one could consider using a norm that magnified the discrepencies in these observables, so that the solution with the least residual would correspond closely to the exact solution in the directions of interest.  On the other hand, we are computing quantum dynamics: these are unitary in the usual norm, so that a small error introduced at an early time is guaranteed to stay small when the state is propagated to later times.  No other norm guarantees this: they all introduce uncontrolled errors regarding how much early errors are magnified by later dynamics.
 
 Equation~\ode\ will be integrated numerically.  For this to be done stably and efficiently, $\dot z$ must be a reasonably smooth function of $z$.  This is formally expressed in terms of the eigenvalues of the Jacobian $D\dot z$; different integration formulae place different bounds on the magnitudes and phases of these, but they all have limited regions of stability.  Moreover, as we will see below, a technically stable integration formula might still not produce a useful solution.
 
-This complicates the solution of the problem in Formula~4.  It does not suffice to find a $\dot z$ with the smallest residual, for a given value of $z$.  In order for Equation~5 to be numerically solvable, the properties of $\dot z$ under perturbation of $z$ are equally important.  Under the usual Hilbert space norm, Formula~4 is a least squares problem; the pertubation properties of such problems are reasonably well understood.  We will examine ways to modify the problem, by introducing extra least-squares constraints, that might improve its perturbation properties.
+This complicates the solution of the problem in Formula~\residual.  It does not suffice to find a $\dot z$ with the smallest residual, for a given value of $z$.  In order for Equation~\ode\ to be numerically solvable, the properties of $\dot z$ under perturbation of $z$ are equally important.  Under the usual Hilbert space norm, Formula~\residual is a least squares problem; the pertubation properties of such problems are reasonably well understood.  We will examine ways to modify the problem, by introducing extra least-squares constraints, that might improve its perturbation properties.
 
 \beginsection{Continuous phase space expansions}
 
@@ -73,7 +108,7 @@ The approximant studied in this paper has the form
 $$|ψ(φ₁,α₁,⋯,φ_R,α_R)〉=∑_{r=1}^R e^{φ_r+α_ra†}|0〉
 	=\pmatrix{|α₁〉&⋯&|α_R〉}\pmatrix{e^{φ₁+½|α₁|²}\cr\vdots\cr e^{φ_R+½|α_R|²}}
 	=|A〉d,\tag\Ad$$
-where $A=\pmatrix{α₁&⋯$α_R}^{\rm T}$ is a vector of complex amplitudes, $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  In the limit of large $R$, where the sum approximates an integral over the amplitude $α$, any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of the next section, followed by a discussion of the discrete expansion operator $|A〉$.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
+where $A=\pmatrix{α₁&⋯&α_R}^{\rm T}$ is a vector of complex amplitudes, $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  In the limit of large $R$, where the sum approximates an integral over the amplitude $α$, any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of the next section, followed by a discussion of the discrete expansion operator $|A〉$.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
 
 Expansion over coherent states is a linear operator from functions of a complex variable to quantum states,
 $$\G f=π^{-½}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
@@ -110,6 +145,25 @@ If, following Bargmann, we identify state space with the entire functions, $|Γ�
 The part of $|Γ〉$ that projects functions onto entire functions can be written as follows
 $$π^{-½}〈β|Γ〉f=π^{-1}\int 〈β|α〉e^{-½|α|²}f(α*)\,d²α=π^{-1}\int 〈0|D(α-β)|0〉e^{-½|α|²}f(α*)\,d²α.$$
 This appears to be a convolution of the function $e^{-½|α|²}f(α*)$ with the kernel $〈0|D(α)|0〉$.  There are many theorems to the effect that real convolution operators are badly conditioned.  It is interesting that these results do not apply to the complex convolution $|Γ〉$: as a projector, it is as nice an operator as it could possibly be.  I think the loophole is that of real functions can only oscillate at a limited rate, so that their Fourier transforms have finite norm.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy.  And the kernel $〈0|D(α)|0〉$ does: it is a wave packet with carrier frequency proportional to the imaginary part of $α$.
+
+
+\beginsection{Gabor frames}
+
+Many of the above results for the operator $\G$ are true of expansions over frames in general.  We will treat the finite case, because every frame will eventually have to be represented on a computer.  So suppose the set of kets $|A〉=\pmatrix{|a₁〉&⋯&|a_R〉}$ is a frame for some subspace of Hilbert space.
+
+The theory of frames is traditionally presented in terms of the frame operator,
+$$S=∑_{r=1}^R |a_r〉〈a_r|={\rm Tr}(|A〉〈A|).$$
+In the case that the columns of $|A〉$ are a frame, $S$ is invertible.  The set of vectors
+$$|F〉=S^{-1}|A〉=\pmatrix{S^{-1}|a₁〉&⋯&S^{-1}|a_R〉}
+	=\pmatrix{|φ₁〉&⋯&|φ_R〉}
+$$
+is also a frame, and is known as the dual frame of $|A〉$.  It has the property that $|A〉〈F|$ is the identity operator on the space.
+
+For finite frames, expansions using dual kets have some special properties.  For a start, the dual expansion is the one where the vector of coefficients has the least norm.  In fact, if $|ψ〉=|A〉d$, and $c=〈F|ψ〉$, then $‖d‖²=‖c‖²+‖d-c‖²$\cite{1989-sir-31-626}.  This suggests that $d-c$ is forced to be orthogonal to $c$.
+
+The methods will consider to approximate $|ψ〉=|A〉d$ set $d$ to a linear function of $|ψ〉$.  We will sometimes denote this mapping $d=〈A⁺|ψ〉$, because we intend that $|ψ〉≈|A〉d=|A〉〈A⁺|ψ〉$, whence $〈A⁺|$ is a pseudoinverse of the expansion operator $|A〉$.  We can then define an error operator $E=\bigl(1-|A〉〈A⁺|\bigr)$, so that $|ψ〉-|A〉d=E|ψ〉$.  Because $〈A⁺|$ is linear, it is equivalent to a column vector of bras $〈A⁺|=\pmatrix{〈φ₁|&⋯&〈φ_R|}^{\rm T},$
+such that $d_r=〈φ_r|ψ〉$.  We will call $|φ_r〉$ the dual ket of the component $|α_r〉$.  Note that the dual kets are not normalised.
+
 
 \beginsection{Truncated phase space}
 
@@ -169,12 +223,6 @@ The following three figures show the right singular vectors, sampled versions of
 %The right singular functions $v_i$ for the truncated expansion operator $\Gx$, where phase space is truncated at $|α|=3$, 4 and 5.  These are functions of a complex variable: the brightness of the plot indicates modulus, and the color indicates phase.\endinsert
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
-
-
-\beginsection{Gabor frames}
-
-The methods will consider to approximate $|ψ〉=|A〉d$ set $d$ to a linear function of $|ψ〉$.  We will sometimes denote this mapping $d=〈A⁺|ψ〉$, because we intend that $|ψ〉≈|A〉d=|A〉〈A⁺|ψ〉$, whence $〈A⁺|$ is a pseudoinverse of the expansion operator $|A〉$.  We can then define an error operator $E=\bigl(1-|A〉〈A⁺|\bigr)$, so that $|ψ〉-|A〉d=E|ψ〉$.  Because $〈A⁺|$ is linear, it is equivalent to a column vector of bras $〈A⁺|=\pmatrix{〈φ₁|&⋯&〈φ_R|}^{\rm T},$
-such that $d_r=〈φ_r|ψ〉$.  We will call $|φ_r〉$ the dual ket of the component $|α_r〉$.  Note that the dual kets are not normalised.
 
 \beginsection{Discrete phase space expansions}
 
@@ -504,7 +552,7 @@ $$|Dψ(z)〉=
 $$
 The variational problem is equivalent to expanding the state over a frame of $2R$ coherent states, clustered in tight pairs, then taking sums and differences of the expansion coefficients.  In fact, the vector $d$ could be absorbed into the shifts $+½h$ and $-½h$, so that the transformation matrix was even simpler.  This offers other approaches to regularisation: we could expand with regularised coefficients, and apply the transformation to the result.
 
-When two amplitudes $α_r$ and $α_s$ are close together, three linearly independent $d$ cause $|Dψ(z)〉d$ become parallel.  These being $|∂_rψ〉- $|∂_sψ〉$, |∂_{R+r}ψ〉$, and $|∂_{R+s}ψ〉$.  Two nearby points effectively become one, as far as the variational problem is concerned!
+When two amplitudes $α_r$ and $α_s$ are close together, three linearly independent $d$ cause $|Dψ(z)〉d$ become parallel.  These being $|∂_rψ〉- |∂_sψ〉$, $|∂_{R+r}ψ〉$, and $|∂_{R+s}ψ〉$.  Two nearby points effectively become one, as far as the variational problem is concerned!
 
 Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ〉$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ〉$ in the future.
 
