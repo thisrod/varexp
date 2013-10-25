@@ -38,29 +38,30 @@ The second type of instability is a dynamical one.  This occurs whenever Schröd
 
 \beginsection{Notational preliminaries}
 
-Numerical analysis and quantum mechanics are both founded in vector spaces and linear algebra.  In numerical analysis, the vectors and operators have finitely many dimensions, and are usually represented as matrices.  In quantum mechanics, they usually come from infinite dimensional spaces, and are written as bras an d kets.  This paper is about computational quantum mechanics, and it combines both notations.
+Quantum mechanics deals with infinite dimensional linear algebra, represented abstractly as bras and kets.  Numerical analysis is also founded on vectors and operators, but in finite dimensional spaces, expanded as matrices and column vectors.  The numerical quantum mechanics discussed in this paper is most conveniently described by combining these notations.
 
-Let's start with ket expanded as a linear combination, 
+Consider a linear combination of kets,
 $$|ψ〉=c₁|a₁〉+c₂|a₂〉+⋯+c_R|a_R〉.$$
-This can be written $|ψ〉=|A〉c$, where $c=\pmatrix{c₁&⋯&c_R}^{\rm T}$ is a column vector of coefficients, and $|A〉=\pmatrix{|a₁〉&⋯&|a_R〉}$ is a row vector of kets.  There are other ways to picture the object $|A〉$.  It can be seen as a linear operator from ${\bf C}^R$ into ket space, or as a matrix representation of that operator, whose columns $|a₁〉$ through $|a_R〉$ are infinite dimensional.  This operator has an adjoint, $〈A|=\pmatrix{〈a₁|&⋯&〈a_R|}^{\rm T}$, that maps kets to complex column vectors.  The products
+This can be written as a matrix product $|ψ〉=|A〉c$, where $c=\pmatrix{c₁&⋯&c_R}^{\rm T}$ is a column vector of coefficients, and $|A〉=\pmatrix{|a₁〉&⋯&|a_R〉}$ is a row vector of kets.  Alternatively, the kets $|a_r〉$ can be regarded as infinite dimensional columns, and $|A〉$ as a matrix, representing a linear operator from ${\bf C}^R$ into ket space.  This operator has an adjoint, $〈A|=\pmatrix{〈a₁|&⋯&〈a_R|}^{\rm T}$, that maps kets back to column vectors.  Under the rules of matrix multiplication, the product
 $$〈A|A〉=\pmatrix{〈a₁|a₁〉&&〈a₁|a_R〉\cr &\ddots&\cr 〈a_R|a₁〉&&〈a_R|a_R〉}$$
-and $|A〉〈A|=|a₁〉〈a₁|+⋯+|a_R〉〈a_R|$ both follow the usual rules of matrix multiplication.  Matrix products work too: for instance, the kets $|a_r〉$ are linearly independent, then $|A〉$ has a singular value decomposition $|A〉=|U〉SV†$, where $|U〉$ is a row of $R$ kets, $S$ is an $R×R$ diagonal matrix of complex numbers, and $V$ is an orthogonal $R×R$ complex matrix.  In general, things written as kets have infinite dimensional columns and finitely many rows, while bras are the other way around.
+is an operator on ${\bf C}^R$, and $|A〉〈A|=|a₁〉〈a₁|+⋯+|a_R〉〈a_R|$ is a Hilbert space operator.  Other matrix products work too; provided the $|a_r〉$ are linearly independent, $|A〉$ will have a singular value decomposition $|A〉=|U〉SV†$, where $|U〉$ is a row of $R$ kets, $S$ is an $R×R$ diagonal matrix of complex numbers, and $V$ is an orthogonal $R×R$ complex matrix%
+\footnote{${}^1$}{In fact, $|A〉$ has an SVD regardless, but $|U〉$ and $S$ are smaller.  When the $|a_r〉$ are linearly dependent, they span a space of dimension less than $R$, and there is no way to choose in which directions it should be extended to give $R$ orthonormal kets.  In this case, $|U〉$ will be a row of ${\rm rank}|A〉$ kets, and $S$ will be ${\rm rank}|A〉×R$.}.
+In this paper, things written as kets have a finite number of infinite dimensional columns, and bras are the other way round.
 
 Even more general matrices are sometimes useful.  For instance, the operator
 $$M=\pmatrix{0&〈A|\cr |A〉&0}$$
 can be applied to columns of the form $\pmatrix{|ψ〉&z₁&⋯&z_R}^{\rm T}$, giving objects of the same form.  The top left zero is an operator on Hilbert space, while the bottom right one is an $R×R$ matrix.  The general rule is that the things in each row must have the same column dimension, and visa-versa.  Things that have finite dimensional rows and columns will be written as matrices, and things that are infinite in both directions as Hilbert space operators.  These are both just written as letters.
 
-So far, the operator $|A〉$ has been a linear function from vectors into ket space.  General functions will be written $|A〉$ as well, but their applications will be written $|A(c)〉$ instead of $|A〉c$.  The derivatives of these functions are explained below.
+So far, the operator $|A〉$ has been a linear function from vectors into ket space.  General functions will be written $|f〉$ as well, but their applications will be written $|f(c)〉$ instead of $|A〉c$.  If this function is analytic, it has partial derivatives $|∂_if(c)〉$ with respect to the components of $c$.  The derivative $∂_i$ acts on the function, not in Hilbert space, so it is written inside the ket.  These can be assembled into a Jacobian matrix $|Df(c)〉=\pmatrix{|∂₁f(t)〉&⋯&|∂_Rf(t)〉}$, such that $|f(c+h)〉=|f(c)〉+|Df(c)〉h+o(h²)$.  The derivatives $|∂_if〉$ are ket-valued functions like $|f〉$.
 
 
 \beginsection{Variational dynamics}
 
-Schrödinger's equation, the quantum law of motion, is
+In the notation defined above, Schrödinger's equation is
 $$i\hbar |DΨ(t)〉=H|Ψ(t)〉.$$
-I will discuss many details of mappings from complex numbers to quantum states, so some notation used in this paper is traditionally used more in mathematics than in physics.  The symbol $|Ψ〉$ denotes a ket-valued function of a real number; $|Ψ(t)〉$ is the ket that this function evaluates to at time $t$.  The Hamiltonian $H$, a Hilbert space operator, acts on this ket, not on the function $|Ψ〉$.  Therefore it is written outside the ket.  The total derivative $D$ acts on the function, so it is written inside the ket.  Because $|Ψ〉$ is a function of a single variable, $|DΨ〉$ is simply another ket-valued function, and $|DΨ(t)〉$ is the ket that would traditionally be written ${∂\over ∂t}|Ψ〉\big|_{t=t}$.  This could alternatively be written as a partial derivative $|DΨ〉=|∂₀Ψ〉$.  If $|Ψ〉$ were a function of several variables, the total derivative function $|DΨ〉$ would evaluate to a row vector $|DΨ(t)〉=\pmatrix{|∂₀Ψ(t)〉&⋯&|∂_RΨ(t)〉}$.  One can regard the kets as column vectors and read this as a Jacobian matrix with infinitely many rows and $R$ columns.  The notation will be elaborated below as needed.
-
-Schrödinger's equation could even be abbreviated to
+Here, $|Ψ〉$ denotes a ket-valued function of time, and $|Ψ(t)〉$ is the ket that this function evaluates to at time $t$.  The Hamiltonian $H$, a Hilbert space operator, acts on this ket, not on the function $|Ψ〉$.  Therefore it is written outside the ket.  This could be abbreviated to
 $$i\hbar |DΨ〉=H|Ψ〉.$$
+
 This is a very simple equation.  The challenge of solving it numerically lies in representing the ket $|Ψ(t)〉$—as is well known, the storage required to expand it over a grid grows exponentially with the number of particles being simulated, and exceeds the number of atoms in the known universe when the system includes merely thousands of particles.  In order to compute dynamics by propagating a quantum state, we must restrict the form of $|Ψ〉$, and require that
 $$|Ψ(t)〉=|ψ(z(t))〉,$$
 or $|Ψ〉=|ψ\circ z〉$, where $z(t)=\left(z₁(t),…,z_R(t)\right)$ is a vector of complex parameters.  This imposes two challenges: to find a form $|ψ〉$ that can approximate the states $|Ψ(t)〉$ with a reasonable number of parameters $R$, and to stably and efficiently compute $z(t)$ to accomplish that approximation.
