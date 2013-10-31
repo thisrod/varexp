@@ -15,7 +15,7 @@ When they realised that positions and momenta are essentially uncertain, the fir
 
 The simplest mechanical systems allow Schrödinger's law of motion to be solved in closed form, but most quantum problems must be solved approximately.  This can be done variationally, specifying a class of approximants that can be manipulated exactly, then finding one of them that most nearly solves the problem.  To test how well a wave function approximates the dynamics of a system, the difference between the two sides of Schrödinger's equation can be measured by the Hilbert space norm.  It remains to choose a class of approximants.  The gaussian wave packets are an common choice, because they differ in their scale and their central position and momentum, useful properties to determine for any quantum state.
 
-The invention of the laser called for a quantum theory of intense radiation.  Laser beams are hard to analyse because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When very coherent matter, in the form of atomic Bose-Einstein condensates, became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
+The invention of the laser in 1963 called for a quantum theory of intense radiation.  Laser beams are hard to analyse because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When very coherent matter, in the form of atomic Bose-Einstein condensates, became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
 
 In the 1970s, Heller put the two ideas together, proposing to simulate quantum dynamics variationally, using finite superpositions of coherent states as the approximants.  This is an appealing approach.  Every quantum state can be approximated arbitrarily well as the number of components in the superposition increases.  The experience of quantum optics shows that, in many systems, the approximation converges with a reasonable number of components.  Also, variational dynamics should avoid the covergence problems that limit the Monte-Carlo methods.
 
@@ -29,49 +29,91 @@ These attempts have aimed to solve chemistry problems, involving dozens of atoms
 
 The instability appears to have two major causes.  The first problem occurs when quantum states are expanded over a finite set of coherent states.  There is a natural way to expand a state as an integral over the coherent states, with a weight function that varies smoothly with the coherent amplitude.  When this function is sampled at a discrete set of coherent amplitudes and the integral approximated by a sum, the state is approximated to some precision.  Part of the error in this appoximation is due to the finite set of coherent states having bounded amplitude, wheras the state being approximated might have components with arbitrarily large particle number—for instance, it might be a coherent state.  When expansion weights for the finite set of coherent states are set by least squares, components with large particle number are approximated by adjacent amplitudes having large weights, with opposite signs so that components with low particle numbers cancel.  This causes the expansion weights to be large, to not resemble samples of any smooth function, and to change sharply as the state changes.  All these properties make it difficult to numerically integrate a rate of change that has been expanded by least squares.  The problems are exacerbated when the amplitudes are spaced irregularly, instead of on a grid.
 
+Expanding a field over Gaussian functions is a rather obvious idea, and physicists are not the only people to have thought of it.  The mathematicians and signal theorists who developed wavelet expansions have also analysed Gaussians.  They call this type of expansion a Gabor frame, or a windowed Fourier transform.  They have prooved several results that are not well known in physics: for example, that discrete sets of coherent states are complete, not just the continuum.  They have also studied overcomplete sets of vectors in general, under the field of frame theory.  Many of these general ideas insight into the specific case of coherent state frames.
+
 The behaviour of the discrete expansion weights is similar to that observed in discrete ill-posed problems, and the methods used to analyse and resolve these can be applied to expansions over coherent states.  However, the cause of ill-posedness in our problem differs from those usually studied—the large number components of the state are real, while the high-frequency components that play the same role in ill-posed problems are spurious ones introduced by errors in measured data.  Therefore the standard methods of resolution don't work as well as usual.  The expansion problem is easier in one way: it is iterated at each timestep, so the dynamics of the coherent amplitudes can be modified so that the expansion problem becomes better posed as the simulation progresses.
 
 The second type of instability is a dynamical one.  This occurs whenever Schrödinger's equation is integrated with a quartic hamiltonian, over discrete timesteps.  In the second quantised picture, it occurs because the repulsion between particles causes components where many particles occupy the mode to oscillate very rapidly.  The simulation becomes stable when these components are removed, but that changes the dynamics.  Integrating Schrödinger's equation with repulsive particles either requires very short timesteps, or special integration formulae that exploit features of Hamiltonian dynamics.  Applying these formulae to the variational dynamics of the coherent states, which are not Hamiltonian, is somewhat subtle.
 
+
+\beginsection{Notational preliminaries}
+
+Quantum mechanics deals with infinite dimensional linear algebra, represented abstractly as bras and kets.  Numerical analysis is also founded on vectors and operators, but in finite dimensional spaces, expanded as matrices and column vectors.  The numerical quantum mechanics discussed in this paper is most conveniently described by combining these notations.
+
+Consider a linear combination of kets,
+$$|ψ〉=c₁|a₁〉+c₂|a₂〉+⋯+c_R|a_R〉.$$
+This can be written as a matrix product $|ψ〉=|A〉c$, where $c=\pmatrix{c₁&⋯&c_R}^{\rm T}$ is a column vector of coefficients, and $|A〉=\pmatrix{|a₁〉&⋯&|a_R〉}$ is a row vector of kets.  Alternatively, the kets $|a_r〉$ can be regarded as infinite dimensional columns, and $|A〉$ as a matrix, representing a linear operator from ${\bf C}^R$ into ket space.  This operator has an adjoint, $〈A|=\pmatrix{〈a₁|&⋯&〈a_R|}^{\rm T}$, that maps kets back to column vectors.  Under the rules of matrix multiplication, the product
+$$〈A|A〉=\pmatrix{〈a₁|a₁〉&&〈a₁|a_R〉\cr &\ddots&\cr 〈a_R|a₁〉&&〈a_R|a_R〉}$$
+is an operator on ${\bf C}^R$, and $|A〉〈A|=|a₁〉〈a₁|+⋯+|a_R〉〈a_R|$ is a Hilbert space operator.  Other matrix products work too; provided the $|a_r〉$ are linearly independent, $|A〉$ will have a singular value decomposition $|A〉=|U〉SV†$, where $|U〉$ is a row of $R$ kets, $S$ is an $R×R$ diagonal matrix of complex numbers, and $V$ is an orthogonal $R×R$ complex matrix%
+\footnote{${}^1$}{In fact, $|A〉$ has an SVD regardless, but $|U〉$ and $S$ are smaller.  When the $|a_r〉$ are linearly dependent, they span a space of dimension less than $R$, and there is no way to choose in which directions it should be extended to give $R$ orthonormal kets.  In this case, $|U〉$ will be a row of ${\rm rank}|A〉$ kets, and $S$ will be ${\rm rank}|A〉×R$.}.
+In this paper, things written as kets have a finite number of infinite dimensional columns, and bras are the other way round.
+
+Even more general matrices are sometimes useful.  For instance, the operator
+$$M=\pmatrix{0&|A〉\cr 〈A|&0}$$
+can be applied to columns of the form $\pmatrix{|ψ〉&z₁&⋯&z_R}^{\rm T}$, giving objects of the same form.  The top left zero is an operator on Hilbert space, while the bottom right one is an $R×R$ matrix.  The general rule is that the things in each row must have the same column dimension, and visa-versa.  Things that have finite dimensional rows and columns will be written as matrices, and things that are infinite in both directions as Hilbert space operators.  These are both just written as letters.
+
+So far, the operator $|A〉$ has been a linear function from vectors into ket space.  General functions will be written $|f〉$ as well, but their applications will be written $|f(c)〉$ instead of $|A〉c$.  If this function is analytic, it has partial derivatives $|∂_if(c)〉$ with respect to the components of $c$.  The derivative $∂_i$ acts on the function, not in Hilbert space, so it is written inside the ket.  These can be assembled into a Jacobian matrix $|Df(c)〉=\pmatrix{|∂₁f(t)〉&⋯&|∂_Rf(t)〉}$, such that $|f(c+h)〉=|f(c)〉+|Df(c)〉h+o(h²)$.  The derivatives $|∂_if〉$ are ket-valued functions like $|f〉$.
+
+
 \beginsection{Variational dynamics}
 
-Schrödinger's equation, the quantum law of motion, is
+In the notation defined above, Schrödinger's equation is
 $$i\hbar |DΨ(t)〉=H|Ψ(t)〉.$$
-I will discuss many details of mappings from complex numbers to quantum states, so some notation used in this paper is traditionally used more in mathematics than in physics.  The symbol $|Ψ〉$ denotes a ket-valued function of a real number; $|Ψ(t)〉$ is the ket that this function evaluates to at time $t$.  The Hamiltonian $H$, a Hilbert space operator, acts on this ket, not on the function $|Ψ〉$.  Therefore it is written outside the ket.  The total derivative $D$ acts on the function, so it is written inside the ket.  Because $|Ψ〉$ is a function of a single variable, $|DΨ〉$ is simply another ket-valued function, and $|DΨ(t)〉$ is the ket that would traditionally be written ${∂\over ∂t}|Ψ〉\big|_{t=t}$.  This could alternatively be written as a partial derivative $|DΨ〉=|∂₀Ψ〉$.  If $|Ψ〉$ were a function of several variables, the total derivative function $|DΨ〉$ would evaluate to a row vector $|DΨ(t)〉=\pmatrix{|∂₀Ψ(t)〉&⋯&|∂_RΨ(t)〉}$.  One can regard the kets as column vectors and read this as a Jacobian matrix with infinitely many rows and $R$ columns.  The notation will be elaborated below as needed.
+Here, $|Ψ〉$ denotes a ket-valued function of time, and $|Ψ(t)〉$ is the ket that this function evaluates to at time $t$.  The Hamiltonian $H$, a Hilbert space operator, acts on this ket, not on the function $|Ψ〉$, and is written outside the ket.  Schrödinger's equation could be abbreviated to
+$$i\hbar |DΨ〉=H|Ψ〉,$$
+equating functions instead of their values.
 
-Schrödinger's equation could even be abbreviated to
-$$i\hbar |DΨ〉=H|Ψ〉.$$
-This is a very simple equation.  The challenge of solving it numerically lies in representing the ket $|Ψ(t)〉$—as is well known, the storage required to expand it over a grid grows exponentially with the number of particles being simulated, and exceeds the number of atoms in the known universe when the system includes merely thousands of particles.  In order to compute dynamics by propagating a quantum state, we must restrict the form of $|Ψ〉$, and require that
+Schrödinger's equation is very simple.  The main challenge of solving it numerically lies in representing the ket $|Ψ(t)〉$—as is well known, the storage required to expand this over a regular basis grows exponentially with the number of particles being simulated, and exceeds the number of atoms in the known universe when the system includes mere thousands of particles.  In order to compute dynamics by propagating a quantum state, we must restrict the form of $|Ψ〉$, and require that
 $$|Ψ(t)〉=|ψ(z(t))〉,$$
-or $|Ψ〉=|ψ\circ z〉$, where $z(t)=\left(z₁(t),…,z_R(t)\right)$ is a vector of complex parameters.  This imposes two challenges: to find a form $|ψ〉$ that can approximate the states $|Ψ(t)〉$ with a reasonable number of parameters $R$, and to stably and efficiently compute $z(t)$ to accomplish that approximation.
+or $|Ψ〉=|ψ\circ z〉$, where $z(t)=\pmatrix{z₁(t)&…&z_R(t)}^{\rm T}$ is a vector of complex parameters.  This poses two challenges: to find a form $|ψ〉$ that can approximate the states $|Ψ(t)〉$ with a reasonable number of parameters $R$, and to stably and efficiently compute $z(t)$ to accomplish that approximation.
 
-Some methods of computing dynamics, such as those involving single-particle Green's functions, derive the expectation values of certain observables without storing data from which the quantum state of the system could be derived.  The above model does not apply to these.  There are also methods, such as phase-space Monte-Carlo ones, that have the above form in principle, but which can compute different parameters $z_r(t)$ independently, and find expectation values of observables without having to store all the parameters at once.
+Some methods of computing dynamics, such as those involving single-particle Green's functions, derive the expectation values of certain observables without storing data from which the quantum state of the system could be derived.  The above model does not apply to these.  There are also methods, such as phase-space Monte-Carlo ones, that have the above form in principle, but which compute different parameters $z_r(t)$ independently, and find expectation values of observables without having to store them all at once.
 
 The next sections will discuss the approximant $|ψ(z)〉$ analysed in this paper.  Before that, I'll outline the method that will be used to compute the dynamical $z(t)$.  The final part of the paper discusses the many details of making this computation numerically stable.
 
 If the approximant $|Ψ(t)〉=|ψ(z(t))〉$ is substituted in Schrödinger's equation, and the chain rule applied, the result is
-$$i\hbar|Dψ(z(t))〉Dz(t)=H|ψ(z(t))〉.$$
-On the left hand side, the kets in the row vector $|Dψ(z(t))〉$ are combined with coefficients from the column vector $Dz(t)=\pmatrix{Dz₁(t)&…&Dz_R(t)}^{\rm T}$.  This is unlikely to have an exact a solution: the kets $|∂_rψ(z(t))〉$ span an $R$-dimensional subspace of Hilbert space, and the ket $H|ψ(z(t))〉$ is likely to have components outside this subspace.  This is a consequence of the restricted form of the approximation.  We can, however, look for a vector $\dot z(z)$ that minimises the residual
-$$\left\|i\hbar|Dψ(z)〉\dot z(z)-H|ψ(z)〉\right\|²,\eqno{(4)}$$
+$$i\hbar|Dψ(z)〉Dz=H|ψ(z)〉.$$
+On the left hand side, the kets in the row vector $|Dψ(z(t))〉$ are combined with coefficients from the column vector $Dz(t)=\pmatrix{Dz₁(t)&…&Dz_R(t)}^{\rm T}$.  This equation is unlikely to have an exact a solution: the kets $|∂_rψ(z(t))〉$ span an $R$-dimensional subspace of Hilbert space, and the ket $H|ψ(z(t))〉$ is likely to lie outside this subspace.  In other words, the restricted form of the approximation does not include the solution to Schrödinger's equation.  We can, however, look for a least-squares solution, a vector $\dot z(z)$ that minimises the residual
+$$\bigl\|i\hbar|Dψ(z)〉\dot z(z)-H|ψ(z)〉\bigr\|²,\tag\residual$$
 and solve the ordinary differential equation
-$${dz\over dt}=\dot z(z),\tag\ode$$
+$$Dz(t)=\dot z(z(t)),\tag\ode$$
 giving a state $|ψ(z(t))〉$ that hopefully approximates the solution to Schrödinger's equation.  When the norm used is the one derived from the inner product of Hilbert space, this is called the Dirac-Frenkel method.
 
-The Dirac-Frenkel solution is only optimised locally.  There might be some $w(t)$ such that, at large times, $|ψ(w(t))〉$ approximates $|Ψ(t)〉$ better that the Dirac-Frenkey solution $|ψ(w(t))〉$ does.  This would require that, at early times, $i\hbar|Dψ(z(t))〉$ is closer to $H|ψ(z(t))〉$ than $i\hbar|Dψ(w(t))〉$ is to $H|ψ(w(t))〉$, but that $z(t)$ loses the ability to track the dynamics at later times.  When we discuss regularisation below, we will see that this is in fact the usual case.  Global optimisation of $z$ is not practical: even computing the local approximation stretches computers to their limits.
+The Dirac-Frenkel solution is only optimised locally.  There might be some $w(t)$ such that, at large times, $|ψ(w(t))〉$ approximates $|Ψ(t)〉$ better that the Dirac-Frenkel solution $|ψ(w(t))〉$ does.  This would require that, at early times, $i\hbar|Dψ(z(t))〉$ is closer to $H|ψ(z(t))〉$ than $i\hbar|Dψ(w(t))〉$ is to $H|ψ(w(t))〉$, but that $z(t)$ loses the ability to track the dynamics at later times.  When we discuss regularisation below, we will see that this is in fact the usual case.  Global optimisation of $z$ is not practical: even computing the local approximation stretches computers to their limits.
+
+The kind of ansatz considered in this paper has the form 
+$$|ψ(z₁,…,z_R)〉=|ψ'(z₁)〉+⋯+|ψ'(z_R)〉.$$
+Here, $z_r$ may be a vector of complex numbers, perhaps a weight and the amplitudes of several modes.  In fact, this form is very general: the DMRG approximants are the only ones I know of that are not a sum of similar terms.  In this case, the derivative has the form
+$$|Dψ(z₁,…,z_R)〉=\pmatrix{|Dψ'(z₁)〉&…&|Dψ'(z_R)〉}.$$
+
+I will refer to the kets $|ψ'(z_r)〉$ as the components of $|ψ(z)〉$.  It is interesting to consider the case where these lie in orthogonal subspaces.  This will very nearly be the case, for instance, if the components are coherent states, with sparsely distributed amplitudes.  In this case, the component derivatives $|Dψ'(z_r)〉$ also lie in the orthogonal subspaces, and the total derivative has a block diagonal structure,
+$$|Dψ(z₁,…,z_R)〉=\pmatrix{|Dψ'(z₁)〉&&\cr&\ddots&\cr&&|Dψ'(z_R)〉},$$
+where the empty elements in row $r$ are null kets in the subspace of the component $|ψ'(z_r)〉$.  The ket from Equation~\residual\ thus becomes
+$$i\hbar|Dψ(z)〉\dot z(z)-H|ψ(z)〉=
+	\pmatrix{|Dψ'(z₁)〉{\dot z}₁(z)-H|ψ'(z₁)〉\cr\vdots\cr |Dψ'(z_R)〉{\dot z}_R(z)-H|ψ'(z_R)〉},$$
+where the rows are mutually orthogonal.  Therefore, the least squares problem can be solved separately for each component, independently minimising 
+$$\bigl‖|Dψ'(z_r)〉{\dot z}_r(z)-H|ψ'(z_r)〉\bigr‖².$$
+If the system is a BEC, and the components $|ψ'(z_r)〉$ are coherent states with amplitudes $z_r$, this problem reduces to the Gross-Pitaevskii Equation.  Heller and others have investigated the problem for general systems with coherent state components, and found that the amplitudes obey something very like classical dynamics.  Therefore variational dynamics with sparse components is a waste of time: its results should be similar to those of the truncated Wigner method, and, if they differ, there won't be much reason to believe one rather than the other.
+
+It is interesting to compare this to positive P simulations for the quartic oscillator.  These have predicted revivals, and have been done for large enough systems that the amplitudes of the coherent states must have been sparse.  I don't know whether both conditions were ever satisfied in the same simulation: it would be interesting to find out.
+
+\beginsection{Modifications to Dirac-Frenkel}
 
 The residual above can be defined using any norm one wishes.  The aim of computing quantum dynamics is usually to find some expectation values that could be compared to observed quantities, and one could consider using a norm that magnified the discrepencies in these observables, so that the solution with the least residual would correspond closely to the exact solution in the directions of interest.  On the other hand, we are computing quantum dynamics: these are unitary in the usual norm, so that a small error introduced at an early time is guaranteed to stay small when the state is propagated to later times.  No other norm guarantees this: they all introduce uncontrolled errors regarding how much early errors are magnified by later dynamics.
 
 Equation~\ode\ will be integrated numerically.  For this to be done stably and efficiently, $\dot z$ must be a reasonably smooth function of $z$.  This is formally expressed in terms of the eigenvalues of the Jacobian $D\dot z$; different integration formulae place different bounds on the magnitudes and phases of these, but they all have limited regions of stability.  Moreover, as we will see below, a technically stable integration formula might still not produce a useful solution.
 
-This complicates the solution of the problem in Formula~4.  It does not suffice to find a $\dot z$ with the smallest residual, for a given value of $z$.  In order for Equation~5 to be numerically solvable, the properties of $\dot z$ under perturbation of $z$ are equally important.  Under the usual Hilbert space norm, Formula~4 is a least squares problem; the pertubation properties of such problems are reasonably well understood.  We will examine ways to modify the problem, by introducing extra least-squares constraints, that might improve its perturbation properties.
+This complicates the solution of the problem in Formula~\residual.  It does not suffice to find a $\dot z$ with the smallest residual, for a given value of $z$.  In order for Equation~\ode\ to be numerically solvable, the properties of $\dot z$ under perturbation of $z$ are equally important.  Under the usual Hilbert space norm, Formula~\residual is a least squares problem; the pertubation properties of such problems are reasonably well understood.  We will examine ways to modify the problem, by introducing extra least-squares constraints, that might improve its perturbation properties.
 
-\beginsection{The phase space expansion operator}
+\beginsection{Continuous phase space expansions}
 
 The approximant studied in this paper has the form
 $$|ψ(φ₁,α₁,⋯,φ_R,α_R)〉=∑_{r=1}^R e^{φ_r+α_ra†}|0〉
 	=\pmatrix{|α₁〉&⋯&|α_R〉}\pmatrix{e^{φ₁+½|α₁|²}\cr\vdots\cr e^{φ_R+½|α_R|²}}
 	=|A〉d,\tag\Ad$$
-where $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  In the limit of large $R$, where the sum approximates an integral over the amplitude $α$, any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of the next section, followed by a discussion of the discrete expansion $|A〉$.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
+where $A=\pmatrix{α₁&⋯&α_R}^{\rm T}$ is a vector of complex amplitudes, $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  The form on the left is more complicated than the $|A〉d$ one, but it is an analytic function of the parameters, which is convenient for derivatives and optimisation.  Wavelet theorists have studyed the conditions on the set of ampltiudes $A$ that allow any state to be expanded in this form, and the stability of expansions as the density of ampltiudes decreases towards the minimum for completeness.  This will be discussed later.
+
+In the limit of large $R$, this sum approximates an integral over the amplitude $α$, and any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of this and the next section.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
 
 Expansion over coherent states is a linear operator from functions of a complex variable to quantum states,
 $$\G f=π^{-½}\int |α〉e^{-½|α|²}f(α*)\,d²α.$$
@@ -108,6 +150,25 @@ If, following Bargmann, we identify state space with the entire functions, $|Γ�
 The part of $|Γ〉$ that projects functions onto entire functions can be written as follows
 $$π^{-½}〈β|Γ〉f=π^{-1}\int 〈β|α〉e^{-½|α|²}f(α*)\,d²α=π^{-1}\int 〈0|D(α-β)|0〉e^{-½|α|²}f(α*)\,d²α.$$
 This appears to be a convolution of the function $e^{-½|α|²}f(α*)$ with the kernel $〈0|D(α)|0〉$.  There are many theorems to the effect that real convolution operators are badly conditioned.  It is interesting that these results do not apply to the complex convolution $|Γ〉$: as a projector, it is as nice an operator as it could possibly be.  I think the loophole is that of real functions can only oscillate at a limited rate, so that their Fourier transforms have finite norm.  Complex functions have space in the Argand plane to oscillate arbitrarily rapidy.  And the kernel $〈0|D(α)|0〉$ does: it is a wave packet with carrier frequency proportional to the imaginary part of $α$.
+
+
+\beginsection{Gabor frames}
+
+Many of the above results for the operator $\G$ are true of expansions over frames in general.  We will treat the finite case, because every frame will eventually have to be represented on a computer.  So suppose the set of kets $|A〉=\pmatrix{|a₁〉&⋯&|a_R〉}$ is a frame for some subspace of Hilbert space.
+
+The theory of frames is traditionally presented in terms of the frame operator,
+$$S=∑_{r=1}^R |a_r〉〈a_r|={\rm Tr}(|A〉〈A|).$$
+In the case that the columns of $|A〉$ are a frame, $S$ is invertible.  The set of vectors
+$$|F〉=S^{-1}|A〉=\pmatrix{S^{-1}|a₁〉&⋯&S^{-1}|a_R〉}
+	=\pmatrix{|φ₁〉&⋯&|φ_R〉}
+$$
+is also a frame, and is known as the dual frame of $|A〉$.  It has the property that $|A〉〈F|$ is the identity operator on the space.
+
+For finite frames, expansions using dual kets have some special properties.  For a start, the dual expansion is the one where the vector of coefficients has the least norm.  In fact, if $|ψ〉=|A〉d$, and $c=〈F|ψ〉$, then $‖d‖²=‖c‖²+‖d-c‖²$\cite{1989-sir-31-626}.  This suggests that $d-c$ is forced to be orthogonal to $c$.
+
+The methods will consider to approximate $|ψ〉=|A〉d$ set $d$ to a linear function of $|ψ〉$.  We will sometimes denote this mapping $d=〈A⁺|ψ〉$, because we intend that $|ψ〉≈|A〉d=|A〉〈A⁺|ψ〉$, whence $〈A⁺|$ is a pseudoinverse of the expansion operator $|A〉$.  We can then define an error operator $E=\bigl(1-|A〉〈A⁺|\bigr)$, so that $|ψ〉-|A〉d=E|ψ〉$.  Because $〈A⁺|$ is linear, it is equivalent to a column vector of bras $〈A⁺|=\pmatrix{〈φ₁|&⋯&〈φ_R|}^{\rm T},$
+such that $d_r=〈φ_r|ψ〉$.  We will call $|φ_r〉$ the dual ket of the component $|α_r〉$.  Note that the dual kets are not normalised.
+
 
 \beginsection{Truncated phase space}
 
@@ -168,17 +229,13 @@ The following three figures show the right singular vectors, sampled versions of
 
 Reducing the dimension of Fock space so that the problem is underdetermined means that, when the problem is solved by SVD, we only take components along $N+1$ directions in Fock space, and map them to $N+1$ directions in parameter space.  The remaining $2R-N-1$ components of the solution are zero.  As we add extra dimensions to Fock space, we are taking components in more Fock space directions, which include more oscillating components of the wavefunction.  This is like sampling a function on a finer grid.  With these directions, we can form some of the smaller singular vectors of the full problem.
 
-
-\beginsection{Gabor frames}
-
-
-\beginsection{Discretely sampled expansions}
+\beginsection{Discrete phase space expansions}
 
 As mentioned above, the computer manipulates a discrete expansion with the form of Equation~\Ad,
 $$|ψ〉=d₁|α₁〉+⋯+d_R|α_R〉=|A〉d.$$
 This kind of expansion has been studied for a long time.  An early question was how dense the amplitudes $α_r$ must be in order for the set to span all kets, and $|A〉$ to be a frame.  In the case that the amplidues are a rectangular grid, with $α_r=ma+inb$ Von~Neumann conjectured in 193? that the condition is one amplitude per area $π$ of phase space, which corresponds to an area $\hbar$ of the $x-p$ plane.  This was proved in 19?.  The conditioning of expansions as the density of sampled amplitudes approaches this limit appears to be an open question.  Another open question is how much this limit can be relaxed if squeezed states are included in the expansion.
 
-In recent decades, these expansions have been studied intensely by engineers involved in signal processing, who call the set of coherent states a Moyal~frame.  These researchers regard gaussian wavepackets as a kind of time-limited Fourier transform, with a gaussian window function, following on from the work of Hamming and others at Bell Labs.  Moyal frames were investigated by the same community that developed wavelets; the latter became of very wide interest, and obscured the earlier work on Moyal frames.
+In recent decades, these expansions have been studied intensely by engineers involved in signal processing, who call the set of coherent states a Gabor~frame.  These researchers regard gaussian wavepackets as a kind of time-limited Fourier transform, with a gaussian window function, following on from the work of Hamming and others at Bell Labs.  Gabor frames were investigated by the same community that developed wavelets; the latter became of very wide interest, and obscured the earlier work.
 
 If the system has only a few modes, so that $α$ is a low-dimensional vector, the set of sampled amplitudes $A=\{α₁, …,α_R\}$ could be a regular grid, with $α_r=(m+in)h$, $m$ and $n$ being integers.  This makes many things easier.  In particular, it is straightforward to relate the weights $d$ to the values of a continuous distribution $f$ at the points $α_r$.  It is convenient to normalise so that $‖d‖=‖f‖$.  If the $α_r$ form a grid with spacing $h$, as specified above, and we set $d_r=cf(α_r)$, $c$ being constant, this normalisation condition is satisfied when
 $$∑_r|d_r|²=c²∑_r|f(α_r)|²=\int |f|²\,d²α≈h²∑_r|f(α_r)|².$$
@@ -319,7 +376,37 @@ The idea is that a relaxed expansion has all the coefficients pulling in the sam
 
 The tensions were calculated for the grid and irregular expansions above, and plotted in the second graph.  Despite the much worse convergence of random sampling, the weights have very nearly the same tension as the regular grid.  
 
-%% Tychonov conditioning
+\beginsection{Tychonov conditioning}
+
+The simplest approximation method is Tychonoff regularised least squares, with different values of the regularisation parameter $λ$.  This assigns expansion coefficients $d$ in order that
+$$\pmatrix{|A〉\cr λI}d≈\pmatrix{|ψ〉\cr 0},$$
+this equation being satisfied in a least-squares sense.  The solution minimises the residual $‖|ψ〉-|A〉d‖²+λ²‖d‖²$.  It is given by
+$$d=〈A⁺|ψ〉=\pmatrix{|A〉\cr λI}⁺\pmatrix{1\cr 0_R}|ψ〉,$$
+where $()⁺$ denotes the Moore-Penrose pseudoinverse of a matrix, $I$ is the $R×R$ unit matrix, and $0_R$ is a $R×1$ zero vector.  I.e., the vector $〈A⁺|$ is the leftmost column of the pseudoinverse matrix.
+
+Suppose $|A〉$ has the singular-value decomposition $|A〉=|U〉SV†$, so that
+$$\pmatrix{|A〉\cr λI}v_r=\pmatrix{σ_r|u_r〉\cr λv_r}=\sqrt{σ_r²+λ²}w_r.$$
+The orthonormality of the $w_r$ follows from that of the $|u_r〉$ and $v_r$, so we have a singular-value decomposition
+$$\pmatrix{|A〉\cr λI}=WTV†,$$
+where $τ_r=\sqrt{σ_r²+λ²}$.  Then 
+$$〈A⁺|=\pmatrix{|A〉\cr λI}⁺\pmatrix{1\cr 0_R}=VT^{-1}W†\pmatrix{1\cr 0_R},$$
+where the last two factors are the first column of $W†$,
+$$W†\pmatrix{1\cr 0_R}=\pmatrix{{σ₁\over\sqrt{σ₁²+λ²}}〈u₁|\cr\vdots\cr 
+	{σ_R\over\sqrt{σ_R²+λ²}}〈u_R|}.$$
+It follows that the right singular vectors of $〈A⁺|$ are the bras $〈u_r|$, and the singular values are 
+$$σ⁺_r={σ_r\over τ_r\sqrt{σ_r²+λ²}}={σ_r\over σ_r²+λ²}.$$
+Tychonov regularisation divides the singular values of $|A〉$ into large ones and small ones, as compared to $λ$.  For large $σ_r$, the inverse is very close to the unregularised problem, with $σ⁺_r≈1/σ_r$.  For small $σ_r$, the component in that singular direction is nearly discarded by $|Α⁺〉$, with $σ⁺_r≈σ_r/λ²$.  Note that, in this limit, $|Α⁺〉=λ^{-2}|A〉$!  In between, there is a maximum at $σ_r=λ$, with $σ_r=1/2λ$, half the unregularised value.
+
+This has dramatic consequences for the conditioning of the regularised problem, and how that varies with $λ$.  When $λ<σ_R$, regularisation has very little effect: the condition of $〈Α⁺|$ is the same as that of $|A〉$, which, for dense sets of coherent states, is usually dreadful.  As $λ$ increases, so that $σ₁<λ<σ_R$, the singular values lie on either side of the $σ_r=λ$ peak; the condition of $〈Α⁺|$ is determined by how far below this peak $σ₁$ and $σ_R$ fall, and the condition number has a sharp minimum when $σ⁺₁=σ⁺_R$.  When $λ$ dominates the singular values, and $|Α⁺〉=λ^{-2}|A〉$, it is again the case that their condition is the same.
+
+\midinsert \XeTeXpicfile tysv.pdf width \hsize
+Figure 3 \endinsert
+
+This is illustrated in Figure~3, which plots the logarithms of the singular values of $|A〉$ against those of $|A⁺〉$, both scaled to the regularisation parameter $λ$.  In the right hand plot, $λ$ is small compared the the singular values, so these lie very close to the line $σ⁺=1/σ$.  In the left hand plot, $λ$ is large, $|A⁺〉$ is nearly $λ^{-2}|A〉$, and the singular values lie on $λσ⁺=σ/λ$.  The singular values have been inverted, but this does not change the ratio of the smallest to the largest, so in both cases the condition numbers of $|A〉$ and $|A⁺〉$ are the same.
+
+In the middle plot, $λ$ is of the same order as the singular values, which is the usual case in well-regularised problems.  In the illustrated case, where the singular values span several orders of magnitude, the condition number of $|A⁺〉$ is about the square root of that of $|A〉$.  If the singular values were more even to begin with, and all fit in the curve at the top of the peak, the improvement would be greater.  However, in this case it is unlikely that the problem would need to be regularised, so the square root improvement is likely the best that can be expected.
+
+The leftmost column of the figure illustrates a large regularisation parameter.  The norm of $d$ is constrained to be small, so the approximation is very bad.  However, the approximation coefficients are very well behaved: they are brackets of $|ψ〉$ with coherent states.  The rightmost column illustrates a small regularisation parameter, where $d$ is essentially the least squares solution to $|A〉d=|ψ〉$.  This approximation is good, and the plot of the error operator is mostly black.  In fact, it is surprisingly good: the largest component amplitude is around 2, but the approximation is nearly exact up to $n=11$.  There is a price to pay for this.  The dual kets have large norms, and they are close to the number state $|n=14〉$.  This means that approximations of states with small amplitudes not be stable: perturbing such a state by adding a small component of $|n=14〉$ will wreak havoc with its expansion coefficients.  Using the approximation method of the leftmost column, this component would have very little effect on the coefficients.  This type of instability is very common in least squares problems, and the purpose of regularisation methods such as Tychonov's is to avoid it by trading off the ability to represent large number states.  The middle columns show some intermediate values of $λ$.  In the third column, the dual kets are close to 1, and number states up to $n=4$ or 5 are approximated well, as would be expected for an expansion over amplitude 2 coherent states.  This seems to achieve the right tradeoff.
 
 There is a family of methods for inverting operators with small singular values, known as regularisation methods.  A very useful idea is due to Tychonov.  The problem
 $$\Gx f=|ψ〉$$
@@ -457,9 +544,20 @@ The top line indicates that the condition number is independent of the phases of
 
 \beginsection{Ways the problem has been simplified for this paper}
 
-This paper will talk about two related but distinct inverse problems.  Both start with a given wavefunction $|ψ〉$, and a set of amplitudes in phase space, $\{α_j\}$, over which to expand it.  In systems with few modes, these points could be a grid, but in many-mode systems they will have to be more sparse than that: there isn't space to store grid coefficients.  The first problem, let's call it the inverse problem, is to find a set of weights $f_j$ such that $∑f_j|α_j〉$ approximates $|ψ〉$.  This is simply finding a discrete inverse to $G$ sampled on the grid $α_j$; since $G$ is a projection, the pseudoinverse of $G$ should solve it well enough.  The differential case, where we have an expansion for $|ψ〉$ which we want to perturb to represent $|ψ〉+|dψ〉$, is no harder.  Because $G$ is linear, we can expand $|dψ〉$, and add it to the expansion of $|ψ〉$.
+The problem we have discussed so far is to expand a state $|ψ〉$ over a set of coherent states, in the form $|ψ〉=|A〉d$.  In order for a this state to be represented on a computer, the coherent amplitudes $A$ and the coefficients $d$ would all have to be stored in memory.  In a simulation, we will have an expansion $d$ for $|ψ〉$, which we want to perturb to represent $|ψ〉+|δψ〉$.  The expansion operator $|A〉$ is linear, so we could expand $|δψ〉=|A〉δd$ and add $δd$ to $d$  However, if the simulation is to represent a many-mode state efficiently, the amplitudes will likely have to vary over time as well as the coefficients.  Also, it might sometimes be more efficient to vary the ampltiudes.  For example, if a coherent state was rotating in an oscillator, it might be simpler to rotate the $α_j$ than to vary the weights.
 
-The second problem, the variational one, is a generalisation.  As well as the grid $α_j$, we have a set of weights $f_j$ representing some wavefunction, presumably not $|ψ〉$.  Instead of expanding $|ψ〉$ over phase space, we want to expand it over the columns of $|Dψ(f,α)〉$, the set of all changes we can make by slightly adjusting the original expansion, and the grid.  Obviously, we can solve this problem simply by setting the coefficients of $|∂fψ(f,a)〉$ to the solution of the inverse problem, and those of $|∂fψ(f,a)〉$ to zero.  Is this the smallest norm solution?  Probably not: if a coherent state was moving in an oscillator, it might be easier to just rotate the $α_j$.
+We then have a variational problem $|\dot ψ〉=|Dψ(z)〉\dot z$, where
+$$z=\pmatrix{A\cr d},$$
+and the expansion operator $|Dψ(z)〉$ includes the derivatives of the coherent states with respect to their amplitudes (notation?).
+
+These two problems are closely related.  In fact,
+$$|Dψ(z)〉=
+	\lim_{h→0}\pmatrix{|A+½h〉&|A-½h〉}
+	\pmatrix{{I\over 2}&{Id\over h}\cr{I\over 2}&-{Id\over h}}.
+$$
+The variational problem is equivalent to expanding the state over a frame of $2R$ coherent states, clustered in tight pairs, then taking sums and differences of the expansion coefficients.  In fact, the vector $d$ could be absorbed into the shifts $+½h$ and $-½h$, so that the transformation matrix was even simpler.  This offers other approaches to regularisation: we could expand with regularised coefficients, and apply the transformation to the result.
+
+When two amplitudes $α_r$ and $α_s$ are close together, three linearly independent $d$ cause $|Dψ(z)〉d$ become parallel.  These being $|∂_rψ〉- |∂_sψ〉$, $|∂_{R+r}ψ〉$, and $|∂_{R+s}ψ〉$.  Two nearby points effectively become one, as far as the variational problem is concerned!
 
 Since we have a totally stable solution to the problem, why would we try anything else?  Because we're iterating the problem, and we need to preserve our ability to solve it at future steps.  If the amplitudes form a grid, which covers all the energies the system could possibly access, we're set: we'll always be able to expand over them.  However, we can't do that for many mode systems: there will always be accessible states of the system whose support in phase space is remote from the current grid.  The set $|Dψ〉$ will have some small singular values, corresponding to directions where the amplitudes and samples are adjusted in a way that preserves the wavefunction.  We are free to add these as we like, in order to maintain a grid on which we can expand $|ψ〉$ in the future.
 
