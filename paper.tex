@@ -8,12 +8,13 @@
 \def\G{|Γ〉}
 \def\Gx{|Γ_χ〉}
 \def\cite#1{$[\hbox{\tt #1}]$}
+\def\T{^{\rm T}}
 
 %% Background
 
 When they realised that positions and momenta are essentially uncertain, the first quantum physicists were bound to discover the gaussian wave packet by seeking conditions that produce a normal distribution of probability.  They soon understood the free particle and turned to the harmonic oscillator, investigating the form of its ground state and the way its excited states generate sinusoidal motion in the classical limit.  These problems were also solved by the gaussian wave packet.  With its width fixed by equipartition of energy and the uncertainty principle, it became the coherent state.
 
-The simplest mechanical systems allow Schrödinger's law of motion to be solved in closed form, but most quantum problems must be solved approximately.  This can be done variationally, specifying a class of approximants that can be manipulated exactly, then finding one of them that most nearly solves the problem.  To test how well a wave function approximates the dynamics of a system, the difference between the two sides of Schrödinger's equation can be measured by the Hilbert space norm.  It remains to choose a class of approximants.  The gaussian wave packets are an common choice, because they differ in their scale and their central position and momentum, useful properties to determine for any quantum state.
+The simplest mechanical systems allow Schrödinger's law of motion to be solved in closed form, but most quantum problems must be solved approximately.  This can be done variationally, specifying a class of approximants that can be manipulated exactly, then finding one of them that most nearly solves the problem.  To measure how well a wave function $|ψ(t)〉$ approximates the dynamics of a system, we will compare the left and right sides of Schrödinger's equation, $i\hbar{d|ψ〉\over dt}$ and $H|ψ〉$; these are both vectors in Hilbert space, and the norm defines a distance between them.  It remains to choose a class of approximants.  The gaussian wave packets are an common choice, because they differ in their scale and their central position and momentum, useful properties to determine for any quantum state.
 
 The invention of the laser in 1963 called for a quantum theory of intense radiation.  Laser beams are hard to analyse because their quantum descriptions are so large, comprising up to $10^{18}$ photons distributed across thousands of modes.  The theory was made managable by Glauber and Sudarshan, who showed that any quantum state can be expanded as a superposition of coherent states.  Laser light is very coherent, so these expansions often represent it efficiently.  Moyal(?) developed an efficient way to calculate dynamics, leading to a family of phase space Monte-Carlo methods.  When very coherent matter, in the form of atomic Bose-Einstein condensates, became easy to access in the lab, phase space methods were sucessfully applied to calculate its dynamics, and have since been applied to other forms of condensed matter.  They have solved many problems, but are limited by intractable convergence issues.
 
@@ -27,9 +28,11 @@ These attempts have aimed to solve chemistry problems, involving dozens of atoms
 
 %% Overview
 
+Both condition and numerical stability refer to reasons that a computer can give the wrong answer to a numerical problem.  The distinction between them is a bit subtle.  A problem is ill-conditioned if the solution is very sensitive to the data with which the problem is stated: the canonical example is computing $\sin(x)$ for $x=10⁶$, whence a relative error of $π×10^{-6}$ in $x$ causes a 100\% error in $\sin(x)$.  The key thing to note is that this has nothing to do with how $\sin(x)$ is computed—the error in $x$ could be due to measurement uncertainty, in which case there would be no way to calculate $\sin(x)$: we'd need to measure it directly.  Condition is a property of problems.  Stability is a property of solutions.  For example, if we asked a computer to calculate $1-\cos(x)$ in the obvious way, with $x$ between 0 and $10^{-10}$, the result might vary randomly around 0, in a range determined by the precision with which the computer stored numbers.  But this problem is not intrinsically hard: at any reasonable level of precision, it amounts to finding $x²/2$.  The method of subtracting a numerical value of $\cos(x)$ from 1, which generates random numbers, is unstable.
+
 The instability appears to have two major causes.  The first problem occurs when quantum states are expanded over a finite set of coherent states.  There is a natural way to expand a state as an integral over the coherent states, with a weight function that varies smoothly with the coherent amplitude.  When this function is sampled at a discrete set of coherent amplitudes and the integral approximated by a sum, the state is approximated to some precision.  Part of the error in this appoximation is due to the finite set of coherent states having bounded amplitude, wheras the state being approximated might have components with arbitrarily large particle number—for instance, it might be a coherent state.  When expansion weights for the finite set of coherent states are set by least squares, components with large particle number are approximated by adjacent amplitudes having large weights, with opposite signs so that components with low particle numbers cancel.  This causes the expansion weights to be large, to not resemble samples of any smooth function, and to change sharply as the state changes.  All these properties make it difficult to numerically integrate a rate of change that has been expanded by least squares.  The problems are exacerbated when the amplitudes are spaced irregularly, instead of on a grid.
 
-Expanding a field over Gaussian functions is a rather obvious idea, and physicists are not the only people to have thought of it.  The mathematicians and signal theorists who developed wavelet expansions have also analysed Gaussians.  They call this type of expansion a Gabor frame, or a windowed Fourier transform.  They have prooved several results that are not well known in physics: for example, that discrete sets of coherent states are complete, not just the continuum.  They have also studied overcomplete sets of vectors in general, under the field of frame theory.  Many of these general ideas insight into the specific case of coherent state frames.
+Expanding a field over Gaussian functions is a rather obvious idea, and physicists are not the only people to have thought of it.  The mathematicians and signal theorists who developed wavelet expansions have also analysed Gaussians.  They call this type of expansion a Gabor frame, or a windowed Fourier transform.  They have proved several results that are not well known in physics: for example, that discrete sets of coherent states are complete, not just the continuum.  They have also studied overcomplete sets of vectors in general, under the field of frame theory.  Many of these general ideas insight into the specific case of coherent state frames.
 
 The behaviour of the discrete expansion weights is similar to that observed in discrete ill-posed problems, and the methods used to analyse and resolve these can be applied to expansions over coherent states.  However, the cause of ill-posedness in our problem differs from those usually studied—the large number components of the state are real, while the high-frequency components that play the same role in ill-posed problems are spurious ones introduced by errors in measured data.  Therefore the standard methods of resolution don't work as well as usual.  The expansion problem is easier in one way: it is iterated at each timestep, so the dynamics of the coherent amplitudes can be modified so that the expansion problem becomes better posed as the simulation progresses.
 
@@ -42,15 +45,15 @@ Quantum mechanics deals with infinite dimensional linear algebra, represented ab
 
 Consider a linear combination of kets,
 $$|ψ〉=c₁|a₁〉+c₂|a₂〉+⋯+c_R|a_R〉.$$
-This can be written as a matrix product $|ψ〉=|A〉c$, where $c=\pmatrix{c₁&⋯&c_R}^{\rm T}$ is a column vector of coefficients, and $|A〉=\pmatrix{|a₁〉&⋯&|a_R〉}$ is a row vector of kets.  Alternatively, the kets $|a_r〉$ can be regarded as infinite dimensional columns, and $|A〉$ as a matrix, representing a linear operator from ${\bf C}^R$ into ket space.  This operator has an adjoint, $〈A|=\pmatrix{〈a₁|&⋯&〈a_R|}^{\rm T}$, that maps kets back to column vectors.  Under the rules of matrix multiplication, the product
+This can be written as a matrix product $|ψ〉=|A〉c$, where $c=\pmatrix{c₁&⋯&c_R}\T$ is a column vector of coefficients, and $|A〉=\pmatrix{|a₁〉&⋯&|a_R〉}$ is a row vector of kets.  Alternatively, the kets $|a_r〉$ can be regarded as infinite dimensional columns, and $|A〉$ as a matrix, representing a linear operator from ${\bf C}^R$ into ket space.  This operator has an adjoint, $〈A|=\pmatrix{〈a₁|&⋯&〈a_R|}\T $, that maps kets back to column vectors.  Under the rules of matrix multiplication, the product
 $$〈A|A〉=\pmatrix{〈a₁|a₁〉&&〈a₁|a_R〉\cr &\ddots&\cr 〈a_R|a₁〉&&〈a_R|a_R〉}$$
-is an operator on ${\bf C}^R$, and $|A〉〈A|=|a₁〉〈a₁|+⋯+|a_R〉〈a_R|$ is a Hilbert space operator.  Other matrix products work too; provided the $|a_r〉$ are linearly independent, $|A〉$ will have a singular value decomposition $|A〉=|U〉SV†$, where $|U〉$ is a row of $R$ kets, $S$ is an $R×R$ diagonal matrix of complex numbers, and $V$ is an orthogonal $R×R$ complex matrix%
+operates on ${\bf C}^R$, and $|A〉〈A|=|a₁〉〈a₁|+⋯+|a_R〉〈a_R|$ operates on Hilbert space.  Other matrix products work too; provided the $|a_r〉$ are linearly independent, $|A〉$ will have a singular value decomposition $|A〉=|U〉SV†$, where $|U〉$ is a row of $R$ kets, $S$ is an $R×R$ diagonal matrix of complex numbers, and $V$ is an orthogonal $R×R$ complex matrix%
 \footnote{${}^1$}{In fact, $|A〉$ has an SVD regardless, but $|U〉$ and $S$ are smaller.  When the $|a_r〉$ are linearly dependent, they span a space of dimension less than $R$, and there is no way to choose in which directions it should be extended to give $R$ orthonormal kets.  In this case, $|U〉$ will be a row of ${\rm rank}|A〉$ kets, and $S$ will be ${\rm rank}|A〉×R$.}.
 In this paper, things written as kets have a finite number of infinite dimensional columns, and bras are the other way round.
 
 Even more general matrices are sometimes useful.  For instance, the operator
 $$M=\pmatrix{0&|A〉\cr 〈A|&0}$$
-can be applied to columns of the form $\pmatrix{|ψ〉&z₁&⋯&z_R}^{\rm T}$, giving objects of the same form.  The top left zero is an operator on Hilbert space, while the bottom right one is an $R×R$ matrix.  The general rule is that the things in each row must have the same column dimension, and visa-versa.  Things that have finite dimensional rows and columns will be written as matrices, and things that are infinite in both directions as Hilbert space operators.  These are both just written as letters.
+acts on columns of the form $\pmatrix{|ψ〉&z₁&⋯&z_R}\T $ to give columns of the same form.  The top left zero is an operator on Hilbert space, while the bottom right one is an $R×R$ matrix.  The general rule is that the things in each row must have the same column dimension, and visa-versa.  Things that have finite dimensional rows and columns will be written as matrices, and things that are infinite in both directions as Hilbert space operators.  These are both just written as letters.
 
 So far, the operator $|A〉$ has been a linear function from vectors into ket space.  General functions will be written $|f〉$ as well, but their applications will be written $|f(c)〉$ instead of $|A〉c$.  If this function is analytic, it has partial derivatives $|∂_if(c)〉$ with respect to the components of $c$.  The derivative $∂_i$ acts on the function, not in Hilbert space, so it is written inside the ket.  These can be assembled into a Jacobian matrix $|Df(c)〉=\pmatrix{|∂₁f(t)〉&⋯&|∂_Rf(t)〉}$, such that $|f(c+h)〉=|f(c)〉+|Df(c)〉h+o(h²)$.  The derivatives $|∂_if〉$ are ket-valued functions like $|f〉$.
 
@@ -65,7 +68,7 @@ equating functions instead of their values.
 
 Schrödinger's equation is very simple.  The main challenge of solving it numerically lies in representing the ket $|Ψ(t)〉$—as is well known, the storage required to expand this over a regular basis grows exponentially with the number of particles being simulated, and exceeds the number of atoms in the known universe when the system includes mere thousands of particles.  In order to compute dynamics by propagating a quantum state, we must restrict the form of $|Ψ〉$, and require that
 $$|Ψ(t)〉=|ψ(z(t))〉,$$
-or $|Ψ〉=|ψ\circ z〉$, where $z(t)=\pmatrix{z₁(t)&…&z_R(t)}^{\rm T}$ is a vector of complex parameters.  This poses two challenges: to find a form $|ψ〉$ that can approximate the states $|Ψ(t)〉$ with a reasonable number of parameters $R$, and to stably and efficiently compute $z(t)$ to accomplish that approximation.
+or $|Ψ〉=|ψ\circ z〉$, where $z(t)=\pmatrix{z₁(t)&…&z_R(t)}\T $ is a vector of complex parameters.  This poses two challenges: to find a form $|ψ〉$ that can approximate the states $|Ψ(t)〉$ with a reasonable number of parameters $R$, and to stably and efficiently compute $z(t)$ to accomplish that approximation.
 
 Some methods of computing dynamics, such as those involving single-particle Green's functions, derive the expectation values of certain observables without storing data from which the quantum state of the system could be derived.  The above model does not apply to these.  There are also methods, such as phase-space Monte-Carlo ones, that have the above form in principle, but which compute different parameters $z_r(t)$ independently, and find expectation values of observables without having to store them all at once.
 
@@ -73,7 +76,7 @@ The next sections will discuss the approximant $|ψ(z)〉$ analysed in this pape
 
 If the approximant $|Ψ(t)〉=|ψ(z(t))〉$ is substituted in Schrödinger's equation, and the chain rule applied, the result is
 $$i\hbar|Dψ(z)〉Dz=H|ψ(z)〉.$$
-On the left hand side, the kets in the row vector $|Dψ(z(t))〉$ are combined with coefficients from the column vector $Dz(t)=\pmatrix{Dz₁(t)&…&Dz_R(t)}^{\rm T}$.  This equation is unlikely to have an exact a solution: the kets $|∂_rψ(z(t))〉$ span an $R$-dimensional subspace of Hilbert space, and the ket $H|ψ(z(t))〉$ is likely to lie outside this subspace.  In other words, the restricted form of the approximation does not include the solution to Schrödinger's equation.  We can, however, look for a least-squares solution, a vector $\dot z(z)$ that minimises the residual
+On the left hand side, the kets in the row vector $|Dψ(z(t))〉$ are combined with coefficients from the column vector $Dz(t)=\pmatrix{Dz₁(t)&…&Dz_R(t)}\T $.  This equation is unlikely to have an exact solution: the kets $|∂_rψ(z(t))〉$ span an $R$-dimensional subspace of Hilbert space, and the ket $H|ψ(z(t))〉$ is likely to lie outside this subspace.  In other words, the restricted form of the approximation does not include the exact solution to Schrödinger's equation.  We can, however, look for a least-squares solution, a vector $\dot z(z)$ that minimises the residual
 $$\bigl\|i\hbar|Dψ(z)〉\dot z(z)-H|ψ(z)〉\bigr\|²,\tag\residual$$
 and solve the ordinary differential equation
 $$Dz(t)=\dot z(z(t)),\tag\ode$$
@@ -111,7 +114,7 @@ The approximant studied in this paper has the form
 $$|ψ(φ₁,α₁,⋯,φ_R,α_R)〉=∑_{r=1}^R e^{φ_r+α_ra†}|0〉
 	=\pmatrix{|α₁〉&⋯&|α_R〉}\pmatrix{e^{φ₁+½|α₁|²}\cr\vdots\cr e^{φ_R+½|α_R|²}}
 	=|A〉d,\tag\Ad$$
-where $A=\pmatrix{α₁&⋯&α_R}^{\rm T}$ is a vector of complex amplitudes, $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  The form on the left is more complicated than the $|A〉d$ one, but it is an analytic function of the parameters, which is convenient for derivatives and optimisation.  Wavelet theorists have studyed the conditions on the set of ampltiudes $A$ that allow any state to be expanded in this form, and the stability of expansions as the density of ampltiudes decreases towards the minimum for completeness.  This will be discussed later.
+where $A=\pmatrix{α₁&⋯&α_R}\T $ is a vector of complex amplitudes, $|α_r〉$ is a coherent state, and $φ_r$ is a complex weight.  The form on the left is more complicated than the $|A〉d$ form, but it is an analytic function of $φ$ and $α$, which is convenient for derivatives and optimisation.  Wavelet theorists have studied the conditions on the set of amplitudes $A$ that allow any state to be expanded in this form, and the numerical stability of those expansions as the density of ampltiudes decreases towards the minimum for completeness.  This will be discussed later.
 
 In the limit of large $R$, this sum approximates an integral over the amplitude $α$, and any state can be approximated arbitrarily well by this form.  The continuous phase-space expansion is the topic of this and the next section.  Many problems in quantum optics have been solved by a family of Monte-Carlo methods, using similar expansions, where the amplitudes $α_r$ are propagated independently.  This gives some grounds to hope that the states of interesting many-particle systems can be expanded with a reasonable number of components $R$.
 
@@ -166,7 +169,7 @@ is also a frame, and is known as the dual frame of $|A〉$.  It has the property
 
 For finite frames, expansions using dual kets have some special properties.  For a start, the dual expansion is the one where the vector of coefficients has the least norm.  In fact, if $|ψ〉=|A〉d$, and $c=〈F|ψ〉$, then $‖d‖²=‖c‖²+‖d-c‖²$\cite{1989-sir-31-626}.  This suggests that $d-c$ is forced to be orthogonal to $c$.
 
-The methods will consider to approximate $|ψ〉=|A〉d$ set $d$ to a linear function of $|ψ〉$.  We will sometimes denote this mapping $d=〈A⁺|ψ〉$, because we intend that $|ψ〉≈|A〉d=|A〉〈A⁺|ψ〉$, whence $〈A⁺|$ is a pseudoinverse of the expansion operator $|A〉$.  We can then define an error operator $E=\bigl(1-|A〉〈A⁺|\bigr)$, so that $|ψ〉-|A〉d=E|ψ〉$.  Because $〈A⁺|$ is linear, it is equivalent to a column vector of bras $〈A⁺|=\pmatrix{〈φ₁|&⋯&〈φ_R|}^{\rm T},$
+The methods will consider to approximate $|ψ〉=|A〉d$ set $d$ to a linear function of $|ψ〉$.  We will sometimes denote this mapping $d=〈A⁺|ψ〉$, because we intend that $|ψ〉≈|A〉d=|A〉〈A⁺|ψ〉$, whence $〈A⁺|$ is a pseudoinverse of the expansion operator $|A〉$.  We can then define an error operator $E=\bigl(1-|A〉〈A⁺|\bigr)$, so that $|ψ〉-|A〉d=E|ψ〉$.  Because $〈A⁺|$ is linear, it is equivalent to a column vector of bras $〈A⁺|=\pmatrix{〈φ₁|&⋯&〈φ_R|}\T ,$
 such that $d_r=〈φ_r|ψ〉$.  We will call $|φ_r〉$ the dual ket of the component $|α_r〉$.  Note that the dual kets are not normalised.
 
 
@@ -310,10 +313,10 @@ $$U=π^{-½}\pmatrix{e^{-(x-x₁)²}&⋯&e^{-(x-x_R)²}},$$
 and $w$ be a column vector of $R$ real weights.  Then define a residual
 $$r(w)=\int_D(Uw-1)².$$
 The derivative of this with respect to the weights is
-$$Dr(w)=\int_D 2(Uw-1)U=2\int_D U^{\rm T}Uw-U.$$
-(Note that, for row vectors $a$ and $c$, and $b$ a column vector, $abc=c^{\rm T}ab$.)
+$$Dr(w)=\int_D 2(Uw-1)U=2\int_D U\T Uw-U.$$
+(Note that, for row vectors $a$ and $c$, and $b$ a column vector, $abc=c\T ab$.)
 Unfortunately,
-$$\int (U^{\rm T}U)_{ij}=π^{-1}\int e^{-(x-x_i)²-(x-x_j)²}\,dx
+$$\int (U\T U)_{ij}=π^{-1}\int e^{-(x-x_i)²-(x-x_j)²}\,dx
 	={1\over\sqrt{2π}}e^{(x_i-x_j)²/2},$$
 and $\int u_i=1$, so this is the identical problem again.
 
@@ -321,7 +324,7 @@ An obvious way would be to assign amplitudes to the nearest sample.  That makes 
 
 To prevent the weights from oscillating in order to fit the edges of the samples, it is tempting to do a weighted least squares fit, which emphasises fitting the centre of the cluster over fitting the edges.  There are two ways to do this.  Firstly, instead of expanding the constant function $f(x)=1$, we can expand a peaked function such as $f(x)=e^{-x²}$, then divide the coefficient of $e^{-(x-x_r)²}$ by $e^{-(x_r)²}$ to get a weight.  This mimics the expansions we need to do in practice, where the sample points cover the region where the expanded function has large values.  The residual in this case is
 $${\cal E} = \int\left(e^{-x²}-∑_rd_re^{(x-x_r)²}\right)²;$$
-the only change to the normal equations is that the right hand side $\pmatrix{1&⋯&1}^{\rm T}$ is replaced by a constant multiple of 
+the only change to the normal equations is that the right hand side $\pmatrix{1&⋯&1}\T $ is replaced by a constant multiple of 
 $$b=\pmatrix{e^{-x₁²/2}&⋯&e^{-x_R²/2}}.\tag\rhs$$
 For now, I'm ignoring factors of 2, $\sqrt π $ and so on: how the weights oscillate is more interesting than their size.  This seems to work: with random sample points, the weights still oscillate, but remain within an order of magnitude or two, where the weights from expanding the constant function vary by a factor of a million.
 
