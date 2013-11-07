@@ -4,7 +4,7 @@
 
 \title{The dual frame of coherent states with random amplitudes}
 
-\midinsert\XeTeXpicfile approx.pdf height \hsize rotated 90 \endinsert
+%\midinsert\XeTeXpicfile approx.pdf height \hsize rotated 90 \endinsert
 
 Let $\{α₁,…,α_R\}$ be a set of $R$ complex amplitudes, distributed irregularly.  An example is plotted in the top line overleaf, with $R=15$, and the amplitudes drawn from a gaussian distribution with $|α|_{\rm rms}=2$.  We aim to approximate kets with linear combinations of the coherent states $|α₁〉$ through $|α_R〉$, in the form $|ψ〉≈|A〉d$, where $|A〉=\pmatrix{|α₁〉&⋯&|α_R〉}$, and $d$ is a column of complex weights.  Presumably, not all kets can be approximated this way: it would be asking too much to approximate a Fock state $|n=100〉$ in terms of coherent states with amplitudes 1 and 2.
 
@@ -12,7 +12,30 @@ Some dual kets and error operators are plotted overleaf, for a family of related
 
 The approximation in the leftmost column is essentially $〈A⁺|=10^{-2}〈A|$, which is very close to zero.  Therefore the error operator is close to $E=1$, with ones on the diagonal, and zeros elsewhere.  The first three dual kets $|φ₁〉$ through $|φ₃〉$ are illustrated below, by plotting the inner products $〈β|φ_r〉$, where $β$ ranges over phase space.  The component amplitudes are overlaid as white dots.  In this case, the dual kets are scaled component kets, with $|φ_r〉\propto|α_r〉$.  The amplitudes $α₁$, $α₂$ and $α₃$ are the white dots at the centres of the plotted coherent states. 
 
-\midinsert\XeTeXpicfile tych.pdf width\hsize \endinsert
+The illustrated approximation methods use Tychonoff regularised least squares, with different values of the regularisation parameter $λ$.  They assign expansion coefficients $d$ in order that
+$$\pmatrix{|A〉\cr λI}d≈\pmatrix{|ψ〉\cr 0},$$
+this equation being satisfied in a least-squares sense.  The solution minimises the residual $‖|ψ〉-|A〉d‖²+λ²‖d‖²$.  It is given by
+$$d=〈A⁺|ψ〉=\pmatrix{|A〉\cr λI}⁺\pmatrix{1\cr 0_R}|ψ〉,$$
+where $()⁺$ denotes the Moore-Penrose pseudoinverse of a matrix, $I$ is the $R×R$ unit matrix, and $0_R$ is a $R×1$ zero vector.  I.e., the vector $〈A⁺|$ is the leftmost column of the pseudoinverse matrix.
+
+Suppose $|A〉$ has the singular-value decomposition $|A〉=|U〉SV†$, so that
+$$\pmatrix{|A〉\cr λI}v_r=\pmatrix{σ_r|u_r〉\cr λv_r}=\sqrt{σ_r²+λ²}w_r.$$
+The orthonormality of the $w_r$ follows from that of the $|u_r〉$ and $v_r$, so we have a singular-value decomposition
+$$\pmatrix{|A〉\cr λI}=WTV†,$$
+where $τ_r=\sqrt{σ_r²+λ²}$.  Then 
+$$〈A⁺|=\pmatrix{|A〉\cr λI}⁺\pmatrix{1\cr 0_R}=VT^{-1}W†\pmatrix{1\cr 0_R},$$
+where the last two factors are the first column of $W†$,
+$$W†\pmatrix{1\cr 0_R}=\pmatrix{{σ₁\over\sqrt{σ₁²+λ²}}〈u₁|\cr\vdots\cr 
+	{σ_R\over\sqrt{σ_R²+λ²}}〈u_R|}.$$
+It follows that the right singular vectors of $〈A⁺|$ are the bras $〈u_r|$, and the singular values are 
+$$σ⁺_r={σ_r\over τ_r\sqrt{σ_r²+λ²}}={σ_r\over σ_r²+λ²}.$$
+Tychonov regularisation divides the singular values of $|A〉$ into large ones and small ones, as compared to $λ$.  For large $σ_r$, the inverse is very close to the unregularised problem, with $σ⁺_r≈1/σ_r$.  For small $σ_r$, the component in that singular direction is nearly discarded by $|Α⁺〉$, with $σ⁺_r≈σ_r/λ²$.  Note that, in this limit, $|Α⁺〉=λ^{-2}|A〉$!  In between, there is a maximum at $σ_r=λ$, with $σ_r=1/2λ$, half the unregularised value.
+
+This has dramatic consequences for the conditioning of the regularised problem, and how that varies with $λ$.  When $λ<σ_R$, regularisation has very little effect: the condition of $〈Α⁺|$ is the same as that of $|A〉$, which, for dense sets of coherent states, is usually dreadful.  As $λ$ increases, so that $σ₁<λ<σ_R$, the singular values lie on either side of the $σ_r=λ$ peak; the condition of $〈Α⁺|$ is determined by how far below this peak $σ₁$ and $σ_R$ fall, and the condition number has a sharp minimum when $σ⁺₁=σ⁺_R$.  When $λ$ dominates the singular values, and $|Α⁺〉=λ^{-2}|A〉$, it is again the case that their condition is the same.
+
+The leftmost column of the figure illustrates a large regularisation parameter.  The norm of $d$ is constrained to be small, so the approximation is very bad.  However, the approximation coefficients are very well behaved: they are brackets of $|ψ〉$ with coherent states.  The rightmost column illustrates a small regularisation parameter, where $d$ is essentially the least squares solution to $|A〉d=|ψ〉$.  This approximation is good, and the plot of the error operator is mostly black.  In fact, it is surprisingly good: the largest component amplitude is around 2, but the approximation is nearly exact up to $n=11$.  There is a price to pay for this.  The dual kets have large norms, and they are close to the number state $|n=14〉$.  This means that approximations of states with small amplitudes not be stable: perturbing such a state by adding a small component of $|n=14〉$ will wreak havoc with its expansion coefficients.  Using the approximation method of the leftmost column, this component would have very little effect on the coefficients.  This type of instability is very common in least squares problems, and the purpose of regularisation methods such as Tychonov's is to avoid it by trading off the ability to represent large number states.  The middle columns show some intermediate values of $λ$.  In the third column, the dual kets are close to 1, and number states up to $n=4$ or 5 are approximated well, as would be expected for an expansion over amplitude 2 coherent states.  This seems to achieve the right tradeoff.
+
+%\midinsert\XeTeXpicfile tych.pdf width\hsize \endinsert
 
 The next figure attempts to illustrate the tradeoff between accuracy and stability as the regularisation parameter varies.  The obvious way to measure accuracy is some norm of the error operator.  However, Hilbert space has infinite dimensions, and only finitely many of them are preserved by these approximations, so the usual norms indicate that all of them are infinitely bad.  I've handled this by truncating Fock space, and taking the Frobenius norm of the matrix 
 $$\pmatrix{〈0|E|0〉&&〈0|E|20〉\cr &\vdots&\cr 〈20|E|0〉&&〈20|E|20〉}.$$
