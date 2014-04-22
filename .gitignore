@@ -1,3 +1,7 @@
 *.pyc
 *.log
 *.pdf
+*.eps
+*.mpx
+*.1
+*.html
