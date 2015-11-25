@@ -23,7 +23,7 @@ for b=3:5;
     for i=1:N+1
         smpl(in) = V(:,i);
         figure(b); subplot(5,5,i)
-        zplot([-b b], [-b b], smpl)
+        zplot(msh, msh, smpl)
         set(gca, 'DataAspectRatio', [1 1 1])
     end
 end
