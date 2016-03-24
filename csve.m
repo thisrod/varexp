@@ -26,6 +26,8 @@ for b=3:5;
         zplot(msh, msh, smpl)
         set(gca, 'DataAspectRatio', [1 1 1])
     end
+
+    figure(b), saveTightFigure(sprintf('rsv%d.pdf', b))
 end
 
 figure(1)
@@ -34,6 +36,7 @@ title('Convergence of |\Gamma_\chi> as phase space boundary expands')
 xlabel('n')
 ylabel('\sigma_n')
 legend(l, 'b=3', '4', '5', 'Location', 'SouthWest')
+saveTightFigure svgrid.pdf
 
 figure(2)
 set(gca, 'FontSize', 14)
@@ -43,3 +46,4 @@ v = 10.^-[6 4 2 1];  v = [v 0.1:0.2:0.9 1-v];
 ylabel('b^2'); xlabel n
 title('Singular values of |\Gamma_\chi>')
 clabel(C,h)
+saveTightFigure svcont.pdf
