@@ -14,3 +14,13 @@ fprintf('initial residual = %.2e, component norm = %.2f\n', ...
 figure, quiver(real(z), imag(z), real(c), imag(c))
 hold on, plot(2,0,'ok'), plot(z, '+k'), axis image
 title 'initial variational weights'
+
+qo.dimension = 1;
+qo.fields = 2*R;
+qo.ranges = pi/2;
+qo.points = 50;
+qo.steps = 10;
+qo.initial = @(~,~) [f0; z]
+qo.da = @(a,~,~) zeros(size(a));
+
+xspde(qo)
