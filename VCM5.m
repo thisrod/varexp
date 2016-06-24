@@ -4,12 +4,21 @@
 
 % Independent parameters
 
+% N.B: nhn = -4*(0:N)' gives an interesting sudden divergence
+
+global N;  N = 30;  brackets
+% Peter's Hamiltonian
+nhn = nhn/2;
+nhn = nhn-4*(0:N)';
+
 a0=2;		% coherent amplitude of initial state
+c0 = nq*evan(a0, 'even');	% expansion over number states
 epsilon=1i*1.e-4;                                 %%stabilize matrix
 %%om= [0;0;0];					                  %%diagonal frequency
 om= [0;-4];
 %%kap=[0,1,1];                                      %%anharmonic coupling
 kap=[0,1]; 
+% kap = kap*0;
 R = 8;		% variational components
 
 % Derived parameters
@@ -30,13 +39,12 @@ M=1+modes;                                        %%size of state vector
 iters=4;                                          %%iterations of ODE solver
 
 % data to plot
-one.o = zeros(1,length(t));  one.c =  one.o;	% Observed and Comparision
+one.o = zeros(1,length(t));  one.c =  one.o;  one.p = one.o;	% Observed and Comparision
 two = one;  three = one;  four = one;
 nstore =zeros(length(t),R);
 wstore=zeros(length(t),R);
 
 NM=R*M;                                           %%multi-vector size
-omexp=eye(M,M);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 %%	Sets up integration vectors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
@@ -64,7 +72,6 @@ eps=epsilon*eye(NM,NM);
 
 for it=1:length(t);                                      %%loop until time T
   if it>1                                         %%If first time, initia0ize
-    a=omexp*a;
     a1=a;                                         %%Store multivector
     vec1=zeros(NM,1);
     for iter=1:iters;                             %%iteration loop for ODE
@@ -102,7 +109,7 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
        da=reshape(vec1,M,R);                      %%Reshape to matrix     
        a=a1+da;
     end;                                          %%end iterations
-    a=omexp*(a1+2.*da); 
+    a=a1+2.*da; 
   end;                                            %%end if first time
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
@@ -130,8 +137,12 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
 %%  a single anharmonic oscillator with nonlinear coupling and detuning
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 ax=a0(1)*exp(n0*(exp(-1i*kap(2)*t(it))-1)-1i*om(2)*t(it));
-one.c(it)=real(ax);
-two.c(it)=imag(ax);
+ct = exp(-1i*nhn*t(it)).*c0;
+alpha = ct'*aop*ct;
+one.p(it)=real(ax);
+one.c(it)=real(alpha);
+two.p(it)=imag(ax);
+two.c(it)=imag(alpha);
 three.c(it)=real(n0); 
 
 end;                                              %%end time loop
@@ -141,12 +152,12 @@ end;                                              %%end time loop
 
 
 figure
-plot(t,one.o,'-r', t,one.c,'-k');          %%Plot quadrature X
+plot(t,one.o,'-r', t,one.c,'-k', t, one.p, ':k');          %%Plot quadrature X
 xlabel t
 ylabel X
 
 figure
-plot(t,two.o,'-r',t,two.c,'-k');            %%Plot quadrature Y
+plot(t,two.o,'-r',t,two.c,'-k', t, two.p, ':k');            %%Plot quadrature Y
 xlabel t
 ylabel Y
 
