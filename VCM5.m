@@ -11,7 +11,6 @@ om= [0;-4];
 %%kap=[0,1,1];                                      %%anharmonic coupling
 kap=[0,1]; 
 R = 8;		% variational components
-isup = 1;		% index into stores - remove
 
 % Derived parameters
 
@@ -29,10 +28,13 @@ t = h*(0:ceil(T/h));
 modes=1;                                          %%number of modes 
 M=1+modes;                                        %%size of state vector 
 iters=4;                                          %%iterations of ODE solver
-%%itsteep=0;                                        %%steepest descent iterations
-nmeasure=4;                                       %%number of measurements
-store=zeros(length(t),nsup,nmeasure);
-exact=zeros(length(t),nmeasure);
+
+% data to plot
+one.o = zeros(1,length(t));  one.c =  one.o;	% Observed and Comparision
+two = one;  three = one;  four = one;
+nstore =zeros(length(t),R);
+wstore=zeros(length(t),R);
+
 NM=R*M;                                           %%multi-vector size
 omexp=eye(M,M);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
@@ -56,8 +58,6 @@ H=zeros(NM,1)+1i;                                 %%Initia0ises H matrix
 AD=zeros(NM,NM)+1i;                                %%Initia0ises A matrix 
 HD=zeros(NM,1)+1i;                                 %%Initia0ises H matrix 
 eps=epsilon*eye(NM,NM); 
-nstore=zeros(length(t),R);
-wstore=zeros(length(t),R);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 	Starts loop in time:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
@@ -116,24 +116,23 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
   for m=1:R;                                      %%Count superpositions!
     nstore(it,m)=abs(a(2,m))^2;
     wstore(it,m)=real(rho(m,m));                                    
-    store(it,isup,1)=store(it,isup,1)+sum(real(rho(m,:).*a(2,:)));	
-    store(it,isup,2)=store(it,isup,2)+sum(real(rho(m,:).*a(2,:)/1i));
-    store(it,isup,3)=store(it,isup,3)+real(sum(rho(m,:).*a(2,:))*a(2,m)');           	   
+    one.o(it)=one.o(it)+sum(real(rho(m,:).*a(2,:)));	
+    two.o(it)=two.o(it)+sum(real(rho(m,:).*a(2,:)/1i));
+    three.o(it)=three.o(it)+real(sum(rho(m,:).*a(2,:))*a(2,m)');           	   
   end;
-  store(it,isup,1)=store(it,isup,1)/rhosum;
-  store(it,isup,2)=store(it,isup,2)/rhosum;
-  store(it,isup,3)=store(it,isup,3)/rhosum;
-  store(it,isup,4)=rhosum;
-%  t(it)=(it-1)*h;                                %%Store t-coordinate
+  one.o(it)=one.o(it)/rhosum;
+  two.o(it)=two.o(it)/rhosum;
+  three.o(it)=three.o(it)/rhosum;
+  four.o(it)=rhosum;
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 %% 	Ca0culates exact observables for initia0 coherent state case; assumes
 %%  a single anharmonic oscillator with nonlinear coupling and detuning
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 ax=a0(1)*exp(n0*(exp(-1i*kap(2)*t(it))-1)-1i*om(2)*t(it));
-exact(it,1)=real(ax);
-exact(it,2)=imag(ax);
-exact(it,3)=real(n0); 
+one.c(it)=real(ax);
+two.c(it)=imag(ax);
+three.c(it)=real(n0); 
 
 end;                                              %%end time loop
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
@@ -141,54 +140,33 @@ end;                                              %%end time loop
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
-%%        Graphics section
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
+figure
+plot(t,one.o,'-r', t,one.c,'-k');          %%Plot quadrature X
+xlabel t
+ylabel X
 
-fs=20;
-figure(1);
-plot(t,store(:,1,1),'--',t,store(:,2,1),'-',t,exact(:,1),'-.');          %%Plot quadrature X
-set(gca,'FontSize',fs);
-xlabel('t ','FontSize',fs);
-ylabel('X','FontSize',fs);
+figure
+plot(t,two.o,'-r',t,two.c,'-k');            %%Plot quadrature Y
+xlabel t
+ylabel Y
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
+figure
+plot(t,three.o,'-r',t,three.c,'-k');             %%Plot mean N
+xlabel t
+ylabel N
 
-figure(2);
-plot(t,store(:,1,2),'--',t,store(:,2,2),'-',t,exact(:,2),'-.');            %%Plot quadrature Y
-set(gca,'FontSize',fs);
-xlabel('t ','FontSize',fs);
-ylabel('Y','FontSize',fs);
+figure
+plot(t,four.o,'-k',t,four.c,'-r');                           %%Plot norm
+xlabel t
+ylabel Rho
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
-
-figure(3);
-plot(t,store(:,1,3),'--',t,store(:,2,3),'-',t,exact(:,3),'-.');             %%Plot mean N
-set(gca,'FontSize',fs);
-xlabel('t ','FontSize',fs);
-ylabel('N','FontSize',fs);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
-
-figure(4);
-set(gca,'FontSize',fs);
-plot(t,store(:,1,4),'--',t,store(:,2,4),'-');                           %%Plot norm
-xlabel('t ','FontSize',fs);
-ylabel('Rho','FontSize',fs);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
-
-figure(5);
-set(gca,'FontSize',fs);
+figure
 plot(t,nstore);                           %%Plot max_N
-xlabel('t ','FontSize',fs);
-ylabel('N_values','FontSize',fs);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
+xlabel t
+ylabel N
 
-figure(6);
-set(gca,'FontSize',fs);
+figure
 plot(t,wstore);                           %%Plot max_W
-xlabel('t ','FontSize',fs);
-ylabel('Weights','FontSize',fs);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
+xlabel t
+ylabel Weights
 
