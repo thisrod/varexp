@@ -45,7 +45,8 @@ iters=4;                                          %%iterations of ODE solver
 % data to plot
 one.o = zeros(1,length(t));  one.c =  one.o;  one.p = one.o;	% Observed and Comparision
 two = one;  three = one;  four = one;
-zdiscrep = one.o; adiscrep = one.o; hdiscrep = one.o;  csize = one.o;
+zdiscrep = one.o; adiscrep = one.o; hdiscrep = one.o; qdiscrep = one.o;  
+csize = one;  qsize = one;
 
 nstore =zeros(length(t),R);
 
@@ -56,6 +57,8 @@ NM=R*M;                                           %%multi-veqeor size
 
 da=0.0*1i+zeros(M,R);                             %%complex matrix of zeros 
 a = repmat(av,1,R) + sigma*(randn(M,R)+1i*randn(M,R));                          %%Initia0ises amplitudes
+	zp = a.';  zp = zp(:);
+
 phimask=[ones(1),zeros(modes,1)']'*ones(1,R);
 amask=[zeros(1),ones(modes,1)']'*ones(1,R);
 a=a.*amask;                                       %%Mask phase to zero
@@ -77,6 +80,7 @@ eps=epsilon*eye(NM,NM);
 
 for it=1:length(t);                                      %%loop until time T
   if it>1                                         %%If first time, initia0ize
+	zph = zp;
     a1=a;                                         %%Store multiveqeor
     vec1=zeros(NM,1);
     dzt = zeros(2*R,1);  dzp = dzt;	% Tychonov and Peter
@@ -113,20 +117,24 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
         %%B=A'; C=B*A; D=diag(B);
         vec1=vec1+(A+eps)\(-1i*H*h/2-A*vec1); 
        da=reshape(vec1,M,R);                      %%Reshape to matrix
-       dza = da.';  dza = dza(:);
-       
-	z = a.';  z = z(:);
-	c = sqrt(sum(abs(nq*evan(z)).^2));
-	w = z;  w(1:R) = w(1:R) - log(max(c));
+       	dza = 2*da.';  dza = dza(:);
+       a=a1+da;
+
+	
+	% independent propagation
+	c = sqrt(sum(abs(nq*evan(zph)).^2));
+	w = zph;  w(1:R) = w(1:R) - log(max(c));
 	ensemble = nq*evan(w);
 	Dq = [ensemble, ndqr*evan(w)];
 	AA = Dq'*Dq;
 	Hq = nhn.*sum(ensemble,2);
 	HH = Dq'*Hq;
 	dzt = dzt + [Dq; sqrt(epsilon)*eye(2*R)] \ [-1i*Hq*h/2-Dq*dzt; zeros(2*R,1)];
-	dzp = dzp + (AA+epsilon*eye(2*R))\(-1i*HH*h/2-AA*dzp);
-       a=a1+da;
+	dzp = dzp + (AA+epsilon*eye(2*R))\(-1i*HH*h-AA*dzp);
+	zph = zp + dzp/2;
+	
     end;                                          %%end iterations
+    	zp = zp + dzp;
     a=a1+2.*da;
 	z = a.';  z = z(:);
 	c = sqrt(sum(abs(nq*evan(z)).^2));
@@ -141,14 +149,24 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
 %% 	Ca0culates observables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
+	qdiscrep(it) = discrepency(sum(nq*evan(z), 2), sum(nq*evan(zp), 2));
 
 	% brackets
 	qo = sum(nq*evan(z), 2);
-	qsize(it) = norm(qo);
-	alphao = qo'*aop*qo/qsize(it)^2;
+	qsize.p(it) = norm(qo);
+	alphao = qo'*aop*qo/qsize.p(it)^2;
 	one.p(it) = real(alphao);  two.p(it) = imag(alphao);
-	three.p(it) = sum(abs(qo).^2.*(0:N)')/qsize(it)^2;
-	csize(it) = norm(c);
+	three.p(it) = sum(abs(qo).^2.*(0:N)')/qsize.p(it)^2;
+	csize.p(it) = norm(c);
+	
+	% independent brackets
+	qo = sum(nq*evan(zp), 2);
+	qsize.o(it) = norm(qo);
+	alphao = qo'*aop*qo/qsize.o(it)^2;
+	one.o(it) = real(alphao);  two.o(it) = imag(alphao);
+	three.o(it) = sum(abs(qo).^2.*(0:N)')/qsize.o(it)^2;
+	csize.o(it) = norm(c);
+	
 
 	
 	% Peter for comparison
@@ -189,6 +207,10 @@ plot(t,zdiscrep,'-k', t,adiscrep,':k',  t,hdiscrep,'--k');
 xlabel t, ylabel discrepency, legend z A H
 
 figure
+plot(t,qdiscrep,'-k');
+xlabel t, ylabel 'state discrepency'
+
+figure
 plot(t,orank,':k',t,rrank,'-k');
 xlabel t
 ylabel rank
@@ -210,12 +232,12 @@ xlabel t
 ylabel N
 
 figure
-plot(t,qsize,'-k');
+plot(t,qsize.o,'-r', t,qsize.p,':k');
 xlabel t
 ylabel 'norm of |\psi>'
 
 figure
-plot(t,csize);                           %%Plot max_W
+plot(t,csize.o,'-r', t,csize.p,':k');                           %%Plot max_W
 xlabel t
 ylabel '|c|'
 
