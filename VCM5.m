@@ -32,6 +32,7 @@ iters=4;                                          %%iterations of ODE solver
 BUF = nan(1,length(t));
 alpha.o = BUF;  number = BUF;  csize = BUF;  qsize = BUF;
 urank = BUF;  rrank = BUF;
+fcondition = BUF;  vcondition = BUF;
 
 % draw initial ensemble
 
@@ -67,7 +68,8 @@ for i = 1:length(t)
 		zph = zp + dzp/2;
 	end
     	zp = zp + dzp;
-	urank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);  
+	urank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);
+	fcondition(i) = cond(ensemble);  vcondition(i) = cond(Dq);
 
 end
  
@@ -81,6 +83,12 @@ plot(t, 2*R-urank, ':k', t, 2*R-rrank, '-k');
 xlabel t
 ylabel 'rank deficiency in |\psi''>'
 legend original regularised
+
+figure
+semilogy(t, fcondition, '-k', t, vcondition, ':k');
+xlabel t
+ylabel 'frame condition'
+legend Gabor variational
 
 figure
 plot(t, real(alpha.o), '-r', t, real(alpha.e),' -k');
