@@ -6,8 +6,6 @@
 
 % N.B: nhn = -4*(0:N)' gives an interesting sudden divergence
 
-warning off MATLAB:rankDeficientMatrix
-
 global N;  N = 30;  brackets
 % Peter's Hamiltonian
 nhn = nhn/2;
@@ -25,7 +23,6 @@ n0 = abs(a0)^2;
 
 sigma=.02;                                        %%initial standard deviation
 z = zeros(2*R, 1);
-c = 0;		% get rid of this once loop is refactored
 
 T=2*pi;  h=0.005;		% time axis
 t = h*(0:ceil(T/h));
@@ -34,35 +31,25 @@ iters=4;                                          %%iterations of ODE solver
 
 % initialise storage for data to plot
 
-one.o = nan(1,length(t));  one.c =  one.o;  one.p = one.o;	% Observed and Comparision
-two = one;  three = one;  four = one;
-zdiscrep = one.o; adiscrep = one.o; hdiscrep = one.o; qdiscrep = one.o;  
-csize = one;  qsize = one;
-orank = one.o;  rrank = one.o;
+BUF = nan(1,length(t));
+alpha.o = BUF;  number = BUF;  csize = BUF;  qsize = BUF;
+urank = BUF;  rrank = BUF;
 
+% draw initial ensemble
+zp = [zeros(R,1);  a0 + sigma*randn(R,2)*[1; 1i] ];
 
-zp = [zeros(R,1);  a0 + sigma*randn(R,2)*[1; 1i] ];	% draw initial ensemble
-
-%% Integration loop
+% Integration loop
 
 for i = 1:length(t) 
 
 	% independent brackets
 	qo = sum(nq*evan(zp), 2);
-	qsize.o(i) = norm(qo);
-	alphao = qo'*aop*qo/qsize.o(i)^2;
-	one.o(i) = real(alphao);  two.o(i) = imag(alphao);
-	three.o(i) = sum(abs(qo).^2.*(0:N)')/qsize.o(i)^2;
-	csize.o(i) = norm(c);
-  
-	% Exact values for comparison
-	
-	qe = exp(-1i*nhn*t(i)).*c0;
-	alphae = qe'*aop*qe;
-	one.c(i)=real(alphae);
-	two.c(i)=imag(alphae);
-	three.c(i)=real(n0);
-	
+	c = sqrt(sum(abs(nq*evan(zp)).^2));
+	qsize(i) = norm(qo);
+	alpha.o(i) = qo'*aop*qo/qsize(i)^2;
+	number(i) = sum(abs(qo).^2.*(0:N)')/qsize(i)^2;
+	csize(i) = norm(c);
+ 	
 	if i == length(t), break, end
 	
 	zph = zp;
@@ -80,39 +67,43 @@ for i = 1:length(t)
 		zph = zp + dzp/2;
 	end
     	zp = zp + dzp;
-	orank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);  
+	urank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);  
 
 end
+ 
+% Exact values for comparison
 
+qe = exp(-1i*nhn*t).*repmat(c0,size(t));	% column i is q(t(i))
+alpha.e = sum(conj(qe).*(aop*qe));
 
 figure
-plot(t,orank,':k',t,rrank,'-k');
+plot(t, 2*R-urank, ':k', t, 2*R-rrank, '-k');
 xlabel t
-ylabel rank
+ylabel 'rank deficiency in |\psi''>'
 legend original regularised
 
 figure
-plot(t,one.o,'-r', t,one.c,'-k', t, one.p, ':k');
+plot(t, real(alpha.o), '-r', t, real(alpha.e),' -k');
 xlabel t
 ylabel X_1
 
 figure
-plot(t,two.o,'-r',t,two.c,'-k', t, two.p, ':k');            %%Plot quadrature Y
+plot(t, imag(alpha.o), '-r', t, imag(alpha.e),' -k');
 xlabel t
 ylabel X_2
 
 figure
-plot(t,three.o,'-r', t,three.c,'-k', t,three.p,':k');             %%Plot mean N
+plot(t, number, '-r', t([1 end]), abs(a0)^2*[1 1]);
 xlabel t
-ylabel N
+ylabel <n>
 
 figure
-plot(t,qsize.o,'-r', t,qsize.p,':k');
+plot(t, qsize, '-r');
 xlabel t
 ylabel 'norm of |\psi>'
 
 figure
-plot(t,csize.o,'-r', t,csize.p,':k');                           %%Plot max_W
+plot(t, csize, '-r');                           %%Plot max_W
 xlabel t
 ylabel '|c|'
 
