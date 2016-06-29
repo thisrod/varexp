@@ -32,22 +32,42 @@ t = h*(0:ceil(T/h));
 
 iters=4;                                          %%iterations of ODE solver
 
-% data to plot
-one.o = zeros(1,length(t));  one.c =  one.o;  one.p = one.o;	% Observed and Comparision
+% initialise storage for data to plot
+
+one.o = nan(1,length(t));  one.c =  one.o;  one.p = one.o;	% Observed and Comparision
 two = one;  three = one;  four = one;
 zdiscrep = one.o; adiscrep = one.o; hdiscrep = one.o; qdiscrep = one.o;  
 csize = one;  qsize = one;
+orank = one.o;  rrank = one.o;
 
 
 zp = [zeros(R,1);  a0 + sigma*randn(R,2)*[1; 1i] ];	% draw initial ensemble
 
 %% Integration loop
 
-for it=1:length(t) 
-if it>1                                         %%If first time, initia0ize
+for i = 1:length(t) 
+
+	% independent brackets
+	qo = sum(nq*evan(zp), 2);
+	qsize.o(i) = norm(qo);
+	alphao = qo'*aop*qo/qsize.o(i)^2;
+	one.o(i) = real(alphao);  two.o(i) = imag(alphao);
+	three.o(i) = sum(abs(qo).^2.*(0:N)')/qsize.o(i)^2;
+	csize.o(i) = norm(c);
+  
+	% Exact values for comparison
+	
+	qe = exp(-1i*nhn*t(i)).*c0;
+	alphae = qe'*aop*qe;
+	one.c(i)=real(alphae);
+	two.c(i)=imag(alphae);
+	three.c(i)=real(n0);
+	
+	if i == length(t), break, end
+	
 	zph = zp;
 	dzt = zeros(2*R,1);  dzp = dzt;	% Tychonov and Peter
-	for iter=1:iters
+	for j = 1:iters
 		c = sqrt(sum(abs(nq*evan(zph)).^2));
 		w = zph;  w(1:R) = w(1:R) - log(max(c));
 		ensemble = nq*evan(w);
@@ -60,24 +80,7 @@ if it>1                                         %%If first time, initia0ize
 		zph = zp + dzp/2;
 	end
     	zp = zp + dzp;
-	orank(it) = rank(Dq);   rrank(it) = rank([Dq; sqrt(epsilon)*eye(2*R)]);  
-end
-
-	% independent brackets
-	qo = sum(nq*evan(zp), 2);
-	qsize.o(it) = norm(qo);
-	alphao = qo'*aop*qo/qsize.o(it)^2;
-	one.o(it) = real(alphao);  two.o(it) = imag(alphao);
-	three.o(it) = sum(abs(qo).^2.*(0:N)')/qsize.o(it)^2;
-	csize.o(it) = norm(c);
-  
-	% Exact values for comparison
-	
-qe = exp(-1i*nhn*t(it)).*c0;
-alphae = qe'*aop*qe;
-one.c(it)=real(alphae);
-two.c(it)=imag(alphae);
-three.c(it)=real(n0); 
+	orank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);  
 
 end
 
