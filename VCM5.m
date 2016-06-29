@@ -41,6 +41,8 @@ fcondition = BUF;  vcondition = BUF;
 
 z(:,1) = [zeros(R,1);  a0 + sigma*randn(R,2)*[1; 1i] ];
 c0 = sum(nq*evan(z(:,1)), 2);
+z(1:R,1) = -log(norm(c0));
+c0 = sum(nq*evan(z(:,1)), 2);
 
 % Integration loop
 
@@ -102,9 +104,9 @@ for ti = snapshots
 	figure, zplot(x,y,Aps'*sum(ensemble, 2)), axis equal, hold on
 	plot(z(R+1:end,i),'ow')
 	contour(x,y,rsdl,[0.5 0.5],'-w')
-	contour(x,y,nrms, csize(i)/qsize(i)*[1 1],'-g')
-	contour(x,y,nrms, csize(i)/qsize(i)*[10 10],'-y')
-	contour(x,y,nrms, csize(i)/qsize(i)*[100 100],'-r')
+	contour(x,y,nrms, [1 1],'-g')
+	contour(x,y,nrms, [10 10],'-y')
+	contour(x,y,nrms, [100 100],'-r')
 	title(sprintf('state at t = %.2f', ti))
 	
 	D = [ensemble, ndqr*evan(z(:,i))];
@@ -116,9 +118,9 @@ for ti = snapshots
 	figure, zplot(x,y,Aps'*(nhn.*sum(ensemble, 2))), axis equal, hold on
 	plot(z(R+1:end,i),'ow')
 	contour(x,y,rsdl,[0.5 0.5],'-w')
-	contour(x,y,nrms, csize(i)/qsize(i)*[1 1],'-g')
-	contour(x,y,nrms, csize(i)/qsize(i)*[10 10],'-y')
-	contour(x,y,nrms, csize(i)/qsize(i)*[100 100],'-r')
+	contour(x,y,nrms, [1 1],'-g')
+	contour(x,y,nrms, [10 10],'-y')
+	contour(x,y,nrms, [100 100],'-r')
 	title(sprintf('derivative at t = %.2f', ti))
 
 end
@@ -156,7 +158,12 @@ xlabel t
 ylabel 'norm of |\psi>'
 
 figure
-plot(t, csize, '-r');                           %%Plot max_W
+plot(t, csize, '-r');
 xlabel t
 ylabel '|c|'
+
+figure
+plot(t, csize./qsize, '-r');
+xlabel t
+ylabel 'norm ratio'
 
