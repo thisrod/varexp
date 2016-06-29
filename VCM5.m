@@ -3,7 +3,7 @@
 % By Peter Drummond, ported to Matlab by Rodney Polkinghorne
 
 
-global N;  N = 30;  brackets
+global N;  N = 50;  brackets
 
 % Peter's Hamiltonian
 % nhn = -4*(0:N)' gives an interesting sudden divergence
@@ -86,9 +86,22 @@ x = -5:0.2:5;  y = -5:0.2:5;
 [X,Y] = meshgrid(x,y);  Z = X(:)+1i*Y(:);
 Aps = nq*evan(Z,'even');
 
+% plot in phase space at half time
+
 [~,i] = min(abs(t-T/2));
-figure, zplot(x,y,Aps'*sum(nq*evan(z(:,i)), 2)), axis equal, hold on
+ensemble = nq*evan(z(:,i));
+% find residuals by taking components in the orthogonal space
+[U,~,~] = svd(ensemble);  U = U(:,rank(ensemble)+1:end);
+rsdl = U'*Aps;  rsdl = sqrt(sum(abs(rsdl).^2));  rsdl = reshape(rsdl, size(X));
+nrms = pinv(ensemble)*Aps;  nrms = sqrt(sum(abs(nrms).^2));
+nrms = reshape(nrms, size(X));
+
+figure, zplot(x,y,Aps'*sum(ensemble, 2)), axis equal, hold on
 plot(z(R+1:end,i),'ow')
+contour(x,y,rsdl,[0.5 0.5],'-w')
+contour(x,y,nrms, csize(i)/qsize(i)*[1 1],'-g')
+contour(x,y,nrms, csize(i)/qsize(i)*[10 10],'-y')
+contour(x,y,nrms, csize(i)/qsize(i)*[100 100],'-r')
 
 figure
 plot(t, 2*R-urank, ':k', t, 2*R-rrank, '-k');
