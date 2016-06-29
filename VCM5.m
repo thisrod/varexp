@@ -36,16 +36,16 @@ fcondition = BUF;  vcondition = BUF;
 
 % draw initial ensemble
 
-zp = [zeros(R,1);  a0 + sigma*randn(R,2)*[1; 1i] ];
-c0 = sum(nq*evan(zp), 2);
+z = [zeros(R,1);  a0 + sigma*randn(R,2)*[1; 1i] ];
+c0 = sum(nq*evan(z), 2);
 
 % Integration loop
 
 for i = 1:length(t) 
 
 	% independent brackets
-	qo = sum(nq*evan(zp), 2);
-	c = sqrt(sum(abs(nq*evan(zp)).^2));
+	qo = sum(nq*evan(z), 2);
+	c = sqrt(sum(abs(nq*evan(z)).^2));
 	qsize(i) = norm(qo);
 	alpha.o(i) = qo'*aop*qo/qsize(i)^2;
 	number(i) = sum(abs(qo).^2.*(0:N)')/qsize(i)^2;
@@ -53,21 +53,21 @@ for i = 1:length(t)
  	
 	if i == length(t), break, end
 	
-	zph = zp;
-	dzt = zeros(2*R,1);  dzp = dzt;	% Tychonov and Peter
+	zh = z;
+	dz = zeros(2*R,1);
 	for j = 1:iters
-		c = sqrt(sum(abs(nq*evan(zph)).^2));
-		w = zph;  w(1:R) = w(1:R) - log(max(c));
+		c = sqrt(sum(abs(nq*evan(zh)).^2));
+		w = zh;  w(1:R) = w(1:R) - log(max(c));
 		ensemble = nq*evan(w);
 		Dq = [ensemble, ndqr*evan(w)];
 		AA = Dq'*Dq;
 		Hq = nhn.*sum(ensemble,2);
 		HH = Dq'*Hq;
-		dzt = dzt + [Dq; sqrt(epsilon)*eye(2*R)] \ [-1i*Hq*h/2-Dq*dzt; zeros(2*R,1)];
-		dzp = dzp + (AA+epsilon*eye(2*R))\(-1i*HH*h-AA*dzp);
-		zph = zp + dzp/2;
+		dz = dz + [Dq; sqrt(epsilon)*eye(2*R)] \ [-1i*Hq*h/2-Dq*dz; zeros(2*R,1)];
+%		dz = dz + (AA+epsilon*eye(2*R))\(-1i*HH*h-AA*dz);
+		zh = z + dz/2;
 	end
-    	zp = zp + dzp;
+    	z = z + dz;
 	urank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);
 	fcondition(i) = cond(ensemble);  vcondition(i) = cond(Dq);
 
