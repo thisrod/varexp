@@ -6,6 +6,8 @@
 
 % N.B: nhn = -4*(0:N)' gives an interesting sudden divergence
 
+warning off MATLAB:rankDeficientMatrix
+
 global N;  N = 30;  brackets
 % Peter's Hamiltonian
 nhn = nhn/2;
@@ -19,7 +21,7 @@ om= [0;-4];
 %%kap=[0,1,1];                                      %%anharmonic coupling
 kap=[0,1]; 
 % kap = kap*0;
-R = 8;		% variational components
+R = 16;		% variational components
 
 % Derived parameters
 
@@ -41,6 +43,8 @@ iters=4;                                          %%iterations of ODE solver
 % data to plot
 one.o = zeros(1,length(t));  one.c =  one.o;  one.p = one.o;	% Observed and Comparision
 two = one;  three = one;  four = one;
+zdiscrep = one.o; adiscrep = one.o; hdiscrep = one.o;
+
 nstore =zeros(length(t),R);
 wstore=zeros(length(t),R);
 
@@ -74,6 +78,7 @@ for it=1:length(t);                                      %%loop until time T
   if it>1                                         %%If first time, initia0ize
     a1=a;                                         %%Store multivector
     vec1=zeros(NM,1);
+    dzt = zeros(2*R,1);  dzp = dzt;	% Tychonov and Peter
     for iter=1:iters;                             %%iteration loop for ODE
         at=a.*amask+phimask;                      %%Store eigenva0ues
         at1=at+phimask;                           %%Store inner product terms
@@ -106,10 +111,27 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
         A=reshape(A1,NM,NM);
         %%B=A'; C=B*A; D=diag(B);
         vec1=vec1+(A+eps)\(-1i*H*h/2-A*vec1); 
-       da=reshape(vec1,M,R);                      %%Reshape to matrix     
+       da=reshape(vec1,M,R);                      %%Reshape to matrix
+       dza = da.';  dza = dza(:);
+       
+	z = a.';  z = z(:);
+	c = sqrt(sum(abs(nq*evan(z)).^2));
+	w = z;  w(1:R) = w(1:R) - log(max(c));
+	ensemble = nq*evan(w);
+	Dq = [ensemble, ndqr*evan(w)];
+	AA = Dq'*Dq;
+	Hq = nhn.*sum(ensemble,2);
+	HH = Dq'*Hq;
+	dzt = dzt + [Dq; sqrt(epsilon)*eye(2*R)] \ [-1i*Hq*h/2-Dq*dzt; zeros(2*R,1)];
+	dzp = dzp + (AA+epsilon*eye(2*R))\(-1i*HH*h/2-AA*dzp);
        a=a1+da;
     end;                                          %%end iterations
-    a=a1+2.*da; 
+    a=a1+2.*da;
+    shuffle = [1:2:2*R 2:2:2*R];
+    zdiscrep(it) = discrepency(dza, dzp);
+    adiscrep(it) = discrepency(A(shuffle, shuffle), AA, 'fro');
+    hdiscrep(it) = discrepency(H(shuffle), HH, 'fro');
+    orank(it) = rank(Dq);   rrank(it) = rank([Dq; sqrt(epsilon)*eye(2*R)]);  
   end;                                            %%end if first time
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
@@ -150,6 +172,16 @@ end;                                              %%end time loop
 %%        Output section - gives numerica0 output data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
+
+figure
+plot(t,zdiscrep,'-k', t,adiscrep,':k',  t,hdiscrep,'--k');          %%Plot quadrature X
+xlabel t, ylabel discrepency, legend z A H
+
+figure
+plot(t,orank,':k',t,rrank,'-k');          %%Plot quadrature X
+xlabel t
+ylabel rank
+legend original regularised
 
 figure
 plot(t,one.o,'-r', t,one.c,'-k', t, one.p, ':k');          %%Plot quadrature X
