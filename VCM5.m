@@ -29,6 +29,8 @@ iters=4;                                          %%iterations of ODE solver
 
 % initialise storage for data to plot
 
+z = nan(2*R, length(t));
+
 BUF = nan(1,length(t));
 alpha.o = BUF;  number = BUF;  csize = BUF;  qsize = BUF;
 urank = BUF;  rrank = BUF;
@@ -36,16 +38,16 @@ fcondition = BUF;  vcondition = BUF;
 
 % draw initial ensemble
 
-z = [zeros(R,1);  a0 + sigma*randn(R,2)*[1; 1i] ];
-c0 = sum(nq*evan(z), 2);
+z(:,1) = [zeros(R,1);  a0 + sigma*randn(R,2)*[1; 1i] ];
+c0 = sum(nq*evan(z(:,1)), 2);
 
 % Integration loop
 
 for i = 1:length(t) 
 
 	% independent brackets
-	qo = sum(nq*evan(z), 2);
-	c = sqrt(sum(abs(nq*evan(z)).^2));
+	qo = sum(nq*evan(z(:,i)), 2);
+	c = sqrt(sum(abs(nq*evan(z(:,i))).^2));
 	qsize(i) = norm(qo);
 	alpha.o(i) = qo'*aop*qo/qsize(i)^2;
 	number(i) = sum(abs(qo).^2.*(0:N)')/qsize(i)^2;
@@ -53,7 +55,7 @@ for i = 1:length(t)
  	
 	if i == length(t), break, end
 	
-	zh = z;
+	zh = z(:,i);
 	dz = zeros(2*R,1);
 	for j = 1:iters
 		c = sqrt(sum(abs(nq*evan(zh)).^2));
@@ -63,11 +65,11 @@ for i = 1:length(t)
 		AA = Dq'*Dq;
 		Hq = nhn.*sum(ensemble,2);
 		HH = Dq'*Hq;
-		dz = dz + [Dq; sqrt(epsilon)*eye(2*R)] \ [-1i*Hq*h/2-Dq*dz; zeros(2*R,1)];
-%		dz = dz + (AA+epsilon*eye(2*R))\(-1i*HH*h-AA*dz);
-		zh = z + dz/2;
+%		dz = dz + [Dq; sqrt(epsilon)*eye(2*R)] \ [-1i*Hq*h/2-Dq*dz; zeros(2*R,1)];
+		dz = dz + (AA+epsilon*eye(2*R))\(-1i*HH*h-AA*dz);
+		zh = z(:,i) + dz/2;
 	end
-    	z = z + dz;
+    	z(:,i+1) = z(:,i) + dz;
 	urank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);
 	fcondition(i) = cond(ensemble);  vcondition(i) = cond(Dq);
 
