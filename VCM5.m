@@ -80,6 +80,16 @@ end
 qe = exp(-1i*nhn*t).*repmat(c0,size(t));	% column i is q(t(i))
 alpha.e = sum(conj(qe).*(aop*qe))/norm(c0)^2;
 
+% Set up phase space grid
+
+x = -5:0.2:5;  y = -5:0.2:5;
+[X,Y] = meshgrid(x,y);  Z = X(:)+1i*Y(:);
+Aps = nq*evan(Z,'even');
+
+[~,i] = min(abs(t-T/2));
+figure, zplot(x,y,Aps'*sum(nq*evan(z(:,i)), 2)), axis equal, hold on
+plot(z(R+1:end,i),'ow')
+
 figure
 plot(t, 2*R-urank, ':k', t, 2*R-rrank, '-k');
 xlabel t
