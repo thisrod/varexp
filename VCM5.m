@@ -105,7 +105,21 @@ for ti = snapshots
 	contour(x,y,nrms, csize(i)/qsize(i)*[1 1],'-g')
 	contour(x,y,nrms, csize(i)/qsize(i)*[10 10],'-y')
 	contour(x,y,nrms, csize(i)/qsize(i)*[100 100],'-r')
-	title(sprintf('snapshot at t = %.2f', ti))
+	title(sprintf('state at t = %.2f', ti))
+	
+	D = [ensemble, ndqr*evan(z(:,i))];
+	[U,~,~] = svd(D);  U = U(:,rank(D)+1:end);
+	rsdl = U'*Aps;  rsdl = sqrt(sum(abs(rsdl).^2));  rsdl = reshape(rsdl, size(X));
+	nrms = pinv(D)*Aps;  nrms = sqrt(sum(abs(nrms).^2));
+	nrms = reshape(nrms, size(X));
+	
+	figure, zplot(x,y,Aps'*(nhn.*sum(ensemble, 2))), axis equal, hold on
+	plot(z(R+1:end,i),'ow')
+	contour(x,y,rsdl,[0.5 0.5],'-w')
+	contour(x,y,nrms, csize(i)/qsize(i)*[1 1],'-g')
+	contour(x,y,nrms, csize(i)/qsize(i)*[10 10],'-y')
+	contour(x,y,nrms, csize(i)/qsize(i)*[100 100],'-r')
+	title(sprintf('derivative at t = %.2f', ti))
 
 end
 
