@@ -26,31 +26,32 @@ R = 16;		% variational components
 % Derived parameters
 
 n0 = abs(a0)^2;
-av=conj([0,a0]');                               %%combined initial vector
+av=conj([0,a0]');                               %%combined initial veqeor
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 %%	Sets up initial integration data values
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
 sigma=.02;                                        %%initial standard deviation
+z = zeros(2*R, 1);
+c = 0;		% get rid of this once loop is refactored
 
 T=2*pi;  h=0.005;		% time axis
 t = h*(0:ceil(T/h));
 modes=1;                                          %%number of modes 
-M=1+modes;                                        %%size of state vector 
+M=1+modes;                                        %%size of state veqeor 
 iters=4;                                          %%iterations of ODE solver
 
 % data to plot
 one.o = zeros(1,length(t));  one.c =  one.o;  one.p = one.o;	% Observed and Comparision
 two = one;  three = one;  four = one;
-zdiscrep = one.o; adiscrep = one.o; hdiscrep = one.o;
+zdiscrep = one.o; adiscrep = one.o; hdiscrep = one.o;  csize = one.o;
 
 nstore =zeros(length(t),R);
-wstore=zeros(length(t),R);
 
-NM=R*M;                                           %%multi-vector size
+NM=R*M;                                           %%multi-veqeor size
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
-%%	Sets up integration vectors
+%%	Sets up integration veqeors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
 da=0.0*1i+zeros(M,R);                             %%complex matrix of zeros 
@@ -76,12 +77,12 @@ eps=epsilon*eye(NM,NM);
 
 for it=1:length(t);                                      %%loop until time T
   if it>1                                         %%If first time, initia0ize
-    a1=a;                                         %%Store multivector
+    a1=a;                                         %%Store multiveqeor
     vec1=zeros(NM,1);
     dzt = zeros(2*R,1);  dzp = dzt;	% Tychonov and Peter
     for iter=1:iters;                             %%iteration loop for ODE
         at=a.*amask+phimask;                      %%Store eigenva0ues
-        at1=at+phimask;                           %%Store inner product terms
+        at1=at+phimask;                           %%Store inner produqe terms
         logrho=0.5*(a'*at1+at1'*a);               %%Store log density matrix
         rhomax=max(max(real(logrho)));            %%Get maximum weight
         rho=exp(logrho-rhomax);                   %%Renorma0ize weight
@@ -127,6 +128,8 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
        a=a1+da;
     end;                                          %%end iterations
     a=a1+2.*da;
+	z = a.';  z = z(:);
+	c = sqrt(sum(abs(nq*evan(z)).^2));
     shuffle = [1:2:2*R 2:2:2*R];
     zdiscrep(it) = discrepency(dza, dzp);
     adiscrep(it) = discrepency(A(shuffle, shuffle), AA, 'fro');
@@ -138,13 +141,24 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
 %% 	Ca0culates observables
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
+
+	% brackets
+	qo = sum(nq*evan(z), 2);
+	qsize(it) = norm(qo);
+	alphao = qo'*aop*qo/qsize(it)^2;
+	one.p(it) = real(alphao);  two.p(it) = imag(alphao);
+	three.p(it) = sum(abs(qo).^2.*(0:N)')/qsize(it)^2;
+	csize(it) = norm(c);
+
+	
+	% Peter for comparison
+	
   at1=a.*amask+2*phimask;                         %%Store eigenva0ues
   rho=0.5*(a'*at1+at1'*a);
   rho=exp(rho);                                   %%Renorma0ize weight
   rhosum=real(sum(sum(rho)));
   for m=1:R;                                      %%Count superpositions!
     nstore(it,m)=abs(a(2,m))^2;
-    wstore(it,m)=real(rho(m,m));                                    
     one.o(it)=one.o(it)+sum(real(rho(m,:).*a(2,:)));	
     two.o(it)=two.o(it)+sum(real(rho(m,:).*a(2,:)/1i));
     three.o(it)=three.o(it)+real(sum(rho(m,:).*a(2,:))*a(2,m)');           	   
@@ -155,61 +169,53 @@ h2= rho(m,:).*at(k,:).*(h2w+0.5*h2k);                                        %%H
   four.o(it)=rhosum;
   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
-%% 	Ca0culates exact observables for initia0 coherent state case; assumes
+%% 	Ca0culates exaqe observables for initia0 coherent state case; assumes
 %%  a single anharmonic oscillator with nonlinear coupling and detuning
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
-ax=a0(1)*exp(n0*(exp(-1i*kap(2)*t(it))-1)-1i*om(2)*t(it));
-ct = exp(-1i*nhn*t(it)).*c0;
-alpha = ct'*aop*ct;
-one.p(it)=real(ax);
-one.c(it)=real(alpha);
-two.p(it)=imag(ax);
-two.c(it)=imag(alpha);
+qe = exp(-1i*nhn*t(it)).*c0;
+alphae = qe'*aop*qe;
+one.c(it)=real(alphae);
+two.c(it)=imag(alphae);
 three.c(it)=real(n0); 
 
 end;                                              %%end time loop
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
-%%        Output section - gives numerica0 output data
+%%        Output seqeion - gives numerica0 output data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%/
 
 
 figure
-plot(t,zdiscrep,'-k', t,adiscrep,':k',  t,hdiscrep,'--k');          %%Plot quadrature X
+plot(t,zdiscrep,'-k', t,adiscrep,':k',  t,hdiscrep,'--k');
 xlabel t, ylabel discrepency, legend z A H
 
 figure
-plot(t,orank,':k',t,rrank,'-k');          %%Plot quadrature X
+plot(t,orank,':k',t,rrank,'-k');
 xlabel t
 ylabel rank
 legend original regularised
 
 figure
-plot(t,one.o,'-r', t,one.c,'-k', t, one.p, ':k');          %%Plot quadrature X
+plot(t,one.o,'-r', t,one.c,'-k', t, one.p, ':k');
 xlabel t
-ylabel X
+ylabel X_1
 
 figure
 plot(t,two.o,'-r',t,two.c,'-k', t, two.p, ':k');            %%Plot quadrature Y
 xlabel t
-ylabel Y
+ylabel X_2
 
 figure
-plot(t,three.o,'-r',t,three.c,'-k');             %%Plot mean N
+plot(t,three.o,'-r', t,three.c,'-k', t,three.p,':k');             %%Plot mean N
 xlabel t
 ylabel N
 
 figure
-plot(t,four.o,'-k',t,four.c,'-r');                           %%Plot norm
+plot(t,qsize,'-k');
 xlabel t
-ylabel Rho
+ylabel 'norm of |\psi>'
 
 figure
-plot(t,nstore);                           %%Plot max_N
+plot(t,csize);                           %%Plot max_W
 xlabel t
-ylabel N
-
-figure
-plot(t,wstore);                           %%Plot max_W
-xlabel t
-ylabel Weights
+ylabel '|c|'
 
