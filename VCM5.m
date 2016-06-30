@@ -30,7 +30,7 @@ iters=4;                                          %%iterations of ODE solver
 
 % initialise storage for data to plot
 
-z = nan(2*R, length(t));
+z = nan(2*R, length(t));  component_lengths = nan(4, length(t));
 
 BUF = nan(1,length(t));
 alpha.o = BUF;  number = BUF;  csize = BUF;  qsize = BUF;
@@ -48,13 +48,20 @@ c0 = sum(nq*evan(z(:,1)), 2);
 
 for i = 1:length(t) 
 
-	% independent brackets
-	qo = sum(nq*evan(z(:,i)), 2);
-	c = sqrt(sum(abs(nq*evan(z(:,i))).^2));
+	% collect data to plot
+
+	ensemble = nq*evan(z(:,i));
+	D2 = ndqr*evan(z(:,i));  Dq = [ensemble D2];
+	qo = sum(ensemble, 2);
+	c = sqrt(sum(abs(ensemble).^2));
 	qsize(i) = norm(qo);
 	alpha.o(i) = qo'*aop*qo/qsize(i)^2;
 	number(i) = sum(abs(qo).^2.*(0:N)')/qsize(i)^2;
 	csize(i) = norm(c);
+	urank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);
+	fcondition(i) = cond(ensemble);  vcondition(i) = cond(Dq);
+	d = sqrt(sum(abs(D2).^2));
+	component_lengths(:,i) = [min(d) min(c) max(c)  max(d)];
  	
 	if i == length(t), break, end
 	
@@ -73,8 +80,6 @@ for i = 1:length(t)
 		zh = z(:,i) + dz/2;
 	end
     	z(:,i+1) = z(:,i) + dz;
-	urank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);
-	fcondition(i) = cond(ensemble);  vcondition(i) = cond(Dq);
 
 end
  
@@ -104,9 +109,10 @@ for ti = snapshots
 	figure, zplot(x,y,Aps'*sum(ensemble, 2)), axis equal, hold on
 	plot(z(R+1:end,i),'ow')
 	contour(x,y,rsdl,[0.5 0.5],'-w')
-	contour(x,y,nrms, [1 1],'-g')
-	contour(x,y,nrms, [10 10],'-y')
-	contour(x,y,nrms, [100 100],'-r')
+	nrmax = component_lengths(3,i);
+	contour(x,y,nrms, nrmax*[1 1],'-g')
+	contour(x,y,nrms, nrmax*[10 10],'-y')
+	contour(x,y,nrms, nrmax*[100 100],'-r')
 	title(sprintf('state at t = %.2f', ti))
 	
 	D = [ensemble, ndqr*evan(z(:,i))];
@@ -118,9 +124,10 @@ for ti = snapshots
 	figure, zplot(x,y,Aps'*(nhn.*sum(ensemble, 2))), axis equal, hold on
 	plot(z(R+1:end,i),'ow')
 	contour(x,y,rsdl,[0.5 0.5],'-w')
-	contour(x,y,nrms, [1 1],'-g')
-	contour(x,y,nrms, [10 10],'-y')
-	contour(x,y,nrms, [100 100],'-r')
+	nrmax = max(nrmax, component_lengths(4,i));
+	contour(x,y,nrms, nrmax*[1 1],'-g')
+	contour(x,y,nrms, nrmax*[10 10],'-y')
+	contour(x,y,nrms, nrmax*[100 100],'-r')
 	title(sprintf('derivative at t = %.2f', ti))
 
 end
@@ -165,5 +172,12 @@ ylabel '|c|'
 figure
 plot(t, csize./qsize, '-r');
 xlabel t
-ylabel 'norm ratio'
+title 'ratio of coefficient norm to state norm'
 
+figure, fi = gcf;
+lines = semilogy(t, component_lengths);
+set(lines, 'Color', 'k');
+set(lines, {'LineStyle'}, {'-' '--' '--' '-'}');
+xlabel t
+ylabel lengths
+legend variational gabor
