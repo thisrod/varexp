@@ -14,9 +14,9 @@ for i=1:3
         title('Too regularised')
         ylabel('\lambda\sigma^+')
     end
-    if i==3 title('Not regularised enough'); end
+    if i==3 title('Under regularised'); end
     if i>1; set(gca, 'YTick', []); end
     a = 100*a;
 end
 
-print(gcf, '-depsc', 'tysv.eps')
+saveTightFigure tysv.pdf
