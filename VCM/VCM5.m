@@ -95,11 +95,14 @@ x = -5:0.2:5;  y = -5:0.2:5;
 Aps = nq*evan(Z,'even');
 
 % plot snapshots in phase space
+% white contour: coherent amplitudes where the component of |alpha> in the span of the frame drops to 0.5.
+% coloured contours: where the norm of the least-squares expansion of |alpha> is 1, 10, and 100 times the length of the largest element in the frame.
 
 for ti = snapshots
 
 	[~,i] = min(abs(t-ti));
 	ensemble = nq*evan(z(:,i));
+
 	% find residuals by taking components in the orthogonal space
 	[U,~,~] = svd(ensemble);  U = U(:,rank(ensemble)+1:end);
 	rsdl = U'*Aps;  rsdl = sqrt(sum(abs(rsdl).^2));  rsdl = reshape(rsdl, size(X));
