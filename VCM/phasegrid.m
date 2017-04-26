@@ -9,6 +9,7 @@ nhn = nhn/2;
 nhn = nhn-4*(0:N)';
 
 a0 = 2;		% coherent amplitude of initial state
+% q0 = zeros(N+1,1);  q0(5) = 1;		% number state 2
 q0 = nq*evan(a0,'even');	% expansion of |a0> over number states
 epsilon=1i*1.e-4;                                 %%stabilize matrix
 
@@ -53,20 +54,13 @@ for i = 1:length(t)
 
 	% collect data to plot
 
-%	ensemble = nq*evan(z(:,i));
-%	D2 = ndqr*evan(z(:,i));  Dq = [ensemble D2];
 	qo = A*c(:,i);
-%	c = sqrt(sum(abs(ensemble).^2));
 	rsdl(i) = norm(qe(:,i)-qo);
 	rsdln(i) = sum(abs(qe(:,i)-qo).^2.*(0:N)')/rsdl(i)^2;
 	qsize(i) = norm(qo);
 	alpha.o(i) = qo'*aop*qo/qsize(i)^2;
 	number(i) = sum(abs(qo).^2.*(0:N)')/qsize(i)^2;
 	csize(i) = norm(c(:,i));
-%	urank(i) = rank(Dq);   rrank(i) = rank([Dq; sqrt(epsilon)*eye(2*R)]);
-%	fcondition(i) = cond(ensemble);  vcondition(i) = cond(Dq);
-%	d = sqrt(sum(abs(D2).^2));
-%	component_lengths(:,i) = [min(d) min(c) max(c)  max(d)];
  	
 	if i == length(t), break, end
 
@@ -84,25 +78,11 @@ end
 
 % Eigenvalues of discretised Hamiltonian and step operators
 
-M = pinvA*diag(1i*nhn)*A;  ew = flip(eig(M));
-figure, plot(1:length(a),real(ew),'+k',1:length(a),imag(ew),'.k',1:length(a),nhn(1:41),'or')
-title 'Discretised H eigenvalues'
-
-P = 1+h*M;  ew = flip(eig(P));
-figure, semilogy(1:length(a),real(ew),'+k',1:length(a),imag(ew),'.k')
-title '1st iteration eigenvalues'
-
-P = 1+h*M*P;  ew = flip(eig(P));
-figure, semilogy(1:length(a),real(ew),'+k',1:length(a),imag(ew),'.k')
-title '2nd iteration eigenvalues'
-
-P = 1+h*M*P;  ew = flip(eig(P));
-figure, semilogy(1:length(a),real(ew),'+k',1:length(a),imag(ew),'.k')
-title '3rd iteration eigenvalues'
-
-P = 1+h*M*P;  ew = flip(eig(P));
-figure, semilogy(1:length(a),real(ew),'+k',1:length(a),imag(ew),'.k')
-title '4th iteration eigenvalues'
+M = pinvA*diag(-1i*nhn)*A;
+figure, plot(1:length(a), sort(abs(eig(M))), 'vk', 1:length(a), sort(abs(nhn(1:length(a)))), '^k')
+hold on, plot([1 length(a)], 2/h*[1 1], '-k')
+title 'H eigenvalues and Nyquist limit'
+legend('discrete', 'exact', 'Location', 'SouthEast')
 
 
 % set up plotting grid
@@ -110,6 +90,17 @@ title '4th iteration eigenvalues'
 x = -10:0.3:10;  y = -10:0.3:10;
 [X,Y] = meshgrid(x,y);  Z = X(:)+1i*Y(:);
 Aps = nq*evan(Z,'even');
+
+% Maximum eigenvector of discrete H
+
+[ev,ew] = eig(M);  ew = diag(ew);
+[~,i] = max(abs(ew));
+figure, plog(x,y,Aps'*A*ev(:,i),a)
+title 'largest ev of discrete H'
+
+figure, semilogy(0:N, abs(A*ev(:,i))/norm(A*ev(:,i)), '.k')
+title 'number components of largest ev'
+
 
 % plot derivatives
 
@@ -250,6 +241,12 @@ figure
 plot(t, csize./qsize, '-r');
 xlabel t
 title 'ratio of coefficient norm to state norm'
+
+
+ccc = permute(cc, [1 3 2]);  ccc = reshape(ccc, length(a), []);
+figure, waterfall(0:N,h/4*(0:(size(ccc,2)-1)),log(abs(A*ccc))')
+xlabel n, ylabel t
+title 'Growth of parasitic eigenvector'
 
 %figure, fi = gcf;
 %lines = semilogy(t, component_lengths);
