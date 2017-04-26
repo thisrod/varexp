@@ -1,0 +1,47 @@
+\input respnotes
+
+\title Failure of the Iterated Semi-Implicit method at large energy
+
+The semi-implicit method is usually used to solve partial differential equations.  However, in this application it is used as a method of lines, and the semi-implicit method is a way to solve the resulting ordinary differential equations.
+
+For the differential equation~${dx\over dt}=f(x,t)$, the SI formula with time step~$h$ is
+$$x_{n+1}=x_n+hf_{n+½},\qquad f_{n+½}=f\left({x_n+x_{n+1}\over 2}\right).$$
+This has the nice property that it is symplectic in ket space, but the obvious problem is evaluating~$f_{n+½}$.  This is often done iteratively, with
+$$\eqalign{
+	x_{n+1}⁰&=x_n\qquad f_{n+½}⁰=f(x_n)\cr
+	x_{n+1}^{i+1}&=x_n+hf_{n+½}ⁱ\qquad f_{n+½}^{i+1}=f\left({x_n+x_{n+1}ⁱ\over 2}\right)\cr
+}$$
+
+Now consider the quantum case, where~$x$ is the expansion of a ket over an orthonormal basis, and~$f$ is a linear Hamiltonian operator~$-iH$.  In this case, the iteration rule becomes
+$$x_{n+1}^{i+1}=x_n+hf_{n+½}ⁱ\qquad f_{n+½}^{i+1}=-{i\over2}Hx_n-{i\over2}Hx_{n+1}ⁱ$$
+or
+$$x_{n+1}^{i+1}=(1-{ih\over2}H)x_n-{ih\over2}Hx_{n+1}ⁱ$$
+with solution
+$$x_{n+1}ⁱ=Ux_n=\left(1-ihH-{(hH)²\over 2}+{i(hH)³\over 4}+…+2\left({-ihH\over 2}\right)ⁱ\right)x_n.$$
+The eigenvalues of the time step operator~$U$ are the same as those of~$H$.  The iteration will converge if{f} the eigenvalues of~$H$ are bounded by~$2/h$, a kind of Nyquist condition.
+
+Actually, this condition only restricts the eigenvalues whose eigenkets have components in~$x_n$.  Consider a state~$x₀$ with moderate expected energy, but with a small component with a large energy, such as a coherent state.  The iteration will appear to converge for a small number of cycles, and the formula will appear to solve the differential equation.  However, the component with large energy will be amplified by the operator~$U$ at each timestep, and eventually this parasitic solution will dominate the real solution.
+
+This is illustrated in a numerical experiment with the Hamiltonian
+$$H=½(a†)²a²-4a†a,$$
+and the initial coherent state~$|o(2)〉$ such that~$〈H〉=0$.  The state was expanded over set of 41 coherent states, whose amplitudes form the grid in the figure below.  The figure also shows the largest eigenstate of the discrete Hamiltonian on this grid.
+
+\XeTeXpdffile VCM/aa.pdf width 0.7\hsize
+
+The second figure shows an expansion of this eigenstate over number states.  The most energetic eigenstate is a combination of~$|42〉$ and~$|43〉$, which is not unexpected: any set of 41 number states near the origin of phase space will span nearly the same space as~$|0〉$ through~$|40〉$.
+
+\XeTeXpdffile VCM/ab.pdf width 0.7\hsize
+
+The next figure shows the initial state~$|o(2)〉$ propagated with a 4-iteration semi-implicit rule.  When the initial state is discretised, the components of the number states~$|0〉$ through roughly~$|40〉$ decay exponentially, as they should for a coherent state.  The larger number states form a residual component, that lies orthogonal to the span of the coherent state grid and can not be represented in this discretisation.
+
+The phases of the number state components should rotate, but their sizes should remain constant.  All of the iterations are shown, and the jump every 4 steps comes at the start of each timestep, where the converged solution is replaced by a new rough estimate.  The exponential growth of the parasitic mode is obvious.
+
+\XeTeXpdffile VCM/ac.pdf width 0.7\hsize
+
+The final figure shows the eigenvalues of the exact and discretised Hamiltonians, along with the Nyquist energy limit~$2/h$.  It is clear that parasitic modes will be present.
+
+\XeTeXpdffile VCM/ad.pdf width 0.7\hsize
+
+In an expansion over coherent states, constraining the size of the expansion coefficients has the effect of constraining the energy of the expanded state!  So a solution with constrained norm ought to limit the growth of the parasitic modes, and restrict the simulated state to the part of phase space near the grid.  We will implement this by finding a constrained least-squares solution at each iteration. 
+
+\bye
