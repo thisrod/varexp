@@ -11,12 +11,18 @@ nhn = nhn-4*(0:N)';
 a0 = 2;		% coherent amplitude of initial state
 % q0 = zeros(N+1,1);  q0(5) = 1;		% number state 2
 q0 = nq*evan(a0,'even');	% expansion of |a0> over number states
-epsilon=1i*1.e-4;                                 %%stabilize matrix
 
 T=2*pi;  h=0.005;		% time axis
-T = 0.05;
+% T = 0.05;
 t = h*(0:ceil(T/h));
-snapshots = h*(0:5);
+snapshots = [h 2*h 0.1 1 2 4];
+
+gfac = 1.5;		% relative coefficient growth limit
+% gfac = inf;
+
+laf = 3e-4;		% Lagrange multiplier for Tyc conditioning.
+% laf = 3e-4;	% value where parasitic solution takes over at t=pi
+% laf = 0;
 
 iters = 4;                                          %%iterations of ODE solver
 
@@ -29,6 +35,7 @@ A = nq*evan(a,'even');
 pinvA = pinv(A);
 
 % initialise storage for data to plot
+% cc(:,i,:) converge to c(:,i)
 
 c = nan(length(a), length(t));
 cc = nan(length(a), length(t), iters);
@@ -36,12 +43,11 @@ cc = nan(length(a), length(t), iters);
 BUF = nan(1,length(t));
 alpha.o = BUF;  number = BUF;  csize = BUF;  qsize = BUF;
 rsdl = BUF;  rsdln = BUF;
-%urank = BUF;  rrank = BUF;
-%fcondition = BUF;  vcondition = BUF;
 
 % initial condition, the least squares expansion of |a0> over A
 
 c(:,1) = pinvA*q0;
+glim = gfac*norm(c(:,1));
 
 % Exact values for comparison
 
@@ -52,7 +58,7 @@ alpha.e = sum(conj(qe).*(aop*qe))/norm(A*c(:,1))^2;
 
 for i = 1:length(t) 
 
-	% collect data to plot
+	% collect state data
 
 	qo = A*c(:,i);
 	rsdl(i) = norm(qe(:,i)-qo);
@@ -70,7 +76,24 @@ for i = 1:length(t)
 	for j = 1:iters
 		cc(:,i+1,j) = c(:,i) + dc;
 		ch = c(:,i) + dc/2;
-		dc = pinvA*(-1i*h*nhn.*(A*ch));
+		% Tychonov
+		dc = h*pinv([A; laf*eye(length(a))])*[diag(-1i*nhn)*A*ch; zeros(size(a))];
+		if norm(c(:,i) + dc) > glim
+			% N.B. dc never comes out orthogonal to c
+			% solve real l.s. problem with constant |c|
+			cri = [real(c(:,i)); imag(c(:,i))];
+			% Householder reflect c = grad(|c|²) onto e1, drop first column
+			U = eye(2*length(a));
+			v = U(:,1);  if sign(cri(1)) < 0, v = -v; end
+			v = v + cri/norm(cri);
+			U = U - 2*v*v'/(v'*v);  U = U(:, 2:end);
+			% solve constrained least squares problem
+			rhs = -1i*h*nhn.*(A*ch);  rhs = [real(rhs); imag(rhs)];
+			dc = U*pinv([real(A) -imag(A); imag(A) real(A)]*U)*rhs;
+			dc = dc(1:length(a)) + 1i*dc(length(a)+1:end);
+			% keyboard
+		end
+		
 	end
     	c(:,i+1) = c(:,i) + dc;
 
@@ -78,10 +101,27 @@ end
 
 % Eigenvalues of discretised Hamiltonian and step operators
 
-M = pinvA*diag(-1i*nhn)*A;
-figure, plot(1:length(a), sort(abs(eig(M))), 'vk', 1:length(a), sort(abs(nhn(1:length(a)))), '^k')
+M = pinv(A)*diag(nhn)*A;
+
+figure, subplot 311
+plot(1:length(a), sort(abs(eig(M))), 'vk', 1:length(a), sort(abs(nhn(1:length(a)))), '^k')
 hold on, plot([1 length(a)], 2/h*[1 1], '-k')
 title 'H eigenvalues and Nyquist limit'
+legend('discrete', 'exact', 'Location', 'SouthEast')
+
+% singular values of A
+
+subplot 312
+[~,S,~] = svd(A);
+semilogy(1:length(a), diag(S), '.k', [0 length(a)], [laf laf]);
+title 'Singular values of expansion'
+xlabel n, ylabel '\sigma_n'
+
+subplot 313
+Hty = pinv([A; laf*eye(length(a))])*[diag(nhn)*A; zeros(length(a))];
+plot(1:length(a), sort(abs(eig(Hty))), 'vk', 1:length(a), sort(abs(nhn(1:length(a)))), '^k')
+hold on, plot([1 length(a)], 2/h*[1 1], '-k')
+title 'regularised H eigenvalues'
 legend('discrete', 'exact', 'Location', 'SouthEast')
 
 
@@ -105,10 +145,10 @@ title 'number components of largest ev'
 % plot derivatives
 
 figure, title derivatives
-for ti = snapshots, for j = 1:iters
+for ti = 1:length(snapshots), for j = 1:iters
 
-	[~,i] = min(abs(t-ti));
-	subplot(length(snapshots), iters, iters*(i-1) + j)
+	[~,i] = min(abs(t-snapshots(ti)));
+	subplot(length(snapshots), iters, iters*(ti-1) + j)
 	plog(x,y,Aps'*A*(cc(:,i+1,j)-c(:,i)),a)
 	text(-4.4,8,num2str(norm(cc(:,i+1,j)-c(:,i))), 'Color', 'white')
 	if j == 1
@@ -125,36 +165,38 @@ for ti = snapshots
 	[~,i] = min(abs(t-ti));
 	qo = A*c(:,i);
 
-	figure, subplot 331
-	plog(x,y,Aps'*qe(:,i),a), title(sprintf('exact state t = %.1e', t(i)))
+	figure, subplot 241
+	plog(x,y,Aps'*qe(:,i),a)
+	text(-4.4,9,sprintf('state size %.1e', norm(qe(:,i))), 'Color', 'white')
+	text(-4.4,7,sprintf('expansion size %.1e', norm(pinvA*qe(:,i))), 'Color', 'white')
+	title(sprintf('state t = %.1e', t(i)))
 
-	subplot 332, plog(x,y,Aps'*A*pinvA*qe(:,i),a)
-	text(-4.4,8,sprintf('expansion size %.1e', norm(pinvA*qe(:,i))), 'Color', 'white')
-	title 'frame expansion'
+	subplot 245, plog(x,y,Aps'*(qe(:,i)-A*pinvA*qe(:,i)),a)
+	title(sprintf('residual fraction %.1e', norm(q0-A*c(:,1))/norm(qe(:,i))))
 	
-	subplot 333, plog(x,y,Aps'*(qe(:,i)-A*pinvA*qe(:,i)),a)
-	text(-4.4,8,sprintf('residual %.1e', norm(q0-A*c(:,1))), 'Color', 'white')
-	title 'residual'
+	subplot 242, plog(x,y,Aps'*(nhn.*qe(:,i)),a)
+	text(-4.4,9,sprintf('derivative size %.1e', norm(nhn.*qe(:,i))), 'Color', 'white')
+	text(-4.4,7,sprintf('expansion size %.1e', norm(pinvA*(nhn.*qe(:,i)))), 'Color', 'white')
+	title 'derivative'
 	
-	subplot 334, plog(x,y,Aps'*(nhn.*qe(:,i)),a), title 'exact derivative'
-	text(-4.4,8,sprintf('derivative size %.1e', norm(nhn.*qe(:,i))), 'Color', 'white')
-	title 'exact derivative'
+	subplot 246, plog(x,y,Aps'*(nhn.*qe(:,i)-A*pinvA*(nhn.*qe(:,i))),a)
+	title(sprintf('%.1e', norm(nhn.*qe(:,i)-A*pinvA*(nhn.*qe(:,i)))/norm(nhn.*qe(:,i))))
+	
+	subplot 243, plog(x,y,Aps'*qo,a)
+	text(-4.4,9,sprintf('state size %.1e', norm(A*c(:,i))), 'Color', 'white')
+	text(-4.4,7,sprintf('expansion size %.1e', norm(c(:,i))), 'Color', 'white')
+	title 'simulated state'
+	
+	subplot 247, plog(x,y,Aps'*(qe(:,i)-qo),a)
+	title(sprintf('%.1e', norm(qe(:,i)-qo)/norm(qe(:,i))))
 
-	subplot 335, plog(x,y,Aps'*A*pinvA*(nhn.*qe(:,i)),a)
-	text(-4.4,8,sprintf('expansion size %.1e', norm(pinvA*(nhn.*qe(:,i)))), 'Color', 'white')
-	
-	subplot 336, plog(x,y,Aps'*(nhn.*qe(:,i)-A*pinvA*(nhn.*qe(:,i))),a)
-	text(-4.4,8,sprintf('residual %.1e', norm(nhn.*qe(:,i)-A*pinvA*(nhn.*qe(:,i)))), 'Color', 'white')
-	
-	subplot 337, plog(x,y,Aps'*qo,a), title 'simulated state'
-	text(-4.4,8,sprintf('expansion size %.1e', norm(c(:,i))), 'Color', 'white')
-
-	subplot 338, plog(x,y,Aps'*(nhn.*qo),a)
+	subplot 244, plog(x,y,Aps'*(nhn.*qo),a)
+	text(-4.4,9,sprintf('derivative size %.1e', norm(nhn.*qo)), 'Color', 'white')
+	text(-4.4,7,sprintf('expansion size %.1e', norm(pinv(A)*(nhn.*qo))), 'Color', 'white')
 	title 'simulated derivative'
 	
-	subplot 339, plog(x,y,Aps'*(qe(:,i)-qo),a)
-	text(-4.4,8,sprintf('residual %.1e', norm(qe(:,i)-qo)), 'Color', 'white')
-	title 'simulated state residual'
+	subplot 248, plog(x,y,Aps'*(nhn.*(qe(:,i)-qo)),a)
+	title(sprintf('%.1e', norm(nhn.*(qe(:,i)-qo))/norm(nhn.*qe(:,i))))
 
 %	% find residuals by taking components in the orthogonal space
 %	[U,~,~] = svd(ensemble);  U = U(:,rank(ensemble)+1:end);
@@ -188,17 +230,19 @@ for ti = snapshots
 
 end
 
-%figure
-%plot(t, 2*R-urank, ':k', t, 2*R-rrank, '-k');
-%xlabel t
-%ylabel 'rank deficiency in |\psi''>'
-%legend original regularised
-
-%figure
-%semilogy(t, fcondition, '-k', t, vcondition, ':k');
-%xlabel t
-%ylabel 'frame condition'
-%legend Gabor variational
+% plot vector sum diagrams (do this for snapshots)
+    	
+figure
+for j = 1:length(snapshots)
+	[~,i] = min(abs(t-snapshots(j)));
+ 	subplot(1, length(snapshots), j)
+ 	u = [c(:,i) c(:,i+1) squeeze(cc(:,i+1,:))];
+ 	[Q,R] = qr([real(u); imag(u)], 0);
+ 	plot([0 R(1,1)], [0 0], '-k', [R(1,1) R(1,2)], [0 R(2,2)], '-r', ...
+ 		R(1,3:end), R(2,3:end), 'xk', 'LineWidth', 2)
+ 	axis image
+ 	title(sprintf('t = %.4f', t(i)+h/2))
+end
 
 figure, subplot 311
 semilogy(t, rsdl, '-k');
@@ -217,16 +261,17 @@ xlabel t
 ylabel '|c|'
 
 figure
+subplot 311
 plot(t, real(alpha.o), '-r', t, real(alpha.e),' -k');
 xlabel t
 ylabel X_1
 
-figure
+subplot 312
 plot(t, imag(alpha.o), '-r', t, imag(alpha.e),' -k');
 xlabel t
 ylabel X_2
 
-figure
+subplot 313
 plot(t, number, '-r', t([1 end]), number([1 1]), '-k');
 xlabel t
 ylabel <n>

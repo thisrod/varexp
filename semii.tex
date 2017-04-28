@@ -44,4 +44,14 @@ The final figure shows the eigenvalues of the exact and discretised Hamiltonians
 
 In an expansion over coherent states, constraining the size of the expansion coefficients has the effect of constraining the energy of the expanded state!  So a solution with constrained norm ought to limit the growth of the parasitic modes, and restrict the simulated state to the part of phase space near the grid.  We will implement this by finding a constrained least-squares solution at each iteration. 
 
+(Insert figures from phasegrid below.)
+
+It turns out that the steps of the integration formula quickly become larger than the state vector.  This can be solved by Tychonov conditioning.  Constraining~$dc$ to be orthogonal to~$c$ doesn't help, because~$dc$ is too large for the small angle approximations to work, and this does not keep the norm constant.
+
+The matrix~$〈A⁺|H|A〉$ is not normal.  However, because~$|A〉〈A⁺|≈1$, the coefficient vectors~$〈A⁺|E_i〉$ are very nearly eigenvectors, with eigenvalues~$E_i$.  The approximation is very good for low energy, but starts to fail as the energy~$E_i$ approaches the highest energy in the span of $|A〉$.  Presumably the eigenvectors are those of the projection of~$H$ on to the span of~$|A〉$.
+
+If~$〈A⁺|$ is Tychonov regularised, then the same argument should work on the low energy space where the regularised expansion is a good approximation.  But it doesn't appear to: eigenvalues of~$H$ are shifted that are low enoug that the corresponding singular vectors of~$A$ should hardly be touched by regularisation.
+
+Todo.  For number states~$|n〉 with energies~$E_n$, see how the size of~$〈A⁺|n〉$ varies with the lagrange multiplier.
+
 \bye
