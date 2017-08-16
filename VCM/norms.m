@@ -3,7 +3,9 @@ function B = norms(A,dim)
 
 if nargin < 2, dim = 1; end
 B = sqrt(sum(abs(A).^2,dim));
-s = size(B);
-B = reshape(B,[s(1:dim-1) s(dim+1:end)]);
+if ndims(B) > 2
+	s = size(B);
+	B = reshape(B,[s(1:dim-1) s(dim+1:end)]);
+end
 
 end

@@ -67,6 +67,7 @@ title(['Picard plot for expanding a cat over ' num2str(R) ...
     ' coherent states'])
 legend('\sigma_r', '|<u_r|\psi>|', '|<u_r|\psi>|/\sigma_r', ...
     'Location', 'SouthWest')
+xlabel 'r', ylabel 'singular value and vector sizes'
 saveTightFigure capic.pdf
 
 figure

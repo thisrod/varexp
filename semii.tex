@@ -52,6 +52,10 @@ The matrix~$〈A⁺|H|A〉$ is not normal.  However, because~$|A〉〈A⁺|≈1$
 
 If~$〈A⁺|$ is Tychonov regularised, then the same argument should work on the low energy space where the regularised expansion is a good approximation.  But it doesn't appear to: eigenvalues of~$H$ are shifted that are low enoug that the corresponding singular vectors of~$A$ should hardly be touched by regularisation.
 
+Explanation.  Suppose the energy eigenstate~$|E_i〉$ has components along singular directions of~$|A〉$ whose singular values are around~$σ$.  When the matrix~$〈A⁺_λ|H|A〉$ acts on the coefficient vector~$〈A⁺|E_i〉$, the vector is multiplied successively by scalars of size around~$σ$, $E_i$, and~$σ/(σ²+λ²)$, whose product is~$E_i×σ²/(σ²+λ²)$.
+
+Tychonov regularisation effectively turns off the dynamics in the high-energy Hilbert subspace where the singular values of~$|A〉$ are small.  This is why the semi-implicit method becomes stable.
+
 Todo.  For number states~$|n〉 with energies~$E_n$, see how the size of~$〈A⁺|n〉$ varies with the lagrange multiplier.
 
 \bye

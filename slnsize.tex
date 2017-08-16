@@ -1,0 +1,23 @@
+\input xpmath
+\input respnotes
+
+The way to regularise an ill-posed problem is to bound the size of the solution.  This is straightforward when the problem is being solved once, more complicated when the result is a derivative that will be integrated to find the actual solution.  In this case, small changes can add up to give a large solution, most of which comes from over-fitting.  We want to bound the size of the solution, not the size of the changes.
+
+In the variational gaussian problem, the solution is an expansion $|ψ({\bf φ,α})〉=∑_re^{φ_r}|α_r〉$.  The $|α_r〉$ are translationally invariant, so the size of $\bf α$ doesn't seem to matter, and the size of the solution is measured by $M=\|(e^{φ₁},…,e^{φ_R})\|²=∑_re^{2\Re φ_r}$.  The increment of this is
+$$dM=∑_r2e^{2\Re φ_r}\,d(\Re φ_r).$$
+We want this increment to be mildly negative, say set it to $-ε\,dt$.
+
+The ill-posed problem is the Dirac-Frankel one,
+$$|Dψ(z)〉{\dot z}=-i\hbar H|ψ(z)〉.$$
+The conditioning uses $\Re φ$, which is a nonlinear function of $φ$ with respect to complex numbers.  So we must detour to convert this problem to a linear one over real numbers.  Let $φ=x+iy$, and $α=u+iv$.  Kets don't have real and imaginary parts, but their computer representations do, and we'll use $\Re|ψ(z)〉$ and $\Im|ψ(z)〉$ to denote these.  The problem becomes
+$$\pmatrix{\Re|D₁ψ〉&-\Im|D₁ψ〉&\Re|D₂ψ〉&-\Im|D₂ψ〉\cr
+	\Im|D₁ψ〉&\Re|D₁ψ〉&\Im|D₂ψ〉&\Re|D₂ψ〉
+	}\cdot
+	\pmatrix{\dot x\cr\dot y\cr\dot u\cr\dot v}
+	=\hbar\pmatrix{\Im H|ψ〉\cr -\Re H|ψ〉}.
+$$
+when split into real and imaginary parts.  In this expression, $|ψ(z)〉$ has been abbreviated to $|ψ〉$.
+
+The appropriate norm for $dz$ is $\|φ\|₂+\|α\|_∞$.  An ensemble with more components should not have a bigger norm if the $α$ change by the same amount.
+
+\bye

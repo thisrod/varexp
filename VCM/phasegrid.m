@@ -31,6 +31,7 @@ iters = 4;                                          %%iterations of ODE solver
 l = 1.1;			% frame density, a0 is not a grid point
 [ax,ay] = meshgrid(-4:l:4);  a = ax(:)+1i*ay(:);
 a = a(abs(a) <= 4);
+[~, i] = sort(abs(a));  a = a(i);
 A = nq*evan(a,'even');
 pinvA = pinv(A);
 
@@ -99,31 +100,80 @@ for i = 1:length(t)
 
 end
 
+% Suffix convention: ev, ew, sw, u = lsv, v = rsv
+
+Hew = nhn(1:length(a));
+M = pinv(A)*diag(nhn)*A;
+[ev,ew] = eig(M);  ew = diag(ew);
+% ns = (norms(aop*A*ev)./norms(A*ev)).^2;
+ns = sum(diag(0:N)*abs(A*ev).^2)./norms(A*ev).^2;
+[ns, P] = sort(ns);
+ev = ev(:,P);  ew = ew(P);
+[Au,Asw,Av] = svd(A,'econ');  Asw = diag(Asw);
+% Tychonov regularised H
+Hy = pinv([A; laf*eye(length(a))])*[diag(nhn)*A; zeros(length(a))];
+[Hyev, Hyew] = eig(Hy);  Hyew = diag(Hyew);
+% yns = (norms(aop*A*Hyev)./norms(A*Hyev)).^2;
+yns = sum(diag(0:N)*abs(A*Hyev).^2)./norms(A*Hyev).^2;
+[yns, P] = sort(yns);
+Hyev = Hyev(:,P);  Hyew = Hyew(P);
+
 % Eigenvalues of discretised Hamiltonian and step operators
 
-M = pinv(A)*diag(nhn)*A;
+figure
+zplot(1:length(a), 0:N, Au), axis image
+title 'svs of A'
+
+unit = eye(N+1,length(a));
+Afock = pinv(A)*unit;
+Afock = Afock/diag(norms(Afock));
+
+figure, subplot 221
+zplot(1:length(a), 1:length(a), ev), axis image
+title 'evs of discretised H'
+
+subplot 222
+tmp2 = A*ev;  tmp2 = tmp2/diag(norms(tmp2));
+imagesc(abs(tmp2(1:length(a),:)).^2), colormap gray, axis image
+set(gca, 'YDir', 'normal')
+title 'Fock discretised H'
+
+subplot 223
+zplot(1:length(a), 1:length(a), Afock), axis image
+title 'number states'
+
+subplot 224
+tmp1 = A*Afock;  tmp1 = tmp1/diag(norms(tmp1));
+imagesc(abs(tmp1(1:length(a),:)).^2), colormap gray, axis image
+set(gca, 'YDir', 'normal')
+title 'Fock number states'
+
+
+figure
+plot(0:length(a)-1, yns, '.r', 0:length(a)-1, ns, '.k', [0 length(a)], [0 length(a)], ':k')
+title 'Average number in numerical eigenstates'
+ylabel '<n>' , title 'excitation ns of discrete evs'
+legend discrete regularised Location NorthWest
 
 figure, subplot 311
-plot(1:length(a), sort(abs(eig(M))), 'vk', 1:length(a), sort(abs(nhn(1:length(a)))), '^k')
+plot(1:length(a), ew, 'vk', 1:length(a), Hew, '^k')
 hold on, plot([1 length(a)], 2/h*[1 1], '-k')
-title 'H eigenvalues and Nyquist limit'
+text(1, 2/h, 'Nyquist limit')
+title 'H eigenvalues'
 legend('discrete', 'exact', 'Location', 'SouthEast')
 
-% singular values of A
-
 subplot 312
-[~,S,~] = svd(A);
-semilogy(1:length(a), diag(S), '.k', [0 length(a)], [laf laf]);
+semilogy(1:length(a), Asw, '.k', [0 length(a)], [laf laf]);
 title 'Singular values of expansion'
 xlabel n, ylabel '\sigma_n'
 
 subplot 313
-Hty = pinv([A; laf*eye(length(a))])*[diag(nhn)*A; zeros(length(a))];
-plot(1:length(a), sort(abs(eig(Hty))), 'vk', 1:length(a), sort(abs(nhn(1:length(a)))), '^k')
+pew = Hew.*Asw.^2./(Asw.^2+laf.^2);
+
+plot(1:length(a), Hyew, 'vk', 1:length(a), Hew, '^k', 1:length(a), pew, '.k')
 hold on, plot([1 length(a)], 2/h*[1 1], '-k')
 title 'regularised H eigenvalues'
-legend('discrete', 'exact', 'Location', 'SouthEast')
-
+legend('discrete', 'exact', 'predicted', 'Location', 'NorthWest')
 
 % set up plotting grid
 
@@ -131,16 +181,51 @@ x = -10:0.3:10;  y = -10:0.3:10;
 [X,Y] = meshgrid(x,y);  Z = X(:)+1i*Y(:);
 Aps = nq*evan(Z,'even');
 
-% Maximum eigenvector of discrete H
+ixs = [1:4 round(linspace(5,length(a),4))];
+cmap = phase(128);
+ff = linspace(0, 2*pi, size(cmap,1));
 
-[ev,ew] = eig(M);  ew = diag(ew);
-[~,i] = max(abs(ew));
-figure, plog(x,y,Aps'*A*ev(:,i),a)
-title 'largest ev of discrete H'
+% Singular vectors of A
 
-figure, semilogy(0:N, abs(A*ev(:,i))/norm(A*ev(:,i)), '.k')
-title 'number components of largest ev'
+for i = ixs
+	figure, zplot(x,y,Aps'*Au(:,i)), hold on, axis image
+	title(sprintf('Singular vector %d', i))
+	text(-9,8,sprintf('\\sigma = %.1e', Asw(i)), 'Color', 'white')
+	scale = 10/max(abs(Av(:,i)));
+	for j = 1:length(a)
+		plot(a(j), 'o', 'MarkerSize', scale*abs(Av(j,i)), ...
+			'MarkerEdgeColor', interp1(ff, cmap, mod(angle(Av(j,i)), 2*pi)))
+	end
+end
 
+% Eigenvectors of M
+
+[~, P] = sort(abs(ew));
+for i = ixs
+	figure, zplot(x,y,Aps'*A*ev(:,P(i))), hold on, axis image
+	title(sprintf('Discrete H eigenvector %d', i))
+	text(-9,8,sprintf('ew = %.1e', ew(P(i))), 'Color', 'white')
+	text(-9,7,sprintf('|A*ev| = %.1e', norm(A*ev(:,P(i)))), 'Color', 'white')
+	scale = 10/max(abs(ev(:,P(i))));
+	for j = 1:length(a)
+		plot(a(j), 'o', 'MarkerSize', scale*abs(ev(j,P(i))), ...
+			'MarkerEdgeColor', interp1(ff, cmap, mod(angle(ev(j,P(i))), 2*pi)))
+	end
+end
+
+% expansions of number states
+
+for i = ixs
+	cs = pinv(A)*unit(:,i);
+	figure, zplot(x,y,Aps'*A*cs), hold on, axis image
+	title(sprintf('Number state %d', i))
+	text(-9,7,sprintf('|c| = %.1e', norm(cs)), 'Color', 'white')
+	scale = 10/max(abs(cs));
+	for j = 1:length(a)
+		plot(a(j), 'o', 'MarkerSize', scale*abs(cs(j)), ...
+			'MarkerEdgeColor', interp1(ff, cmap, mod(angle(cs(j)), 2*pi)))
+	end
+end
 
 % plot derivatives
 

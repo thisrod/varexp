@@ -19,7 +19,15 @@ for i = 1:numel(ts)
 	figure, zplot(mesh, mesh, Aps'*c), hold on, axis image
 	plot(0, 0, 'ow', real(a), imag(a), '+w'), axis off
 	saveTightFigure(sprintf('qrt%02d.pdf', i))
-%	title(sprintf('Q.O. at t = %.2f*2\\pi', t))
+
+	figure, zplot(mesh, mesh, widi(c,z)), hold on, axis image
+	plot(0, 0, 'ow', real(a), imag(a), '+w'), axis off
+	saveTightFigure(sprintf('qrtw%02d.pdf', i))
+
+	z0 = exp(-2i*pi*t*(2*abs(z).^2-1)).*z;
+	figure, zplot(mesh, mesh, exp(-2*abs(z0-3.5).^2))
+	axis image, axis off
+	saveTightFigure(sprintf('qrtt%02d.pdf', i))
 end
 
 tt = 0:0.001:0.25;  m = numel(tt);
