@@ -1,0 +1,331 @@
+% SIAM Article Template
+\documentclass[review]{siamart1116}
+
+% Packages and macros go here
+\usepackage{lipsum}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{algorithmic}
+\ifpdf
+  \DeclareGraphicsExtensions{.eps,.pdf,.png,.jpg}
+\else
+  \DeclareGraphicsExtensions{.eps}
+\fi
+
+%strongly recommended
+\numberwithin{theorem}{section}
+
+% Declare title and authors, without \thanks
+\newcommand{\TheTitle}{Stability of the semi-implicit formula for quantum dynamics} 
+\newcommand{\TheAuthors}{Rodney E. S. Polkinghorne}
+
+% Sets running headers as well as PDF title and authors
+\headers{\TheTitle}{\TheAuthors}
+
+% Title. If the supplement option is on, then "Supplementary Material"
+% is automatically inserted before the title.
+\title{{\TheTitle}\thanks{Submitted to the editors DATE.
+\funding{This work was funded by the Fog Research Institute under contract no.~FRI-454.}}}
+
+% Authors: full names plus addresses.
+\author{
+  Rodney E. S. Polkinghorne\thanks{Swinburne University of Technology
+    (\email{rpolkinghorne@swin.edu.au}, \url{http://www.imag.com/\string~ddoe/}).}
+}
+
+\usepackage{amsopn}
+\DeclareMathOperator{\diag}{diag}
+
+
+%%% Local Variables: 
+%%% mode:latex
+%%% TeX-master: "ex_article"
+%%% End: 
+
+% Optional PDF information
+\ifpdf
+\hypersetup{
+  pdftitle={\TheTitle},
+  pdfauthor={\TheAuthors}
+}
+\fi
+
+% The next statement enables references to information in the
+% supplement. See the xr-hyperref package for details.
+
+\externaldocument{ex_supplement}
+
+% FundRef data to be entered by SIAM
+%<funding-group>
+%<award-group>
+%<funding-source>
+%<named-content content-type="funder-name"> 
+%</named-content> 
+%<named-content content-type="funder-identifier"> 
+%</named-content>
+%</funding-source>
+%<award-id> </award-id>
+%</award-group>
+%</funding-group>
+
+\begin{document}
+
+\maketitle
+
+% REQUIRED
+\begin{abstract}
+  This is an example SIAM \LaTeX\ article. This can be used as a
+  template for new articles.  Abstracts must be able to stand alone
+  and so cannot contain citations to the paper's references,
+  equations, etc.  An abstract must consist of a single paragraph and
+  be concise. Because of online formatting, abstracts must appear as
+  plain as possible. Any equations should be inline.
+\end{abstract}
+
+% REQUIRED
+\begin{keywords}
+  example, \LaTeX
+\end{keywords}
+
+% REQUIRED
+\begin{AMS}
+  68Q25, 68R10, 68U05
+\end{AMS}
+
+\section{Introduction}
+
+The semi-implicit method \cite{jkp-132-313,jkp-93-144} is often used to solve stochastic partial differential equations that arise when Monte-Carlo methods are used in quantum optics and in atom optics.  This is done as a method of lines, in which the spatial axes are discretised, often by spectral derivatives, to give a system of ordinary differential equations.  The semi-implicit formula is then used to integrate these.  For a system of equations~${dx\over dt}=f(x,t)$, with time step~$h$, the formula is
+\begin{equation}\label{eq:i}
+    x_{n+1}=x_n+hf_{n+\frac12},
+\end{equation}
+where
+\begin{equation}\label{eq:ii}
+    f_{n+\frac12}=f\left({x_n+x_{n+1}\over 2}\right).
+\end{equation}
+
+The formula has the theoretical advantage that it conserves Hilbert space norm when it is applied to a quantum equation of motion of the form
+\begin{equation}\label{eq:iii}
+	{dx\over dt}=-iHx,
+\end{equation}
+where $H$ is a hermitian operator.  However, it is mostly used because it has been found to work well in practice.
+
+It is not obvious how to apply this formula, because of the need
+to evaluate~$x_{n+1}$ and~$f_{n+\frac12}$ self-consistently.  The
+usual way of doing this is a very simple iterative one.  At first,
+$x_{n+1}$ is set to~$x_n$, and~$f_{n+\frac12}$ to~$f'(x_n)$.  Then
+Equations~\cref{eq:i,eq:ii} are evaluated in turn, and the values of~$x_n$
+and~$f_{n+\frac12}$ updated.  This ought to continue until they
+converge, but in practice this is continued for a fixed number of
+iterations.  Formally, this process gives a sequence of~$x_{n+1}^i$
+and~$f_{n+\frac12}^i$, with
+\begin{subequations}
+\begin{align}
+	\label{eq:iv} x_{n+1}^0&=x_n\qquad f_{n+\frac12}^0=f(x_n)\\
+	\label{eq:v} x_{n+1}^{i+1}&=x_n+hf_{n+\frac12}^i\qquad f_{n+\frac12}^{i+1}=f\left({x_n+x_{n+1}^i\over 2}\right).
+\end{align}
+\end{subequations}
+Any fixed point of this iteration is a self-consistent solution to
+Equations~\cref{eq:i,eq:ii}, but the question remains of when the
+iteration converges.
+
+It is a generally known problem that the time steps in formulae for
+partial differential equations need to be reduced in proportion to
+the spatial grid steps, in order for the formulae to remain stable.
+To date, no one has made a specific analysis of the iterative
+semi-implicit formula, so the stable time step has had to be
+determined by trial and error.  This can be a time consuming process
+for fields that are being simulated on large grids.
+
+This paper analyses the semi-implicit formula, in the case that it
+is used to integrate linear Hamiltonian dynamics as in
+Equation~\cref{eq:iii}.  The main result is that the stability
+depends on a Nyquist-like condition, and the iterations converge
+if and only if the largest eigenvalue of~$H$ is no more than~$2/h$.
+
+\section{Stability analysis}
+
+Suppose that the equation being integrated has the form of
+Equation~\cref{eq:iii}, where~$x$ is a vector of coefficients
+obtained by expanding a ket~$|\psi\rangle$ over an orthonormal
+basis, and~$f$ is the linear operator~$-iH$, where~$H$ is the matrix
+for the Hamiltonian operator in this basis.  The
+iteration rules of Equation~\cref{eq:v} becomes
+$$x_{n+1}^{i+1}=x_n+hf_{n+\frac12}^i\qquad f_{n+\frac12}^{i+1}
+	=-{i\over2}Hx_n-{i\over2}Hx_{n+1}^i$$
+or
+$$x_{n+1}^{i+1}=(1-{ih\over2}H)x_n-{ih\over2}Hx_{n+1}^i$$
+with solution
+$$x_{n+1}^i=Ux_n=\left(1-ihH-\frac{(hH)^2}2
+	+{i(hH)^3\over 4}+\cdots+2\left({-ihH\over 2}\right)^i\right)x_n.$$
+The time step matrix~$U$ has the the same eigenvectors as the
+hamiltonian matrix~$H$.
+
+The iteration will converge if and only if the angular frequencies
+that are eigenvalues of~$H$ are bounded by~$2/h$, a kind of Nyquist
+condition.  If the discretised Hamiltonian has an eigenstate~$x_\omega$
+with a frequency~$\omega\gg 2/h$, then~$U$ will magnify the component
+of~$x_\omega$ in~$x$ by a factor close to~$(h\omega/2)^i$, and this
+component is a parasitic solution growing steadily at the
+rate~$(h\omega/2)^i/h$.
+
+The semi-implicit method is rarely used to solve the linear Equation~\cref{eq:iii}, and more often used to solve a nonlinear Gross-Pitaevskii~equation of the form
+\begin{equation}
+	{\partial\psi\over\partial t}=-i(\hat H+g|\psi|^2)\psi.
+\end{equation}
+However, following the usual approach to the stability of integation formulae \cite{something}, the mapping
+$\psi\to -i(\hat H+g|\psi|^2)\psi$ can be linearised at each time step, in the form
+\begin{equation}
+	\psi(t)+\delta\psi\to -i(\hat H+g|\psi(t)|^2)\psi(t) -i\hat H'\delta\psi.
+\end{equation}
+This linearisation has been extensively studied, and the operator~$\hat
+H'$ is the hamiltonian for Bogoliubov sound waves \cite{something}.
+The stability conditon for the Gross-Pitaevskii~equation is that
+the highest frequency of the Bogoliubov sound waves in the discretised
+Hamiltonian is less than~$2/h$.  In the limit of fine grids, the
+high-frequency Bogoliubov sound waves have the same frequencies as
+the eigenstates of~$\hat H$.  Most simulations use grids fine enough
+for this to be the case, and the nonlinear term will not affect the
+stability of such simulations.
+
+
+
+
+\section{Main results}
+\label{sec:main}
+
+We interleave text filler with some example theorems and theorem-like
+items.
+
+\lipsum[4]
+
+Here we state our main result as \cref{thm:bigthm}; the proof is
+deferred to \cref{sec:proof}.
+
+\begin{theorem}[$LDL^T$ Factorization \cite{GoVa13}]\label{thm:bigthm}
+  If $A \in \mathbb{R}^{n \times n}$ is symmetric and the principal
+  submatrix $A(1:k,1:k)$ is nonsingular for $k=1:n-1$, then there
+  exists a unit lower triangular matrix $L$ and a diagonal matrix
+  \begin{displaymath}
+    D = \diag(d_1,\dots,d_n)
+  \end{displaymath}
+  such that $A=LDL^T$. The factorization is unique.
+\end{theorem}
+
+\lipsum[6]
+
+\begin{theorem}[Mean Value Theorem]\label{thm:mvt}
+  Suppose $f$ is a function that is continuous on the closed interval
+  $[a,b]$.  and differentiable on the open interval $(a,b)$.
+  Then there exists a number $c$ such that $a < c < b$ and
+  \begin{displaymath}
+    f'(c) = \frac{f(b)-f(a)}{b-a}.
+  \end{displaymath}
+  In other words,
+  \begin{displaymath}
+    f(b)-f(a) = f'(c)(b-a).
+  \end{displaymath}
+\end{theorem}
+
+Observe that \cref{thm:bigthm,thm:mvt,cor:a} correctly mix references
+to multiple labels.
+
+\begin{corollary}\label{cor:a}
+  Let $f(x)$ be continuous and differentiable everywhere. If $f(x)$
+  has at least two roots, then $f'(x)$ must have at least one root.
+\end{corollary}
+\begin{proof}
+  Let $a$ and $b$ be two distinct roots of $f$.
+  By \cref{thm:mvt}, there exists a number $c$ such that
+  \begin{displaymath}
+    f'(c) = \frac{f(b)-f(a)}{b-a} = \frac{0-0}{b-a} = 0.
+  \end{displaymath}
+\end{proof}
+
+Note that it may require two \LaTeX\ compilations for the proof marks
+to show.
+
+Display matrices can be rendered using environments from \texttt{amsmath}:
+\begin{equation}\label{eq:matrices}
+S=\begin{bmatrix}1&0\\0&0\end{bmatrix}
+\quad\text{and}\quad
+C=\begin{pmatrix}1&1&0\\1&1&0\\0&0&0\end{pmatrix}.
+\end{equation}
+Equation \cref{eq:matrices} shows some example matrices.
+
+We calculate the Fr\'{e}chet derivative of $F$ as follows:
+\begin{subequations}
+\begin{align}
+  F'(U,V)(H,K) 
+  &= \langle R(U,V),H\Sigma V^{T} + U\Sigma K^{T} -
+  P(H\Sigma V^{T} + U\Sigma K^{T})\rangle \label{eq:aa} \\
+  &= \langle R(U,V),H\Sigma V^{T} + U\Sigma K^{T}\rangle 
+  \nonumber \\
+  &= \langle R(U,V)V\Sigma^{T},H\rangle + 
+  \langle \Sigma^{T}U^{T}R(U,V),K^{T}\rangle. \label{eq:bb}
+\end{align}
+\end{subequations}
+\Cref{eq:aa} is the first line, and \cref{eq:bb} is the last line.
+
+\section{Algorithm}
+\label{sec:alg}
+
+\lipsum[40]
+
+Our analysis leads to the algorithm in \cref{alg:buildtree}.
+
+\begin{algorithm}
+\caption{Build tree}
+\label{alg:buildtree}
+\begin{algorithmic}
+\STATE{Define $P:=T:=\{ \{1\},\ldots,\{d\}$\}}
+\WHILE{$\#P > 1$}
+\STATE{Choose $C^\prime\in\mathcal{C}_p(P)$ with $C^\prime := \operatorname{argmin}_{C\in\mathcal{C}_p(P)} \varrho(C)$}
+\STATE{Find an optimal partition tree $T_{C^\prime}$ }
+\STATE{Update $P := (P{\setminus} C^\prime) \cup \{ \bigcup_{t\in C^\prime} t \}$}
+\STATE{Update $T := T \cup \{ \bigcup_{t\in\tau} t : \tau\in T_{C^\prime}{\setminus} \mathcal{L}(T_{C^\prime})\}$}
+\ENDWHILE
+\RETURN $T$
+\end{algorithmic}
+\end{algorithm}
+
+\lipsum[41]
+
+\section{Experimental results}
+\label{sec:experiments}
+
+\lipsum[50]
+
+\Cref{fig:testfig} shows some example results. Additional results are
+available in the supplement in \cref{tab:foo}.
+
+\begin{figure}[htbp]
+  \centering
+  \label{fig:a}\includegraphics{lexample_fig1}
+  \caption{Example figure using external image files.}
+  \label{fig:testfig}
+\end{figure}
+
+\lipsum[51]
+
+\section{Discussion of \texorpdfstring{{\boldmath$Z=X \cup Y$}}{Z = X union Y}}
+
+\lipsum[76]
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+Some conclusions here.
+
+
+\appendix
+\section{An example appendix} 
+\lipsum[71]
+
+\section*{Acknowledgments}
+We would like to acknowledge the assistance of volunteers in putting
+together this example manuscript and supplement.
+
+\bibliographystyle{siamplain}
+\bibliography{references}
+\end{document}
