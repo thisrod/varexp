@@ -1,0 +1,45 @@
+# I: Stiffness
+
+B: The semi-implicit method is widely used for quantum Monte-Carlo simulations
+P: No one knows how to set the timestep for convergence
+C: Trial and error with big grids
+
+Semi-implicit is method to solve ODEs, often used for methods of lines in Monte-Carlo simulations.  jkp-132-313, jkp-93-144.
+
+symplectic in Hilbert space, until made iterative
+
+power series, U commutes with H
+
+Nyquist condition
+
+parasitic solutions are amplified
+
+could linearise the GPE around ψ(x,t), in which case frequencies of Bogoliubov modes would count.  usually the shortest wavelength modes would be shorter than the healing length, and the nonlinearity wouldn't make a difference.
+
+numerical experiment
+
+keeping space grid and time step in sync is well known, not so clear what this means for more exotic quantum representations, e.g. wave packets.  problem is really being able to represent high energy/high frequency states.
+
+interacting particles are this type of Hamiltonian in second quantisation.  a state with a lot of particles has (a lot)² of interaction energy.
+
+this is easy to solve if you magically know the eigenstates already, because you can truncate to low energy.  same as taking a coarser spatial grid in wave equations.
+
+harder with expansions over non-energy-eigenstates, (e.g. wave packets), because superpositions can have higher energy than any of their components.
+
+to be continued ...
+
+(How should you include the high-energy dynamics if you need to?  Some kind of adiabatic treatment, maybe.)
+
+
+
+# II: Wave packet expansions
+
+B: people have tried to use Gaussian wave packets as a basis/variational approximant for a long time, but they are numerically ill-conditioned.
+P: no one knows why
+C: no one know how to fix it
+
+(Does the SI Nyqist condition fail when you use number states?)
+
+
+# III: Variational amplitudes
+
