@@ -167,7 +167,7 @@ condition.  If the discretised Hamiltonian has an eigenstate~$x_\omega$
 with a frequency~$\omega\gg 2/h$, then~$U$ will magnify the component
 of~$x_\omega$ in~$x$ by a factor close to~$(h\omega/2)^i$, and this
 component is a parasitic solution growing steadily at the
-rate~$(h\omega/2)^i/h$.
+rate~$\frac{i}{h}\ln(\frac{h\omega}2)$.
 
 The semi-implicit method is rarely used to solve the linear Equation~\cref{eq:iii}, and more often used to solve a nonlinear Gross-Pitaevskii~equation of the form
 \begin{equation}
@@ -188,7 +188,14 @@ the eigenstates of~$\hat H$.  Most simulations use grids fine enough
 for this to be the case, and the nonlinear term will not affect the
 stability of such simulations.
 
+\section{Numerical experiments}
 
+\begin{figure}[htbp]
+  \centering
+  \label{fig:a}\includegraphics[width=\textwidth]{pev.eps}
+  \caption{Growth of parasitic eigenvectors.  Dotted line shows the stability limit $\omega=2/h$, dashed line shows the predicted growth rate~$\frac{i}{h}\ln(\frac{h\omega}2)$.}
+  \label{fig:i}
+\end{figure}
 
 
 \section{Main results}
@@ -298,13 +305,6 @@ Our analysis leads to the algorithm in \cref{alg:buildtree}.
 
 \Cref{fig:testfig} shows some example results. Additional results are
 available in the supplement in \cref{tab:foo}.
-
-\begin{figure}[htbp]
-  \centering
-  \label{fig:a}\includegraphics{lexample_fig1}
-  \caption{Example figure using external image files.}
-  \label{fig:testfig}
-\end{figure}
 
 \lipsum[51]
 
