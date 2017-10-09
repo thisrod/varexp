@@ -95,7 +95,10 @@
 
 \section{Introduction}
 
-The semi-implicit method \cite{jkp-132-313,jkp-93-144} is often used to solve stochastic partial differential equations that arise when Monte-Carlo methods are used in quantum optics and in atom optics.  This is done as a method of lines, in which the spatial axes are discretised, often by spectral derivatives, to give a system of ordinary differential equations.  The semi-implicit formula is then used to integrate these.  For a system of equations~${dx\over dt}=f(x,t)$, with time step~$h$, the formula is
+The semi-implicit method \cite{jkp-132-312,jkp-93-144} is often used to solve stochastic partial differential equations that arise when Monte-Carlo methods are used in quantum optics and in atom optics \cite{pra-58-4824}.  This is done as a method of lines, in which the spatial axes are discretised, often by spectral derivatives, to give a system of ordinary differential equations.  The semi-implicit formula is then used to integrate these.
+
+For a system of equations~${dx\over dt}=f(x,t)$, with time step~$h$,
+the formula is
 \begin{equation}\label{eq:i}
     x_{n+1}=x_n+hf_{n+\frac12},
 \end{equation}
@@ -117,12 +120,12 @@ $x_{n+1}$ is set to~$x_n$, and~$f_{n+\frac12}$ to~$f'(x_n)$.  Then
 Equations~\cref{eq:i,eq:ii} are evaluated in turn, and the values of~$x_n$
 and~$f_{n+\frac12}$ updated.  This ought to continue until they
 converge, but in practice this is continued for a fixed number of
-iterations.  Formally, this process gives a sequence of~$x_{n+1}^i$
-and~$f_{n+\frac12}^i$, with
+iterations.  Formally, this process gives a sequence of~$x_{n+1}^j$
+and~$f_{n+\frac12}^j$, with
 \begin{subequations}
 \begin{align}
 	\label{eq:iv} x_{n+1}^0&=x_n\qquad f_{n+\frac12}^0=f(x_n)\\
-	\label{eq:v} x_{n+1}^{i+1}&=x_n+hf_{n+\frac12}^i\qquad f_{n+\frac12}^{i+1}=f\left({x_n+x_{n+1}^i\over 2}\right).
+	\label{eq:v} x_{n+1}^{j+1}&=x_n+hf_{n+\frac12}^j\qquad f_{n+\frac12}^{j+1}=f\left({x_n+x_{n+1}^j\over 2}\right),\qquad j\ge0.
 \end{align}
 \end{subequations}
 Any fixed point of this iteration is a self-consistent solution to
@@ -150,19 +153,25 @@ Equation~\cref{eq:iii}, where~$x$ is a vector of coefficients
 obtained by expanding a ket~$|\psi\rangle$ over an orthonormal
 basis, and~$f$ is the linear operator~$-iH$, where~$H$ is the matrix
 for the Hamiltonian operator in this basis.  The
-iteration rules of Equation~\cref{eq:v} becomes
-$$x_{n+1}^{i+1}=x_n+hf_{n+\frac12}^i\qquad f_{n+\frac12}^{i+1}
-	=-{i\over2}Hx_n-{i\over2}Hx_{n+1}^i$$
+iteration rules of Equation~\cref{eq:v} become
+$$x_{n+1}^{j+1}=x_n+hf_{n+\frac12}^j\qquad f_{n+\frac12}^{j+1}
+	=-{i\over2}Hx_n-{i\over2}Hx_{n+1}^j$$
 or
-$$x_{n+1}^{i+1}=(1-{ih\over2}H)x_n-{ih\over2}Hx_{n+1}^i$$
+$$x_{n+1}^{j+1}=\left(1-{ih\over2}H\right)x_n-{ih\over2}Hx_{n+1}^j$$
 with solution
-$$x_{n+1}^i=Ux_n=\left(1-ihH-\frac{(hH)^2}2
-	+{i(hH)^3\over 4}+\cdots+2\left({-ihH\over 2}\right)^i\right)x_n.$$
-The time step matrix~$U$ has the the same eigenvectors as the
-hamiltonian matrix~$H$.
+$$x_{n+1}^j=U_jx_n=\left(1-ihH-\frac{(hH)^2}2
+	+{i(hH)^3\over 4}+\cdots+2\left({-ihH\over 2}\right)^j\right)x_n.$$
+The time step matrix~$U_j$ has the the same eigenvectors~$\omega_m$ as the
+hamiltonian matrix~$H$.  The eigenvalues of~$U_j$ are the sums of a geometric series in~$\omega_m$, with the relation between~$\omega_m$ and the sum~$\omega_m^j$ plotted in \cref{fig:ii}.
 
-The iteration will converge if and only if the angular frequencies
-that are eigenvalues of~$H$ are bounded by~$2/h$, a kind of Nyquist
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{wev.eps}
+  \caption{Relation between eigenvectors~$\omega_m$ of~$H$ and~$\omega_m^j$ of~$U_j$.  The lightest line is for~$j=1$, and they get heavier for~$j=2$, 3, 4.  The exact time evolution operator~$U$ is unitary, with unimodular eigenvalues.}
+  \label{fig:ii}
+\end{figure}
+
+The sequence of~$U_j$ is a power series, which will converge if and only if the angular frequencies~$\omega_m$ are bounded by~$2/h$, a kind of Nyquist
 condition.  If the discretised Hamiltonian has an eigenstate~$x_\omega$
 with a frequency~$\omega\gg 2/h$, then~$U$ will magnify the component
 of~$x_\omega$ in~$x$ by a factor close to~$(h\omega/2)^i$, and this
@@ -197,130 +206,17 @@ stability of such simulations.
   \label{fig:i}
 \end{figure}
 
+\section{Conclusion}
 
-\section{Main results}
-\label{sec:main}
+The semi-implicit formula considered here is a special case, but most ODE formulae will become unstable when frequencies get large compared to time steps.
 
-We interleave text filler with some example theorems and theorem-like
-items.
+Stiff formulae stay stable, but reject the physics that is happening on fast timescales.  If we want to simulate physics at frequency~$\omega$, it seems reasonable to require time steps~$?$.
 
-\lipsum[4]
+The problem comes when the interesting physics occurs at slow timescales, but the state representation is inadvertently capable of representing high energies that evolve on fast timescales.
 
-Here we state our main result as \cref{thm:bigthm}; the proof is
-deferred to \cref{sec:proof}.
+In the case here, where we expanded over energy eigenstates, you can simply truncate.  This is contrived: if you know the energy eigenstates, you already know the answer, and you don't need to simulate anything.
 
-\begin{theorem}[$LDL^T$ Factorization \cite{GoVa13}]\label{thm:bigthm}
-  If $A \in \mathbb{R}^{n \times n}$ is symmetric and the principal
-  submatrix $A(1:k,1:k)$ is nonsingular for $k=1:n-1$, then there
-  exists a unit lower triangular matrix $L$ and a diagonal matrix
-  \begin{displaymath}
-    D = \diag(d_1,\dots,d_n)
-  \end{displaymath}
-  such that $A=LDL^T$. The factorization is unique.
-\end{theorem}
-
-\lipsum[6]
-
-\begin{theorem}[Mean Value Theorem]\label{thm:mvt}
-  Suppose $f$ is a function that is continuous on the closed interval
-  $[a,b]$.  and differentiable on the open interval $(a,b)$.
-  Then there exists a number $c$ such that $a < c < b$ and
-  \begin{displaymath}
-    f'(c) = \frac{f(b)-f(a)}{b-a}.
-  \end{displaymath}
-  In other words,
-  \begin{displaymath}
-    f(b)-f(a) = f'(c)(b-a).
-  \end{displaymath}
-\end{theorem}
-
-Observe that \cref{thm:bigthm,thm:mvt,cor:a} correctly mix references
-to multiple labels.
-
-\begin{corollary}\label{cor:a}
-  Let $f(x)$ be continuous and differentiable everywhere. If $f(x)$
-  has at least two roots, then $f'(x)$ must have at least one root.
-\end{corollary}
-\begin{proof}
-  Let $a$ and $b$ be two distinct roots of $f$.
-  By \cref{thm:mvt}, there exists a number $c$ such that
-  \begin{displaymath}
-    f'(c) = \frac{f(b)-f(a)}{b-a} = \frac{0-0}{b-a} = 0.
-  \end{displaymath}
-\end{proof}
-
-Note that it may require two \LaTeX\ compilations for the proof marks
-to show.
-
-Display matrices can be rendered using environments from \texttt{amsmath}:
-\begin{equation}\label{eq:matrices}
-S=\begin{bmatrix}1&0\\0&0\end{bmatrix}
-\quad\text{and}\quad
-C=\begin{pmatrix}1&1&0\\1&1&0\\0&0&0\end{pmatrix}.
-\end{equation}
-Equation \cref{eq:matrices} shows some example matrices.
-
-We calculate the Fr\'{e}chet derivative of $F$ as follows:
-\begin{subequations}
-\begin{align}
-  F'(U,V)(H,K) 
-  &= \langle R(U,V),H\Sigma V^{T} + U\Sigma K^{T} -
-  P(H\Sigma V^{T} + U\Sigma K^{T})\rangle \label{eq:aa} \\
-  &= \langle R(U,V),H\Sigma V^{T} + U\Sigma K^{T}\rangle 
-  \nonumber \\
-  &= \langle R(U,V)V\Sigma^{T},H\rangle + 
-  \langle \Sigma^{T}U^{T}R(U,V),K^{T}\rangle. \label{eq:bb}
-\end{align}
-\end{subequations}
-\Cref{eq:aa} is the first line, and \cref{eq:bb} is the last line.
-
-\section{Algorithm}
-\label{sec:alg}
-
-\lipsum[40]
-
-Our analysis leads to the algorithm in \cref{alg:buildtree}.
-
-\begin{algorithm}
-\caption{Build tree}
-\label{alg:buildtree}
-\begin{algorithmic}
-\STATE{Define $P:=T:=\{ \{1\},\ldots,\{d\}$\}}
-\WHILE{$\#P > 1$}
-\STATE{Choose $C^\prime\in\mathcal{C}_p(P)$ with $C^\prime := \operatorname{argmin}_{C\in\mathcal{C}_p(P)} \varrho(C)$}
-\STATE{Find an optimal partition tree $T_{C^\prime}$ }
-\STATE{Update $P := (P{\setminus} C^\prime) \cup \{ \bigcup_{t\in C^\prime} t \}$}
-\STATE{Update $T := T \cup \{ \bigcup_{t\in\tau} t : \tau\in T_{C^\prime}{\setminus} \mathcal{L}(T_{C^\prime})\}$}
-\ENDWHILE
-\RETURN $T$
-\end{algorithmic}
-\end{algorithm}
-
-\lipsum[41]
-
-\section{Experimental results}
-\label{sec:experiments}
-
-\lipsum[50]
-
-\Cref{fig:testfig} shows some example results. Additional results are
-available in the supplement in \cref{tab:foo}.
-
-\lipsum[51]
-
-\section{Discussion of \texorpdfstring{{\boldmath$Z=X \cup Y$}}{Z = X union Y}}
-
-\lipsum[76]
-
-\section{Conclusions}
-\label{sec:conclusions}
-
-Some conclusions here.
-
-
-\appendix
-\section{An example appendix} 
-\lipsum[71]
+In general, you will use a variational ansatz, or some other tricky representation.  In this case, some care must be taken to avoid inadvertently representing high energy states.  Details to come in future papers.
 
 \section*{Acknowledgments}
 We would like to acknowledge the assistance of volunteers in putting
