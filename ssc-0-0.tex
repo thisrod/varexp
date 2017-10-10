@@ -17,7 +17,7 @@
 \numberwithin{theorem}{section}
 
 % Declare title and authors, without \thanks
-\newcommand{\TheTitle}{Stability of the semi-implicit formula for quantum dynamics} 
+\newcommand{\TheTitle}{Stability of the iterative semi-implicit formula for quantum dynamics} 
 \newcommand{\TheAuthors}{Rodney E. S. Polkinghorne}
 
 % Sets running headers as well as PDF title and authors
@@ -95,7 +95,17 @@
 
 \section{Introduction}
 
-The semi-implicit method \cite{jkp-132-312,jkp-93-144} is often used to solve stochastic partial differential equations that arise when Monte-Carlo methods are used in quantum optics and in atom optics \cite{pra-58-4824}.  This is done as a method of lines, in which the spatial axes are discretised, often by spectral derivatives, to give a system of ordinary differential equations.  The semi-implicit formula is then used to integrate these.
+The semi-implicit formula is a rule for integrating systems of
+ordinary differential equations \cite{jkp-132-312,jkp-93-144}.  It
+is often used as a method of lines, to solve stochastic partial
+differential equations that occur when phase space Monte-Carlo
+methods are used in quantum optics and in atom optics \cite{pra-58-4824}.
+This is done as a method of lines, in which the spatial axes are
+discretised, often by spectral derivatives, to give a system of
+ordinary differential equations \cite{2000-Trefethen-Spectral}.
+The semi-implicit formula is then used to integrate these.
+
+{\bf Relate Hilbert space expansions to methods of lines.}
 
 For a system of equations~${dx\over dt}=f(x,t)$, with time step~$h$,
 the formula is
