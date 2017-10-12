@@ -95,17 +95,23 @@
 
 \section{Introduction}
 
+% formula equations
 The semi-implicit formula is a rule for integrating systems of
 ordinary differential equations \cite{jkp-132-312,jkp-93-144}.  It
 is often used as a method of lines, to solve stochastic partial
 differential equations that occur when phase space Monte-Carlo
 methods are used in quantum optics and in atom optics \cite{pra-58-4824}.
-This is done as a method of lines, in which the spatial axes are
-discretised, often by spectral derivatives, to give a system of
-ordinary differential equations \cite{2000-Trefethen-Spectral}.
-The semi-implicit formula is then used to integrate these.
+These equations are related to Schr\"odinger's equation,
+\begin{equation}
+    \frac{\partial\psi}{\partial t} = -\del^2\psi + V\psi,
+\end{equation}
+with additional nonlinear and random terms.  The spatial axes are
+discretised, often using spectral derivative operators, to give a
+system of ordinary or stochastic differential equations
+\cite{2000-Trefethen-Spectral}, and the semi-implicit formula is
+used to integrate these equations.
 
-{\bf Relate Hilbert space expansions to methods of lines.}
+{\bf Relate Hilbert space expansions to methods of lines using sync wave packets.}
 
 For a system of equations~${dx\over dt}=f(x,t)$, with time step~$h$,
 the formula is
