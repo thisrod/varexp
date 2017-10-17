@@ -1,5 +1,6 @@
 *.pyc
 *.log
+*.aux
 *.pdf
 *.eps
 *.mpx
