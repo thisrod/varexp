@@ -13,7 +13,7 @@ a0 = 2;		% coherent amplitude of initial state
 q0 = nq*evan(a0,'even');	% expansion of |a0> over number states
 
 T=2*pi;  h=0.005;		% time axis
-% T = 0.05;
+T = 0.05;
 t = h*(0:ceil(T/h));
 snapshots = [h 2*h 0.1 1 2 4];
 
