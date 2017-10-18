@@ -111,50 +111,43 @@ system of ordinary or stochastic differential equations
 \cite{2000-Trefethen-Spectral}.  Then these equations are integrated
 by the semi-implicit formula.
 
-For a system of equations~${dx\over dt}=f(x,t)$,
+% iterations
+For a system of equations
+\begin{equation}
+	{ds\over dt}=f(s),
+\end{equation}
 the semi-implicit formula with time step~$h$ is
 \begin{equation}\label{eq:i}
-    x_{n+1}=x_n+hf_{n+\frac12},
+    s_{n+1}=s_n+hf_{n+\frac12},
+	\qquad\text{where}\qquad 
+    f_{n+\frac12}=f\left({\textstyle\frac{s_n+s_{n+1}}{2}}\right).
 \end{equation}
-where
-\begin{equation}\label{eq:ii}
-    f_{n+\frac12}=f\left({\textstyle\frac{x_n+x_{n+1}}{2}}\right).
-\end{equation}
-When this formula is applied to equations of a form similar to~\cref{eq:vi},
-\begin{equation}\label{eq:iii}
-	{dx\over dt}=-iHx,
-\end{equation}
-where~$H$ is a hermitian operator acting on the complex vector~$x$,
-there is an advantage in principle because the norm of~$x$ is
-conserved in the discretised solution.  {\bf Expand on this.}  However, the formula is
-used mainly because it has been found to work well in practice.
-
-% iterations
-It is not obvious how to implement this formula, because~$x_{n+1}$
+It is not obvious how to implement this formula, because~$s_{n+1}$
 and~$f_{n+\frac12}$ need to be evaluated self-consistently.  The
-usual way is a simple iteration.  To start,
-$x_{n+1}$~is initialised to~$x_n$, and~$f_{n+\frac12}$ to~$f'(x_n)$.  Then each iteration
-evaluates Equations~\cref{eq:i,eq:ii} in turn, and updates the values
-of~$x_{n+1}$ and~$f_{n+\frac12}$.  More precisely, the iterations generate a sequence of~$x_{n+1}^j$
-and~$f_{n+\frac12}^j$, with
+usual way is a simple iteration \cite{swx-5-12}.  To start, $s_{n+1}$~is initialised
+to~$s_n$, and~$f_{n+\frac12}$ to~$f(s_n)$.  Then each iteration
+evaluates Equation~\cref{eq:i}, and updates the
+values of~$s_{n+1}$ and~$f_{n+\frac12}$.  More precisely, the
+iterations generate a sequence of~$s_{n+1}^{(j)}$ and~$f_{n+\frac12}^{(j)}$,
+with
 \begin{subequations}
 \begin{align}
-	\label{eq:iv} x_{n+1}^0&=x_n\qquad f_{n+\frac12}^0=f(x_n)\\
-	\label{eq:v} x_{n+1}^{j+1}&=x_n+hf_{n+\frac12}^j
-		\qquad f_{n+\frac12}^{j+1}=f\left({\textstyle\frac{x_n+x_{n+1}^j}{2}}\right),\qquad j\ge0.
+	\label{eq:iv} s_{n+1}^{(0)}&=s_n,\qquad f_{n+\frac12}^{(0)}=f(s_n),\\
+	\label{eq:v} s_{n+1}^{(j+1)}&=s_n+hf_{n+\frac12}^{(j)},
+		\qquad f_{n+\frac12}^{(j+1)}=f\left({\textstyle\frac{s_n+s_{n+1}^{(j)}}{2}}\right)\qquad \text{when $j\ge0$}.
 \end{align}
 \end{subequations}
 This continues until the sequences converge, which is usually
 achieved after a small, fixed number of iterations.  Any fixed point
-of the iteration is a self-consistent solution to
-Equations~\cref{eq:i,eq:ii}.  The remaining question is under what
+of the iteration satisfies
+Equation~\cref{eq:i}.  The remaining question is under what
 conditions the iterations converge.
 
 % steps stability
 Generally, when a partial differential equation is discretised by
 a given formula, the time step needs to be reduced in proportion
 to the grid spacing in order for the discretised solution to remain
-stable \cite{something}.  No one has analysed the stability of the
+stable \cite{2000-Trefethen-Spectral}.  No one has analysed the stability of the
 semi-implicit formula with iterations.  The stable time step has
 had to be determined by trial and error, a time consuming process
 for three-dimensional wave functions that are being simulated on
@@ -164,69 +157,110 @@ This paper analyses the semi-implicit formula, in the case that it
 is used to integrate linear Hamiltonian dynamics as in
 Equation~\cref{eq:iii}.  The main result is that the stability
 depends on a Nyquist-like condition, and the iterations converge
-if and only if the largest eigenvalue of~$H$ is no more than~$2/h$.
+if and only if the eigenvalues of the hamiltonian are bounded by the reciprocal time step~$2/h$.
 
 \section{Stability analysis}
 
 % basis coefficients
 When the semi-implicit rule is applied to \cref{eq:vi}, or a
-stochastic or nonlinear variant, the laplacian operator is usually
-evaluated by a spectral method.  This is equivalent to expanding
-the wave function~$\psi(q)$ over a basis of sinc wave packets
+stochastic or nonlinear variant of it, the laplacian operator is usually
+evaluated by a spectral method \cite{something}.  This is equivalent to expanding
+the wave function~$\psi(x)$ over a basis of sinc wave packets
 \begin{equation}
-	\psi(q) = \sum x_i\phi_i(q),
+	\psi(x) = \sum_m s^m\phi_m(x),
 \end{equation}
-{\bf figure out range of $i$}
-where
+where, for a spatial grid of step~$l$,
 \begin{equation}
-	\phi_i(q) = \frac1{\sqrt{l}} \sinc(\textstyle\frac{q}{l} - i).
+	\phi_m(x) = \frac1{\sqrt{l}} \sinc\left(\textstyle\frac{x}{l} - m\right).
 \end{equation}
 This paper uses the convention
 \begin{equation}
-	\sinc{q} = \frac{\sin(\pi q)}{\pi q},
+	\sinc x = \frac{\sin\pi x}{\pi x},
 \end{equation}
-under which the functions~$\phi_i$ are an orthonormal basis for the
-space of functions limited to bandwidth~$1/2l$.  The spectral method
-reduces \cref{eq:vi} to an equation of the form~\cref{eq:iii} for
-the coefficient vector~$x$, where
+under which the set of functions~$\phi_m$ is an orthonormal basis for the
+space of functions limited to spatial bandwidth~$1/2l$.  The spectral method
+reduces \cref{eq:vi} to an equation for the complex coefficient vector~$s$ of the form
+\begin{equation}\label{eq:iii}
+	{ds\over dt}=-iHs,
+\end{equation}
+where~$H$ is a Hermitian matrix with elements
 \begin{equation}
-	H_{ij} = \int \phi_i(q) (-\nabla^2 + V(q)) \phi_j^\ast(q).
+	H_{mn} = \int \phi_m(x) (-\nabla^2 + V(x)) \phi_n^\ast(x)\,dx.
 \end{equation}
 
-At this point, the
-iteration rules of Equation~\cref{eq:v} become
+If the formula of Equation~\cref{eq:i} could be applied directly
+to Equation~\cref{eq:iii}, the computed solution would be very
+stable.  The coefficient vector~$s_n$ can be expanded over the
+eigenvectors~$v_k$ of~$H$, as $s_n=\sum_k c^kv_k$.  \Cref{fig:iii}
+shows the trajectory over a time step from~$s_n$ to~$s_{n+1}$,
+projected onto the complex plane spanned by the eigenvector~$v_k$.
+The exact solution that satisfies Equation~\cref{eq:iii}, with
+initial condition~$s_n$, is~$s(h)=\sum_k c^ke^{-i\omega_kh}v_k$,
+and its projection lies on the circle around the origin of
+radius~$|c_k|$.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics{semii.1}
+  \caption{A step of the semi-implicit formula, projected onto the
+  complex plane spanned by the eigenvector~$v_k$ of~$H$.  The
+  computed solution~$s_{n+1}$ lies on the same circle as the
+  exact solution~$s(h)=\exp(-ihH)s_n$, but it rotates with angular frequency lower
+  than~$\omega_k$.  See text for details.}
+  \label{fig:iii}
+\end{figure}
+
+Suppose that the point~$s_{n+1}$ also lies on this circle.
+Then~$f_{n+\frac12}=-\frac{i}2H(s_n+s_{n+1})$ is parallel to the
+chord from~$s_n$ to~$s_{n+1}$.  The midpoint of the chord can be
+brought towards and away from the origin by moving~$s_{n+1}$ around
+the circle, so there is some position for
+which~$|s_{n+1}-s_n|=h|f_{n+\frac12}|$, and this value of~$s_{n+1}$
+satisfies Equation~\cref{eq:i}.  The only error introduced by the
+formula is that~$c_k$ rotates with an angular frequency less
+than~$\omega_k$, which is bounded by~$\pi/h$ as~$\omega_k$ becomes
+large.
+
+In practice, the iterations of~Equation~\cref{eq:vi} must be used
+instead of~Equation~\cref{eq:i}, and this is less stable.  For
+Hamiltonian dynamics with the form of Equation~\cref{eq:iii}, the
+iteration rule becomes
 \begin{equation}
-x_{n+1}^{j+1}=x_n+hf_{n+\frac12}^j\qquad f_{n+\frac12}^{j+1}
-	=-{i\over2}Hx_n-{i\over2}Hx_{n+1}^j
+s_{n+1}^{(j+1)}=s_n+hf_{n+\frac12}^{(j)}\qquad f_{n+\frac12}^{(j+1)}
+	=-{i\over2}Hs_n-{i\over2}Hs_{n+1}^{(j)}
 \end{equation}
 or
 \begin{equation}
-x_{n+1}^{j+1}=\left(1-{ih\over2}H\right)x_n-{ih\over2}Hx_{n+1}^j
+s_{n+1}^{(j+1)}=\left(1-{ih\over2}H\right)s_n-{ih\over2}Hs_{n+1}^{(j)}
 \end{equation}
-with solution {\bf check factor of 2}
+with solution
 \begin{equation}\label{eq:viii}
-x_{n+1}^j=U_jx_n=\left(1-ihH-\frac{(hH)^2}2
-	+{i(hH)^3\over 4}+\cdots+2\left({-ihH\over 2}\right)^j\right)x_n.
+s_{n+1}^{(j)}=U^{(j)}s_n
+	=\left(1+2\sum_{i=1}^j\left({-ihH\over 2}\right)^j\right)s_n.
 \end{equation}
-The time step matrix~$U_j$ has the the same eigenvectors~$\omega_m$
-as the hamiltonian matrix~$H$.  The eigenvalues of~$U_j$ are the
-sums of a geometric series in~$\omega_m$, with the relation
-between~$\omega_m$ and the sum~$\omega_m^j$ plotted in \cref{fig:ii}.
+The time step matrix~$U^{(j)}$ for~$j$ iterations has the the same
+eigenvectors~$v_k$ as the hamiltonian matrix~$H$.  Each of its
+eigenvalues~$u_k^{(j)}$ is the sum of a geometric series
+in~$-ih\omega_k/2$, which agrees to second order in~$\omega_k$ with
+the eigenvalue~$e^{-ih\omega_k}$ of the exact time step
+operator~$U=e^{-ihH}$.  The relation between~$h\omega_k$ and~$u_k^{(j)}$
+plotted in \cref{fig:ii}, for the first four iterations.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{wev.eps}
-  \caption{Relation between eigenvectors~$\omega_m$ of~$H$ and~$h\omega_m^j$ of~$U_j$.  The lightest line is for~$j=1$, and they get heavier for~$j=2$, 3, 4.  The exact time evolution operator~$U$ is unitary, with unimodular eigenvalues.}
+  \caption{Relation between eigenvectors~$\omega_k$ of~$H$ and~$u_k^{(j)}$ of~$U^{(j)}$.  The lightest line is for~$j=1$, and the heavier ones are for~$j=2$, 3, 4.  The exact time evolution operator~$U$ has unimodular eigenvalues.}
   \label{fig:ii}
 \end{figure}
 
-The sequence of~$U_j$ is a power series, which will converge if and
-only if the angular frequencies~$\omega_m$ are bounded by the reciprocal time step~$2/h$, a
-kind of Nyquist condition.  If the discretised hamiltonian has an
-eigenstate~$x_\omega$ with a frequency~$\omega\gg 2/h$, then~$U$
-will magnify the component of~$x_\omega$ in~$x$ by a factor close
-to~$2(h\omega/2)^i$, and this component is a parasitic solution
-growing steadily at the rate~$\frac{\ln2}h\frac{i}{h}\ln(\frac{h\omega}2)$.
+The geometric series for~$U^{(j)}$ will converge if and only if the
+angular frequencies~$\omega_k$ are bounded by the reciprocal time
+step~$\frac2h$, a kind of Nyquist condition.  If the discretised
+hamiltonian has an eigenvalue~$\omega_k\gg \frac2h$, then~$U^{(j)}$
+will enlarge the component of~$v_k$ in~$s_n$ by a factor close
+to~$2(h\omega_k/2)^j$ over the time step~$h$.  This component is
+thus a parasitic solution growing at the
+rate~$\frac{\ln2}h+\frac{j}{h}\ln\left(\frac{h\omega_k}2\right)$.
 
 {\bf Rewrite for clarity.}
 The semi-implicit method is rarely used to solve the linear
@@ -241,7 +275,7 @@ $\psi\to -i(\hat H+g|\psi|^2)\psi$ can be linearised at each time step, in the f
 	\psi(t)+\delta\psi\to -i(\hat H+g|\psi(t)|^2)\psi(t) -i\hat H'\delta\psi.
 \end{equation}
 This linearisation has been extensively studied, and the operator~$\hat
-H'$ is the hamiltonian for Bogoliubov sound waves \cite{something}.
+H'$ is the hamiltonian for Bogoliubov sound waves \cite{aop-70-67}.
 The stability conditon for the Gross-Pitaevskii~equation is that
 the highest frequency of the Bogoliubov sound waves in the discretised
 Hamiltonian is less than~$2/h$.  In the limit of fine grids, the
@@ -371,7 +405,7 @@ for one representation, using Gaussian wave packets, will come in
 future papers.
 
 \section*{Acknowledgments}
-I would like to acknowledge the support of Swinburne University of Technology.
+I would like to acknowledge the support of Swinburne University of Technology.  Thanks to Run Yan Teh for suggestions that improved the presentation.
 
 \bibliographystyle{siamplain}
 \bibliography{references}
