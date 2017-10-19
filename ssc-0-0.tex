@@ -98,10 +98,10 @@
 % formula equations
 The semi-implicit formula is a rule for integrating systems of
 ordinary differential equations \cite{jkp-132-312,jkp-93-144}.  It
-is often used as a method of lines, to solve stochastic partial
+is most often used as a method of lines, to solve stochastic partial
 differential equations that occur when phase space Monte-Carlo
 methods are used in quantum optics and in atom optics \cite{pra-58-4824}.
-These equations are related to Schr\"odinger's equation,
+These equations resemble Schr\"odinger's equation,
 \begin{equation}\label{eq:vi}
     \frac{\partial\psi}{\partial t} = -i(-\nabla^2 + V)\psi,
 \end{equation}
@@ -164,7 +164,7 @@ if and only if the eigenvalues of the hamiltonian are bounded by the reciprocal 
 % basis coefficients
 When the semi-implicit rule is applied to \cref{eq:vi}, or a
 stochastic or nonlinear variant of it, the laplacian operator is usually
-evaluated by a spectral method \cite{something}.  This is equivalent to expanding
+evaluated by a spectral method \cite{2000-Trefethen-Spectral}.  This is equivalent to expanding
 the wave function~$\psi(x)$ over a basis of sinc wave packets
 \begin{equation}
 	\psi(x) = \sum_m s^m\phi_m(x),
@@ -177,9 +177,11 @@ This paper uses the convention
 \begin{equation}
 	\sinc x = \frac{\sin\pi x}{\pi x},
 \end{equation}
-under which the set of functions~$\phi_m$ is an orthonormal basis for the
-space of functions limited to spatial bandwidth~$1/2l$.  The spectral method
-reduces \cref{eq:vi} to an equation for the complex coefficient vector~$s$ of the form
+under which the set of functions~$\phi_m$ is an orthonormal basis
+for the space of functions limited to spatial bandwidth~$1/2l$.
+The spectral method reduces Equation~\cref{eq:vi} to an ordinary
+differential equation for the complex coefficient vector~$s$ of the
+form
 \begin{equation}\label{eq:iii}
 	{ds\over dt}=-iHs,
 \end{equation}
@@ -211,14 +213,14 @@ radius~$|c_k|$.
 \end{figure}
 
 Suppose that the point~$s_{n+1}$ also lies on this circle.
-Then~$f_{n+\frac12}=-\frac{i}2H(s_n+s_{n+1})$ is parallel to the
+Then the projection of~$f_{n+\frac12}=-\frac{i}2H(s_n+s_{n+1})$ is parallel to the
 chord from~$s_n$ to~$s_{n+1}$.  The midpoint of the chord can be
 brought towards and away from the origin by moving~$s_{n+1}$ around
 the circle, so there is some position for
-which~$|s_{n+1}-s_n|=h|f_{n+\frac12}|$, and this value of~$s_{n+1}$
-satisfies Equation~\cref{eq:i}.  The only error introduced by the
-formula is that~$c_k$ rotates with an angular frequency less
-than~$\omega_k$, which is bounded by~$\pi/h$ as~$\omega_k$ becomes
+which~$|s_{n+1}-s_n|=h|f_{n+\frac12}|$, so that~$s_{n+1}$
+satisfies Equation~\cref{eq:i}.  The only error introduced by discretisation
+is that~$c_k$ rotates with an angular frequency less
+than~$\omega_k$, bounded by~$\pi/h$ as~$\omega_k$ becomes
 large.
 
 In practice, the iterations of~Equation~\cref{eq:vi} must be used
@@ -241,59 +243,60 @@ s_{n+1}^{(j)}=U^{(j)}s_n
 The time step matrix~$U^{(j)}$ for~$j$ iterations has the the same
 eigenvectors~$v_k$ as the hamiltonian matrix~$H$.  Each of its
 eigenvalues~$u_k^{(j)}$ is the sum of a geometric series
-in~$-ih\omega_k/2$, which agrees to second order in~$\omega_k$ with
+in~$-ih\omega_k/2$, which agrees to second order in~$h\omega_k$ with
 the eigenvalue~$e^{-ih\omega_k}$ of the exact time step
-operator~$U=e^{-ihH}$.  The relation between~$h\omega_k$ and~$u_k^{(j)}$
+operator~$U=e^{-ihH}$.  The relation between~$h\omega_k$ and~$u_k^{(j)}$ is
 plotted in \cref{fig:ii}, for the first four iterations.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{wev.eps}
+  \includegraphics[width=0.7\textwidth]{wev.eps}
   \caption{Relation between eigenvectors~$\omega_k$ of~$H$ and~$u_k^{(j)}$ of~$U^{(j)}$.  The lightest line is for~$j=1$, and the heavier ones are for~$j=2$, 3, 4.  The exact time evolution operator~$U$ has unimodular eigenvalues.}
   \label{fig:ii}
 \end{figure}
 
 The geometric series for~$U^{(j)}$ will converge if and only if the
 angular frequencies~$\omega_k$ are bounded by the reciprocal time
-step~$\frac2h$, a kind of Nyquist condition.  If the discretised
-hamiltonian has an eigenvalue~$\omega_k\gg \frac2h$, then~$U^{(j)}$
+step~$\frac2h$, a kind of Nyquist condition.  If the spectral
+hamiltonian matrix has an eigenvalue~$\omega_k\gg \frac2h$, then~$U^{(j)}$
 will enlarge the component of~$v_k$ in~$s_n$ by a factor close
 to~$2(h\omega_k/2)^j$ over the time step~$h$.  This component is
 thus a parasitic solution growing at the
 rate~$\frac{\ln2}h+\frac{j}{h}\ln\left(\frac{h\omega_k}2\right)$.
 
-{\bf Rewrite for clarity.}
 The semi-implicit method is rarely used to solve the linear
 Equation~\cref{eq:iii}, and more often used to solve a nonlinear
 Gross-Pitaevskii~equation of the form
 \begin{equation}
-	{\partial\psi\over\partial t}=-i(\hat H+g|\psi|^2)\psi.
+	{\partial\psi\over\partial t}=-i(\nabla^2+V+g|\psi|^2)\psi.
 \end{equation}
-However, following the usual approach to the stability of integation formulae \cite{something}, the mapping
-$\psi\to -i(\hat H+g|\psi|^2)\psi$ can be linearised at each time step, in the form
+However, following the usual approach to the stability of integation formulae \cite{1996-Trefethen-finite}, the mapping from~$\psi$ to $\partial\psi\over\partial t$ can be linearised at each time step, as
 \begin{equation}
-	\psi(t)+\delta\psi\to -i(\hat H+g|\psi(t)|^2)\psi(t) -i\hat H'\delta\psi.
+	\left.{\partial\psi\over\partial t}\right|_{\psi=\psi(t)+\delta\psi}
+		\approx -i(\nabla^2+V+g|\psi(t)|^2)\psi(t) - i\hat H'(\psi(t))\delta\psi,
 \end{equation}
-This linearisation has been extensively studied, and the operator~$\hat
-H'$ is the hamiltonian for Bogoliubov sound waves \cite{aop-70-67}.
-The stability conditon for the Gross-Pitaevskii~equation is that
-the highest frequency of the Bogoliubov sound waves in the discretised
-Hamiltonian is less than~$2/h$.  In the limit of fine grids, the
-high-frequency Bogoliubov sound waves have the same frequencies as
-the eigenstates of~$\hat H$.  Most simulations use grids fine enough
-for this to be the case, and the nonlinear term will not affect the
-stability of such simulations.
+where~$\hat H'(\psi(t))$ is an effective hamiltonian operator for
+the field~$\delta\psi$.  This linearisation has been studied
+extensively, and the dynamics generated by the hamiltonian~$\hat
+H'$ are Bogoliubov sound waves \cite{aop-70-67}.  When this equation
+is discretised with the semi-implicit formula, the stability condition
+is that the Bogoliubov sound wave modes on a spatial grid of
+spacing~$l$ have frequencies bounded by~$2/h$.  For a sufficiently
+fine grid, the high-frequency Bogoliubov modes have the same
+frequencies as the eigenvectors of~$H$ \cite{2002-Pethick-Bose}.
+Most simulations use grids fine enough for this to be the case, and
+the nonlinear term will not affect their stability.
 
 \section{Numerical experiments}
 
 As a test of this analysis, a quantum Kerr oscillator was simulated
-using the semi-implicit method.  This system is a single-orbital
-analog of the fields for repulsive particles that are simulated in
-quantum optics.  The states with definite numbers of particles are
-an orthonormal basis for the quantum Hilbert space, so the coefficient
-vector~$x$ has indices~$n=0$, 1, \dots, $N$, where the number of
-particles is limited to~$N$ to make the simulation finite.  (In the
-experiment shown, $N=25$.)  The hamiltonian matrix is then diagonal,
+using the semi-implicit formula.  This system is an analog of the
+fields that are usually simulated using the formula, where all the
+particles are confined to the same orbital.  The states with definite
+numbers of particles are an orthonormal basis for the quantum Hilbert
+space, so the coefficient vector~$s$ has indices~$n=0$, 1, \dots,
+$N$, where the possible number of particles is limited to~$N$.  In
+the example run here, $N=25$.  The hamiltonian matrix is diagonal,
 with
 \begin{equation}
 	H_{nn} = \omega_n = n(n-9)/2.
@@ -301,58 +304,50 @@ with
 The eigenvalues range from~$\omega_4=\omega_5=-10$,
 through~$\omega_1=\omega_9=0$, up to~$\omega_{25}=200$.
 
-In terms of wave functions and Schr\"odinger's equation, this could
-be regarded as the hamiltonian for a single particle, where~$x_n$
-was the coefficient of a Lagrange polynomial~$p_n$ (not quite) in
-the wave function.  It would be quite a wierd hamiltonian physically,
-with terms in products of position and momentum.  On the other hand,
-it makes physical sense in second quantisation, where it describes
-a collection of particles occupying the same orbital, with mutual
-repulsion.
-
-The oscillator was initialised in a quantum-optical coherent state
-\cite{glauber}, where the number of particles is Poisson distributed,
-with
+The oscillator was initialised in a quantum optical coherent state
+\cite{prx-131-2766} with a Poisson distribution of particle numbers,
 \begin{equation}\label{eq:vii}
-	x_n = e^{-|\alpha|^2/2}\frac{\alpha^n}{\sqrt{n!}}.
+	s_n = e^{-|\alpha|^2/2}\frac{\alpha^n}{\sqrt{n!}}.
 \end{equation}
-The experiment was run with~$\alpha=2$, which provides some small
-initial coefficients with large eigenfrequencies, which are useful
-for demonstrating the growth of the parasitic solutions.
+The experiment was run with the coherent amplitude~$\alpha=2$.  This
+provides some small initial coefficients with large eigenfrequencies,
+which demonstrate the growth of the parasitic solutions.
 
 \begin{figure}[htbp]
   \centering
   \label{fig:a}\includegraphics[width=\textwidth]{pev.eps}
-  \caption{Growth of parasitic eigenvectors.  Dotted line shows the stability limit $\omega=2/h$, dashed line shows the predicted growth rate~$\frac{i}{h}\ln(\frac{h\omega}2)$.  (Tidy up fonts.)}
+  \caption{Growth of parasitic eigenvectors.  Dotted line shows the stability limit $\omega=2/h$, dashed line shows the predicted growth rate~$\frac{i}{h}\ln(\frac{h\omega}2)$.}
   \label{fig:i}
 \end{figure}
 
 The results of solving this Hamiltonian with the semi-implicit
 method, with 4~iterations and time step~$h=0.03$, are shown in
-\cref{fig:a}.  The hamiltonian matrix is diagonal, so the norms~$|x_n|$
+\cref{fig:a}.  The hamiltonian matrix is diagonal, so the norms~$|s_n|$
 are constant in the exact solution.  The right hand side of
-\cref{eq:vii} is shown as the solid lines at~$t=0$ and~$t=0.09$,
-and the values of~$|x_n|$ computed by the semi-implicit formula are
-shown as the rulings between these lines.  The size of~$x_n$ is
+Equation~\cref{eq:vii} is shown as the solid lines at~$t=0$ and~$t=0.09$,
+and the values of~$|s_n|$ computed by the semi-implicit formula are
+shown as the rulings between those lines.  The size~$|s_n|$ is
 plotted for all four iterations of the formula within each timestep.
-\Cref{eq:viii} shows that, for~$\omega_n\gg 2/h$, the growth of~$x_n$
-will still be geometric, resulting in straight lines on the logarithmic
+\Cref{eq:viii} shows that, for~$\omega_n\gg 2/h$, the growth of~$s_n$
+from step to step is still geometric, resulting in straight lines on the logarithmic
 scale of the graph.
+
+{\bf Check growth rates.}
 
 Parasitic growth can be
 seen at the left hand side, where~$\omega_n$ is large.  The limit
 of stability is~$\omega_n=2/h\approx 67$, and the dotted line
-indicates~$\omega_17=68$.  The dashed line shows the result of
-growing~$|x_n|$ at the predicted rate~$\frac4h\ln(\frac{h\omega}2)$.
-The undulations in the lines~$|x_n(t)|$ correspond to the growth
-rates given by the different lines in \cref{fig:ii}, which apply
-for the fraction of each step ending with a given iteration.
+indicates~$n=17$, with~$\omega_{17}=68$.  The dashed line shows the result of
+growing~$|s_n|$ at the predicted rate~$\frac4h\ln(\frac{h\omega}2)$.
+The undulations in the lines~$|s_n(t)|$ correspond to the growth
+rates given by the different lines in \cref{fig:ii}, each of which applies
+for the initial fraction of each step up to the corresponding iteration.
 
 \section{Conclusion}
 
 The semi-implicit formula discussed here is only one of the formulae
 that can be used to integrate ordinary differential equations, and
-that could be applied to solve \cref{eq:iii} numerically.  However,
+that could be applied to solve Equation~\cref{eq:iii} numerically.  However,
 most of these formulae suffer from similar problems, and become
 unstable when the eigenvalues of the hamiltonian matrix are large
 compared to the time step.  The phenomenon of stiffness in discretised
@@ -366,47 +361,44 @@ the large eigenvalues.  If the goal is to simulate physics at a
 given frequency, then it seems reasonable that the simulation will
 require a time step around the corresponding Nyquist rate.
 
-The situation where stiff integration formulae would be appropriate
-is when the physics being simulated occurs at slow timescales, but
-the method by which the physical state is being represented
-inadvertently allows the state to contain a component with a large
-energy, that evolves on a fast timescale.  In the numerical example,
-this occured due to the coefficient vector~$x$ including coefficients
-with large~$n$, for which~$x_n$ was too small to have any effect
-on the state.  As demonstrated, the formula caused these minute
-components to grow quickly and dominate the actual solution.  It would
-be possible to address this by using an integration formula that
-was adapted to stiff differential equations.  But it might be better
-to address this by changing the representation so that the simulated
-state can not include such components, or to modify the hamiltonian
-dynamics so that they evolved with reasonable frequencies in the
-simulation.
+On the other hand, stiff integration formulae would be appropriate
+where the dynamics being simulated is relatively slow, but the
+representation of the quantum state inadvertently contains some
+components with large energies whose phases oscillate rapidly.  This
+was the case in the example shown above, where the coefficient
+vector included coefficients with large~$n$, for which~$s_n$ was
+too small to matter.  However, $\omega_n$ was large enough that the
+formula caused these minute components to grow and dominate the
+actual solution.  This could be addressed by using an integration
+formula that was adapted to stiff differential equations.  But it
+would be better to change the representation to exclude the high
+energy components, or to modify the simulated dynamics so that these
+components oscillate with reasonable frequencies.
 
-In the example here, the representation was simply an expansion
-over energy eigenstates.  This can be modified very simply, by
-reducing~$N$ to exclude the large eigenvalues and frequencies.  In
-the example, an expansion with coefficients~$x_0$ to~$x_{17}$ would
-be stable with the time step used in the example.  However, this
-is a contrived example.  If the energy eigenstates were known, their
-amplitudes could be calculated directly as complex
-exponentials~$e^{i\omega_nt}$, and there would be no need to use a
-potentially unstable integration formula.
+The example above can be modified very simply, by reducing~$N$ to
+exclude the high frequencies.  An expansion with coefficients~$s_0$
+to~$s_{17}$ would be stable with the time step used above, and the
+coefficients~$s_n$ with $n>17$ are small.  However, this is a
+contrived example.  Since the energy eigenstates are known, their
+amplitudes can be calculated directly as complex
+exponentials~$e^{i\omega_nt}$, and there is no need to use any
+integration formula, stable or otherwise.
 
-In real simulations, quantum states are represented by expansion
-over a set of states that are not energy eigenstates, by use of a
-variational ansatz, or by similar methods.  These representations
-are not directly related to the hamiltonian, so it is often the
-case that some states with spuriously high energies can be represented,
-and the resulting ordinary differential equations are unnecessarily
-stiff.  In these simulations, some care must be taken to avoid
+In a real simulation, the energy eigenstates are not known beforehand,
+and the quantum state is represented some other way.  This could
+be an expansion over a set of states that are not energy eigenstates,
+a variational ansatz, or a similar method.  Some of these representations
+will allow states with spuriously high energies to be represented,
+so that the differential equations satisfied by the representation
+are unnecessarily stiff.  In this case, care must be taken to avoid
 inadvertently representing high energy states, or to modify the
-hamiltonian dynamics to prevent them from causing stiffness.  Details
-for one representation, using Gaussian wave packets, will come in
-future papers.
+Hamiltonian dynamics to prevent them from causing stiffness.  Details
+for one such representation, using Gaussian wave packets, will be
+given in a future paper.
 
 \section*{Acknowledgments}
 I would like to acknowledge the support of Swinburne University of Technology.  Thanks to Run Yan Teh for suggestions that improved the presentation.
 
 \bibliographystyle{siamplain}
-\bibliography{references}
+\bibliography{references,goats}
 \end{document}
