@@ -1,4 +1,4 @@
-% VCM5  Coherent state grid solver for the quartic oscillator
+%PHASEGRID integrate the Kerr oscillator with wave packet discretisation
 
 global N;  N = 70;  brackets
 
@@ -13,7 +13,7 @@ a0 = 2;		% coherent amplitude of initial state
 q0 = nq*evan(a0,'even');	% expansion of |a0> over number states
 
 T=2*pi;  h=0.005;		% time axis
-T = 0.05;
+% T = 0.05;
 t = h*(0:ceil(T/h));
 snapshots = [h 2*h 0.1 1 2 4];
 
@@ -149,31 +149,6 @@ set(gca, 'YDir', 'normal')
 title 'Fock number states'
 
 
-figure
-plot(0:length(a)-1, yns, '.r', 0:length(a)-1, ns, '.k', [0 length(a)], [0 length(a)], ':k')
-title 'Average number in numerical eigenstates'
-ylabel '<n>' , title 'excitation ns of discrete evs'
-legend discrete regularised Location NorthWest
-
-figure, subplot 311
-plot(1:length(a), ew, 'vk', 1:length(a), Hew, '^k')
-hold on, plot([1 length(a)], 2/h*[1 1], '-k')
-text(1, 2/h, 'Nyquist limit')
-title 'H eigenvalues'
-legend('discrete', 'exact', 'Location', 'SouthEast')
-
-subplot 312
-semilogy(1:length(a), Asw, '.k', [0 length(a)], [laf laf]);
-title 'Singular values of expansion'
-xlabel n, ylabel '\sigma_n'
-
-subplot 313
-pew = Hew.*Asw.^2./(Asw.^2+laf.^2);
-
-plot(1:length(a), Hyew, 'vk', 1:length(a), Hew, '^k', 1:length(a), pew, '.k')
-hold on, plot([1 length(a)], 2/h*[1 1], '-k')
-title 'regularised H eigenvalues'
-legend('discrete', 'exact', 'predicted', 'Location', 'NorthWest')
 
 % set up plotting grid
 
