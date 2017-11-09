@@ -1,10 +1,8 @@
-% see whether the SI method goes parasitic when Fock states are used instead of coherent states
+% demonstrate parasitic solutions to the SI method
 
 global N;  N = 25;  brackets
 
 % Peter's Hamiltonian
-% nhn = -4*(0:N)' gives an interesting sudden divergence
-
 nhn = nhn/2;
 nhn = nhn-4*(0:N)';
 
@@ -67,6 +65,9 @@ for i = 1:length(t)
 
 end
 
+% set(groot, 'defaultAxesFontName', 'Latin Modern Roman');
+% set(groot, 'defaultAxesFontSize', 12);
+
 % iterated hamiltonian ews
 
 ww = linspace(0,3.5,50);
@@ -77,7 +78,8 @@ end
 
 figure
 L = plot(ww, abs(wm), '-k');
-xlabel 'h\omega_m', ylabel 'h|\omega_m^j|'
+[L.LineWidth] = deal(1,1.4,1.7,2);
+xlabel '\it h\omega_k', ylabel '\it u_k^{\rm(\it j\rm)}'
 ylim([0 6])
 saveTightFigure ../wev.eps
 
@@ -95,11 +97,12 @@ psize = abs(q0).*(2*(h*nhn/2).^iters).^(t(end)/h);
 plot3(repmat(t(end), N-16, 1), 17:N, ...
 	psize(18:N+1), '--k', 'LineWidth', 1.5);
 plot3([0 T], [17 17], q0(18)*[1 1], ':k', 'LineWidth', 1.5)
-xlim([0 T]),  view(-71.5,48),  A.ZScale = 'log';
+A.ZScale = 'log';  xlim([0 T]), view(-71.5,48)
+ zlim([1e-6 10]),  A.XTick = 0:h:T,  A.ZTick = 10.^(-6:3:0)
 % L = [A.YTickLabel; '\omega_n = 2/h'];  [A.YTick, i] = sort([A.YTick 17]);
 % A.YTickLabel = L(i);
 S.MeshStyle = 'row';  S.EdgeColor = 'k';  S.FaceColor = 'none';
-xlabel t, ylabel n, zlabel '|x_n|'
+xlabel '\it t', ylabel '\it n', zlabel '|\its_n\rm|'
 % title 'Growth of parasitic eigenvectors'
 saveTightFigure ../pev.eps
 
