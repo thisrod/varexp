@@ -1,0 +1,33 @@
+\input respnotes
+\input xpmath
+\input unifonts \tenrm
+\input xref
+
+%% Inserts
+
+\newcount\figno
+\def\figlbl{\global\advance\figno by 1\bf Figure \the\figno}
+\def\nextfig{{\advance\figno by 1 \the\figno}}
+\def\figure#1{$$\hbox{\figlbl}\quad\vcenter{#1}$$}
+\def\widefigure#1{\midinsert#1
+	\smallskip\centerline{\figlbl}\endinsert}
+
+\title Normality of the discretised number operator
+
+The script {\tt phaseham.m} examines the discretised number operator~$M=〈A⁺|\hat n|A〉$, where
+$$|A〉=\pmatrix{|α₁〉&…&|α_R〉},$$
+and the coherent amplitudes~$α_i$ lie on a square grid bounded by a disk about the origin of phase space.  This makes~$M$ an~$R×R$ matrix.
+
+The pseudospectrum of the exact number operator is pretty well as expected: the eigenstate~$|n〉$ causes the complex number~$λ$ to be in the~$ε$-pseudospectrum of~$\hat n$ whenever~$|λ-n|<ε$.
+
+\figure{\XeTeXpdffile resp021117b.pdf width  0.7\hsize }
+
+Contrast the pseudospectrum of~$M$:
+
+\figure{\XeTeXpdffile resp021117a.pdf width  0.7\hsize }
+
+Pretty well every~$λ$ has some coefficient vector~$c$ such that~$|(〈A⁺|\hat n|A〉-λ)·c|$ is small.  Correspondingly, the eigenvectors of~$M$ are nearly parallel:
+
+\figure{\XeTeXpdffile resp021117c.pdf width  0.7\hsize }
+
+\bye
