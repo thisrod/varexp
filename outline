@@ -38,8 +38,22 @@ B: people have tried to use Gaussian wave packets as a basis/variational approxi
 P: no one knows why
 C: no one know how to fix it
 
-(Does the SI Nyqist condition fail when you use number states?)
+TODO fix Figure 4, the plots of eigenvalues and regularised ones
 
+Localised sets of coherent states can expand states with large energy.
 
-# III: Variational amplitudes
+Eigenvalues of discretised H are very similar to those of H
 
+Effect of ill conditioned expansion matrix
+
+# III: Squeezed state frame
+
+See pra-0-0.scan.pdf
+
+New idea on centres of squeezing.  Treat the Hushimi distribution as a mass density, and squeeze so that the moment of inertia is symmetric, with ΔX₁ = ΔX₂.  (Maybe a double-well is better illustrated with the vacuum state of a single well, though)
+
+Idea: If |n〉 is the nth energy eigenstate, counting the ground state as |0〉, then 〈α|n〉 tends to e^{-inα} at infinity.  Kind of has to work for Bargmann orthogonality.  Goes wrong if the states are reordered, as in quartic oscillator.  Does it work for double wells?  Is there a way to construct the eigenstates from this?
+
+Check who has cited Bargmann
+
+# IV: Variational amplitudes
