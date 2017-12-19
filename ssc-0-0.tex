@@ -75,12 +75,16 @@
 
 % REQUIRED
 \begin{abstract}
-  This is an example SIAM \LaTeX\ article. This can be used as a
-  template for new articles.  Abstracts must be able to stand alone
-  and so cannot contain citations to the paper's references,
-  equations, etc.  An abstract must consist of a single paragraph and
-  be concise. Because of online formatting, abstracts must appear as
-  plain as possible. Any equations should be inline.
+The iterative semi-implicit formula, or some variant of it, is often
+used to solve stochastic partial differential equations that arise
+in quantum optics and in atom optics.  When this formula is applied
+to a quantum system with unitary dynamics, stability depends on a
+kind of Nyquist condition, where the angular frequency corresponding
+to the largest eigenvalue of the discretised hamiltonian is at most
+twice the reciprocal time step.  The formula develops parasitic
+solutions very abruptly as this condition is exceeded, which makes
+it troublesome for practical use, but quite useful as a test of the
+stability of discretisation methods.
 \end{abstract}
 
 % REQUIRED
@@ -108,7 +112,7 @@ These equations resemble Schr\"odinger's equation,
 with additional nonlinear and random terms.  The spatial axes are
 discretised, often using spectral derivative operators, to give a
 system of ordinary or stochastic differential equations
-\cite{2000-Trefethen-Spectral}.  Then these equations are integrated
+\cite{2000-Trefethen-Spectral}.  These equations are integrated
 by the semi-implicit formula.
 
 % iterations
@@ -199,7 +203,7 @@ projected onto the complex plane spanned by the eigenvector~$v_k$.
 The exact solution that satisfies Equation~\cref{eq:iii}, with
 initial condition~$s_n$, is~$s(h)=\sum_k c^ke^{-i\omega_kh}v_k$,
 and its projection lies on the circle around the origin of
-radius~$|c_k|$.
+radius~$|c_k|$.  Here~$\omega_k$ is the eigenvalue of~$H$ corresponding to the eigenvector~$v_k$.
 
 \begin{figure}[htbp]
   \centering
@@ -332,8 +336,6 @@ plotted for all four iterations of the formula within each timestep.
 from step to step is still geometric, resulting in straight lines on the logarithmic
 scale of the graph.
 
-{\bf Check growth rates.}
-
 Parasitic growth can be
 seen at the left hand side, where~$\omega_n$ is large.  The limit
 of stability is~$\omega_n=2/h\approx 67$, and the dotted line
@@ -342,6 +344,25 @@ growing~$|s_n|$ at the predicted rate~$\frac4h\ln(\frac{h\omega}2)$.
 The undulations in the lines~$|s_n(t)|$ correspond to the growth
 rates given by the different lines in \cref{fig:ii}, each of which applies
 for the initial fraction of each step up to the corresponding iteration.
+
+\Cref{fig:a} shows how abruptly the semi-implicit formula becomes
+unstable as the frequency~$\omega_k$ increases through the limit
+of stability.  While this might be unfortunate from a practical
+point of view, it makes the formula useful for evaluating new ways
+to discretise the hamiltonian.  The largest~$\omega_k$ can be
+estimated by integrating the dynamics over a few time steps, and
+adjusting the time step to find the limit of stability.  Quantum
+states inspire some very clever methods of discretisation
+\cite{jcp-64-63,jcp-119-1289}, because the state of a quantum system
+with many degrees of freedom lies in a vector space of just as many
+dimensions, a space where any grid will have impossibly many points.
+It is not always straightforward to estimate the eigenvalues of the
+discrete hamiltonians that result from these methods.  In particular,
+the discrete hamiltonian can be a non-normal operator, in which
+case quite delicate arguments about pseudospectra would be required
+to rigorously determine the stability of the discretised dynamics.
+Running those dynamics, and looking out for parasitic solutions,
+is a fast and simple alternative.
 
 \section{Conclusion}
 
@@ -384,6 +405,26 @@ amplitudes can be calculated directly as complex
 exponentials~$e^{i\omega_nt}$, and there is no need to use any
 integration formula, stable or otherwise.
 
+When the equation being solved is simply Schr\"odinger's equation
+with repulsion, there are ways to modify the semi-implicit method
+and avoid the large energies.  The most commonly used is an interaction
+picture method \cite{2000-CaradocDavies-vortex}.  This is a split
+step method, where a Fourier transform~$\psi(t,k)$ is taken at each
+time step, and the kinetic energy term proportional to~$-i\nabla^2\psi$
+is evaluated exactly as~$\psi(t+h,k)=e^{ik^2h}\psi(t,k)$.  This
+ensures that~$\|\psi(t+h)\|=\|\psi(t)\|$, so that parasitic modes
+can not grow only because of their high kinetic energy.
+
+Interaction picture methods are very effective when they work.
+However, the nonlinear terms can also become large, and this occurs
+quite often in practice.  For example, it is often desirable to
+simulate a cold gas in a harmonic trap, with~$V(x)\propto x^2$.  In
+this case, the energy of the gas oscillates between potential and
+kinetic, and the potential energy of a particle far from the origin
+can be as great as the kinetic energy of a particle with large
+momentum.  This causes the equation to remain just as stiff even
+when the kinetic energy term is solved exactly.
+
 In a real simulation, the energy eigenstates are not known beforehand,
 and the quantum state is represented some other way.  This could
 be an expansion over a set of states that are not energy eigenstates,
@@ -397,7 +438,7 @@ for one such representation, using Gaussian wave packets, will be
 given in a future paper.
 
 \section*{Acknowledgments}
-I would like to acknowledge the support of Swinburne University of Technology.  Thanks to Run Yan Teh for suggestions that improved the presentation.
+I would like to acknowledge the support of Swinburne University of Technology.  Thanks to Run Yan Teh for useful suggestions.
 
 \bibliographystyle{siamplain}
 \bibliography{references,goats}
