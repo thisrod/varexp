@@ -1,4 +1,4 @@
-%PHASEHAM analyse the Kerr Hamiltionian discretised with wave packets
+%PHASEHAM analyse the wave packet discretisation of the number operator
 
 global N;  N = 70;  brackets
 
@@ -76,7 +76,7 @@ ylabel '<n>',  xlabel 'eigenkets of discrete number operator'
 figure
 errorbar(0:R-1, Ans, sqrt(Avarn), 'k'), hold on
 plot([0 R-1], [0 R-1], ':k')
-ylabel '<n>',  xlabel 'left SVs of expansion operator'
+ylabel 'n',  xlabel 'left singular kets of expansion operator'
 
 
 eyeR = eye(R);
@@ -125,8 +125,6 @@ xlabel 'real \lambda',  legend discrete exact Location SouthEast
 title 'pseudospectra of hamiltonian'
 
 
-return
-
 figure
 zplot(0:R-1, 0:R-1, Mkets'*Gkets), axis image
 title 'brackets of discrete N and H eigenkets'
@@ -152,11 +150,20 @@ for i = [1:5 (R-5):R]
 	title(['Discrete eigenstate number ' num2str(i-1)])
 	text(-9,6, {sprintf('<n> = %.1f', Mns(i)); sprintf('\\Deltan = %.1f', sqrt(Mvarn(i)))}, ...
 		'Color', 'white')
+end
 
+% Singular vectors of A
+
+for i = ixs
 	figure, zplot(x,y,Aps'*Au(:,i)), hold on, axis image
-	title(['Left singular ket number ' num2str(i-1)])
+	title(sprintf('Left singular ket number %d', i))
 	text(-9,6, {sprintf('<n> = %.1f', Ans(i)); sprintf('\\Deltan = %.1f', sqrt(Avarn(i))); ...
 		sprintf('\\sigma = %.1e', Asw(i))}, 'Color', 'white')
+	scale = 10/max(abs(Av(:,i)));
+	for j = 1:length(a)
+		plot(a(j), 'o', 'MarkerSize', scale*abs(Av(j,i)), ...
+			'MarkerEdgeColor', interp1(ff, cmap, mod(angle(Av(j,i)), 2*pi)))
+	end
 end
 
 figure, subplot 311
