@@ -160,33 +160,21 @@ ixs = [1:4 round(linspace(5,length(a),4))];
 cmap = phase(128);
 ff = linspace(0, 2*pi, size(cmap,1));
 
-% Singular vectors of A
-
-for i = ixs
-	figure, zplot(x,y,Aps'*Au(:,i)), hold on, axis image
-	title(sprintf('Singular vector %d', i))
-	text(-9,8,sprintf('\\sigma = %.1e', Asw(i)), 'Color', 'white')
-	scale = 10/max(abs(Av(:,i)));
-	for j = 1:length(a)
-		plot(a(j), 'o', 'MarkerSize', scale*abs(Av(j,i)), ...
-			'MarkerEdgeColor', interp1(ff, cmap, mod(angle(Av(j,i)), 2*pi)))
-	end
-end
 
 % Eigenvectors of M
 
 [~, P] = sort(abs(ew));
-for i = ixs
-	figure, zplot(x,y,Aps'*A*ev(:,P(i))), hold on, axis image
-	title(sprintf('Discrete H eigenvector %d', i))
-	text(-9,8,sprintf('ew = %.1e', ew(P(i))), 'Color', 'white')
-	text(-9,7,sprintf('|A*ev| = %.1e', norm(A*ev(:,P(i)))), 'Color', 'white')
-	scale = 10/max(abs(ev(:,P(i))));
-	for j = 1:length(a)
-		plot(a(j), 'o', 'MarkerSize', scale*abs(ev(j,P(i))), ...
-			'MarkerEdgeColor', interp1(ff, cmap, mod(angle(ev(j,P(i))), 2*pi)))
-	end
-end
+% for i = ixs
+% 	figure, zplot(x,y,Aps'*A*ev(:,P(i))), hold on, axis image
+% 	title(sprintf('Discrete H eigenvector %d', i))
+% 	text(-9,8,sprintf('ew = %.1e', ew(P(i))), 'Color', 'white')
+% 	text(-9,7,sprintf('|A*ev| = %.1e', norm(A*ev(:,P(i)))), 'Color', 'white')
+% 	scale = 10/max(abs(ev(:,P(i))));
+% 	for j = 1:length(a)
+% 		plot(a(j), 'o', 'MarkerSize', scale*abs(ev(j,P(i))), ...
+% 			'MarkerEdgeColor', interp1(ff, cmap, mod(angle(ev(j,P(i))), 2*pi)))
+% 	end
+% end
 
 % expansions of number states
 
