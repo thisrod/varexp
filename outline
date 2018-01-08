@@ -34,9 +34,23 @@ to be continued ...
 
 # II: Wave packet expansions
 
+See jcp-0-0.tex
+
 B: people have tried to use Gaussian wave packets as a basis/variational approximant for a long time, but they are numerically ill-conditioned.
 P: no one knows why
 C: no one know how to fix it
+
+## History
+
+Why did any of this work?
+
+## Restricting the problem
+
+This paper will analyse the stability of a simpler method.  The
+full method will have whatever stability problems this one does,
+and possibly some extras of its own.
+
+## Stability
 
 TODO fix Figure 4, the plots of eigenvalues and regularised ones
 
@@ -48,7 +62,7 @@ Effect of ill conditioned expansion matrix
 
 # III: Squeezed state frame
 
-See pra-0-0.scan.pdf
+See pra-0-0.scan.pdf and pra-0-1.tex
 
 New idea on centres of squeezing.  Treat the Hushimi distribution as a mass density, and squeeze so that the moment of inertia is symmetric, with ΔX₁ = ΔX₂.  (Maybe a double-well is better illustrated with the vacuum state of a single well, though)
 
