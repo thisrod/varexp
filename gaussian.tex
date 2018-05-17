@@ -1,0 +1,177 @@
+\input respnotes
+
+\def\H{{\bf H}}
+
+\title A review of variational Gaussian wave packets
+
+This will summarise the work that has been done from the time of Heller to the present day.  It will take the viewpoint of frames and stability.
+
+This literature is disjointed, e.g. there are 20 page papers with “coherent state” in the title, that never mention Roy Glauber \cite{cpx-304-103}.  Name games: Gaussian wave packets vs.\ coherent states vs.\ Gabor frames vs.\ windowed Fourier transforms.
+
+Schrödinger's equation for a phase space wave function is \cite{cpx-304-103}
+$$i\hbar{d\over dt}〈α|ψ(t)〉={1\over π}∫〈α|β〉H_n(α*,β)〈β|ψ(t)〉\,d²β.$$
+This is an integro-differential equation, not just a differential equation.
+
+Notation.  A superposition of~$r$ multimode wave packets, each with~$n$ modes, is~$r×n$.  (The~$×n$ can be omitted for a single mode.)  MCTDH matrices use~$⊗$, so a full tensor product of wave packets over 3 modes might be~$2⊗2⊗2$, or~$2³$.  (Evaluating these as integer expressions gives you a count of the parameters.)  A Hilbert space for a single degree of freedom, expanded over~$r$ basis states that are not gaussian wave packets, is written~$r×\H$.  So the normal MCTDH has structure~$(n₁×\H)⊗…⊗(n_f×\H)$.  An arbitrary expansion is~$\H$, so~$\Hⁿ$ is a general state with~$n$ degrees of freedom.
+
+\section Dirac and Frenkel
+
+Dirac-Frenkel dynamics necessarily conserves the norm of the ket and~$〈H〉$.  Dirac-Frenkel variational coefficients conserve the norm, whatever the amplitudes are forced to do \cite{jcp-136-014109}.
+
+Kay explains that there are several forms of the variational principle
+\cite{cpx-137-165}.  In all cases, there is a ket~$|ψ(z)〉$ that
+sits in a complex vector space, and depends on variational
+parameters~$z$.  In principle, we always want to select~$dz$ so
+that~$|ψ(z+dz)〉=|ψ(z)〉+|dψ〉$ in a Hilbert-space least squares
+sense.  This occurs when the residual~$i\hbar|ψ'(z)〉·dz-H|ψ(z)〉·dt$
+is Hilbert-space orthogonal to the column space of~$|ψ'(z)〉$.  The
+simplest case is when~$z$ is complex, and~$|ψ〉$ is analytic in
+each parameter, and orthogonality reduces
+to
+$$〈D_iψ(z)|\left(i\hbar|ψ'(z)〉·dz-H|ψ(z)〉·dt\right)=0\eqno{\tag\eqi}$$
+for all~$i$.  This is how Frenkel did it \cite{1934-Frenkel-Wave}, and he's OK.
+
+This doesn't work when~$z$ is real, and therefore~$dz$ is real.
+Taking real and imaginary parts, there are twice as many Equations~\eqi\
+as there are unknowns.  What we should do is take real and imaginary
+parts of the residual and the~$|D_iψ(z)〉$ as expanded over some
+orthonormal basis, to get a real least squares problem where more
+equations than unknowns is business as usual.  This sensible approach is developed by Raab \cite{cpl-319-674}.
+
+What the 
+inventors of quantum mechanics did instead was to arbitrarily demand that
+we set the real part of Equations~\eqi\ to zero following
+the “least-action form” \cite{cpx-137-165[3]}, or their imaginary
+parts to zero following McLachlan \cite{cpx-137-165[2]}.  This has
+led to lots of point scoring and name calling regarding which is
+better.
+
+\section Heller
+
+\section Heller's followers
+
+Much work was done with~$1×1$ structures, because this is easy to compute.  The independent Gaussian approximation does an ensemble of~$1×1$ simulations, with different initial conditions.  The local harmonic approximation truncates the potential around each wave packet to a second-order Taylor series, whence Gaussian wave packets retain their form.
+
+Heather and Metiu \cite{cpl-118-558} treat a Morse oscillator using a~$1×1$ approximant.  They find that the LHA gives a different result than a variational method.  Their approximant includes some real paramters, but they claim to minimised the error, implying they did least squares over real and imaginary parts.
+
+\section MCTDH
+
+MCTDH is \dots  It was introduced bye Meyer, Manthe and Cederbaum \cite{cpl-165-73}.  They note that there is a redundancy if the number of single-particle states in one degree of freedom exceeds the product over the other degrees of freedom, because the relative states can not be linearly independent in that case.
+
+The “stays orthogonal” constraint can be expressed as the single-particle modes in each subspace obey some Hamiltonian dynamics.
+
+The original idea \cite{jcp-111-2927} was to treat the system with normal MCTDH, and the bath with a multimode Gaussian wave packet, with structure~$(n₁×\H)⊗…⊗(n_{f-1}×\H)⊗(n_f×m)$.  Motivated by molecules in solution.  Assume the solvents have a small range of motion, so that their potential is nearly harmonic.  This paper derived the variational equations for a density matrix and master equation.
+
+Worth and Burghardt \cite{cpl-368-502} combined variational wave packets with MCTDH.  The idea was simply to use gaussian wave packets as the orbitals~$φⁿ_i$ in that method.  (Note that this arranges the tensor products differently than in the multimode coherent state version.)  The hope was to use multidimensional wave packets, with each set of parameters covering several degrees of freedom.  This was applied to a Henon-Heiles potential, and reproduced a numerically exact autocorrelation function.  It's unclear why this was numerically stable.
+
+This used structures~$(5×2)²$ to~$(25×2)²$, in a phase space of volume~?.
+{\bf Check out who cited it.}
+
+This managed to superpose 625 wavepackets in 4D space.  {\bf How did they deal with the lack of orthogonality?}  Wave packets were deleted when they escaped to large distance.
+
+Noted that tunnelling happens by lots of energy being transferred to a subset of the wave packets.
+
+Another application in \cite{jcp-119-5364}.
+
+\section Static grids
+
+cpl-318-305
+jcp-116-2748
+jcp-87-5302
+jcp-89-4752
+jcp-90-7317
+jcp-115-1158
+
+\section Frozen trajectories
+
+
+
+Habershon \cite{jcp-136-014109} deleted redundant wave packets to maintain full rank, used Eherenfest type trajectories.
+
+Saleshin and Child \cite{cpx-304-103} propagated an ensemble of coherent amplitudes by treating the normally-ordered Hamiltonian as a classical Hamiltonian.  They argue in Section~4 that when~$α(t)$ follows a classical trajectory governed by that Hamiltonian, the wave function has the form~$〈α(t)|ψ(t)〉=C(α(t))e^{iS_α/\hbar}$, where~$S_α$ is the classical action along the trajectory~$α(t)$.  The fuction~$C(α(t))$ obeys a partial differential equation with small and local coupling. 
+
+jcp-113-10028
+jcp-132-244111
+
+\section Regularisation
+
+MCTDH was orthogonalised from the start \cite{cpl-165-73}, ostensibly to make the parameters change quickly and the expansion functions change slowly, and to simplify the mechanics.  They noted that their expansion matrix could become singular, and used Tychonov regularisation as well as truncating singular values.  They state that most work has used two degrees of freedom, and use a Henon-Heiles potential as a numerical example.
+
+Kay cpx-137-165 thought about SVDs and rank-deficiency, and noted that truncating the small sws and taking a pseudoinverse helped in some cases.  He didn't directly consider gaussian wave packets.  Follow up his refs and cites.  (This is actually a discrete problem, not a rank-deficient one 2010-Hansen-Discrete).  
+
+Habershon \cite{jcp-136-014109} propagated an ensemble of wave packets using Eherenfest type trajectories, but forced the variational coefficients of the redundant ones to zero.  He substituted packets in and out as the condition of the expansion operator changed.  This paper treated a double well potential.
+
+The initial amplitudes were sampled from the Wigner distribution for the initial state, no justification for why it wasn't Q.  For a quartic oscillator state, Wigner sampling would generate lots of wave packets that don't overlap the state.  This used a pseudoinverse that truncated small singular values.  Habershon's results diverge in a very similar way to our quartic oscillator results.  He attributes this to conservation of energy failing, but he doesn't think through the stiffness and high energy state ideas.  His stabilisation approach works.  He claims that it works because he is constantly re-expanding the state over a new set of active wave packets.  It's plausible that a parasitic solution in one expansion is well-behaved in the next expansion.
+
+{\bf Discuss section III of jcp-136-014109 in detail.}
+
+\section Index of potentials treated
+
+\section To look at
+
+2014-Grabowski-Review
+jcp-83-3009
+acr-14-368
+1968-Klauder-Fundamentals
+2014-Ali-Coherent
+cpx-304-103
+Herman, Annu. Rev. Phys. Chem. 45, 83.
+pcp-9-3210
+mop-106-2145
+
+These have yet to be categorised:
+
+https://doi.org/10.1080/00268978600100551
+https://doi.org/10.1090/S0025-5718-04-01685-0 
+https://link.springer.com/article/10.1007%2Fs00791-006-0019-8?LI=true
+ijc-47-75
+jcp-110-5526
+jcp-111-2927
+jcp-112-6113
+jcp-117-4738
+jcp-119-1961
+jcp-119-5364
+jcp-121-9247
+jcp-128-054102
+jcp-129-174104
+jcp-130-134113
+jcp-136-014109[1:17]
+jcp-62-1544
+jcp-64-63
+jcp-65-4979
+jcp-67-2017
+jcp-71-3383
+jcp-75-246
+jcp-75-2923
+jcp-80-3123
+jcp-83-3009[1:10]
+jcp-84-227
+jcp-84-3250
+jcp-84-6293
+jcp-85-4129
+jcp-87-5987
+jcp-90-3060
+jcp-91-170
+jcp-93-3919
+jcp-94-2723
+jcp-96-4266
+jpa-19-2559
+njp-10-115005
+pna-14-187
+pra-13-2226
+pra-73-033619
+prb-73-125112
+prx-131-2766
+prx-177-1882
+rmp-2-221
+ssc-31-3027
+xxx-physics-0510076
+cpl-118-558[1:20]
+cpl-368-502[1:7 10 11 12 13:15 21]
+jcp-111-2927[12]
+cpx-137-165[3]
+cpx-137-165[2]
+
+\section Rejected as irrelevant
+
+jcp-117-4738 (only one wave packet, $r=1$)
