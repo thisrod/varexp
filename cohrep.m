@@ -32,6 +32,7 @@ for i = 1:length(a)
 	imagesc(x([1 end]), y([1 end]), rsdl),  colormap gray, axis equal
 	hold on,  plot(a{i}, 'ow')
 	[C,H] = contour(x,y,nrms, [1.5 5 20 100 300],'-r');  clabel(C,H,'Color','red')
+	xlabel 'Re \beta', ylabel 'Im \beta'
 	ax = gca;  ax.CLim = [0 1];
 	saveTightFigure(sprintf('cohrep%d.pdf', i))
 end
