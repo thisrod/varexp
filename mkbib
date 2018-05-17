@@ -1,0 +1,10 @@
+#!/usr/local/plan9/bin/rc
+
+rm -f references.bib
+TDIR = `{pwd}
+cd $DESK/litdex
+for (ref in `{awk 'BEGIN {FS="[{} ,]+"} /\\citation/ {for (i=2; i<NF; i++) print $i}' \
+		$TDIR/*.aux | sort | uniq | 9 grep -v '(^xxx-|-[a-z]+$)'  }) {
+	if (test -r $ref)
+		awk -f tobib $ref >> $TDIR/references.bib
+}
