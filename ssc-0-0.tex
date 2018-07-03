@@ -1,4 +1,5 @@
 % SIAM Article Template
+% This needs to be compiled with LaTeX and dvipdf.  XeTeX doesn't work.
 \documentclass[review]{siamart1116}
 
 % Packages and macros go here
@@ -76,7 +77,7 @@
 % REQUIRED
 \begin{abstract}
 The iterative semi-implicit formula, or some variant of it, is often
-used to solve stochastic partial differential equations that arise
+used to solve stochastic partial differential equations that form part of Monte-Carlo methods used
 in quantum optics and in atom optics.  When this formula is applied
 to a quantum system with unitary dynamics, stability depends on a
 kind of Nyquist condition, where the angular frequency corresponding
@@ -116,7 +117,7 @@ system of ordinary or stochastic differential equations
 by the semi-implicit formula.
 
 % iterations
-For a system of equations
+For a system of ordinary differential~equations
 \begin{equation}
 	{ds\over dt}=f(s),
 \end{equation}
@@ -124,30 +125,29 @@ the semi-implicit formula with time step~$h$ is
 \begin{equation}\label{eq:i}
     s_{n+1}=s_n+hf_{n+\frac12},
 	\qquad\text{where}\qquad 
-    f_{n+\frac12}=f\left({\textstyle\frac{s_n+s_{n+1}}{2}}\right).
+    f_{n+\frac12}=f\left(\frac{s_n+s_{n+1}}{2}\right).
 \end{equation}
 It is not obvious how to implement this formula, because~$s_{n+1}$
 and~$f_{n+\frac12}$ need to be evaluated self-consistently.  The
 usual way is a simple iteration \cite{swx-5-12}.  To start, $s_{n+1}$~is initialised
 to~$s_n$, and~$f_{n+\frac12}$ to~$f(s_n)$.  Then each iteration
 evaluates Equation~\cref{eq:i}, and updates the
-values of~$s_{n+1}$ and~$f_{n+\frac12}$.  More precisely, the
-iterations generate a sequence of~$s_{n+1}^{(j)}$ and~$f_{n+\frac12}^{(j)}$,
-with
+values of~$s_{n+1}$ and~$f_{n+\frac12}$.  This produces sequences~$s_{n+1}^{(j)}$ and~$f_{n+\frac12}^{(j)}$,
+where
 \begin{subequations}
+\label{eq:v}
 \begin{align}
-	\label{eq:iv} s_{n+1}^{(0)}&=s_n,\qquad f_{n+\frac12}^{(0)}=f(s_n),\\
-	\label{eq:v} s_{n+1}^{(j+1)}&=s_n+hf_{n+\frac12}^{(j)},
-		\qquad f_{n+\frac12}^{(j+1)}=f\left({\textstyle\frac{s_n+s_{n+1}^{(j)}}{2}}\right)\qquad \text{when $j\ge0$}.
+	s_{n+1}^{(0)}&=s_n,\qquad f_{n+\frac12}^{(0)}=f(s_n),\\
+	s_{n+1}^{(j+1)}&=s_n+hf_{n+\frac12}^{(j)},
+		\qquad f_{n+\frac12}^{(j+1)}=f\left(\frac{s_n+s_{n+1}^{(j)}}{2}\right)\qquad \text{when $j\ge0$}.
 \end{align}
 \end{subequations}
 This continues until the sequences converge, which is usually
-achieved after a small, fixed number of iterations.  Any fixed point
+achieved by a small, fixed number of iterations.  Any fixed point
 of the iteration satisfies
-Equation~\cref{eq:i}.  The remaining question is under what
+Equation~\cref{eq:i}.  The question is under what
 conditions the iterations converge.
 
-% steps stability
 Generally, when a partial differential equation is discretised by
 a given formula, the time step needs to be reduced in proportion
 to the grid spacing in order for the discretised solution to remain
@@ -157,17 +157,17 @@ had to be determined by trial and error, a time consuming process
 for three-dimensional wave functions that are being simulated on
 large grids.
 
+{\bf Make this less abrupt.}
 This paper analyses the semi-implicit formula, in the case that it
 is used to integrate linear Hamiltonian dynamics as in
 Equation~\cref{eq:iii}.  The main result is that the stability
 depends on a Nyquist-like condition, and the iterations converge
-if and only if the eigenvalues of the hamiltonian are bounded by the reciprocal time step~$2/h$.
+if and only if the eigenvalues of the Hamiltonian are bounded by the reciprocal time step~$2/h$.
 
 \section{Stability analysis}
 
-% basis coefficients
-When the semi-implicit rule is applied to \cref{eq:vi}, or a
-stochastic or nonlinear variant of it, the laplacian operator is usually
+When the semi-implicit formula is applied to Equation~\cref{eq:vi}, or a
+stochastic or nonlinear variant of it, the Laplacian operator is usually
 evaluated by a spectral method \cite{2000-Trefethen-Spectral}.  This is equivalent to expanding
 the wave function~$\psi(x)$ over a basis of sinc wave packets
 \begin{equation}
@@ -193,6 +193,7 @@ where~$H$ is a Hermitian matrix with elements
 \begin{equation}
 	H_{mn} = \int \phi_m(x) (-\nabla^2 + V(x)) \phi_n^\ast(x)\,dx.
 \end{equation}
+{\bf We're thinking about spectral collocation methods, with a delta function in place of~$\phi_m(x)$.  In the band-limited case, the collocation value is the same as the sinc component.  Explain this more fully.}
 
 If the formula of Equation~\cref{eq:i} could be applied directly
 to Equation~\cref{eq:iii}, the computed solution would be very
@@ -200,40 +201,45 @@ stable.  The coefficient vector~$s_n$ can be expanded over the
 eigenvectors~$v_k$ of~$H$, as $s_n=\sum_k c^kv_k$.  \Cref{fig:iii}
 shows the trajectory over a time step from~$s_n$ to~$s_{n+1}$,
 projected onto the complex plane spanned by the eigenvector~$v_k$.
-The exact solution that satisfies Equation~\cref{eq:iii}, with
-initial condition~$s_n$, is~$s(h)=\sum_k c^ke^{-i\omega_kh}v_k$,
-and its projection lies on the circle around the origin of
-radius~$|c_k|$.  Here~$\omega_k$ is the eigenvalue of~$H$ corresponding to the eigenvector~$v_k$.
+The exact solution to Equation~\cref{eq:iii}, with
+initial condition~$s_n$ at time~$t_n$, is~$s(t_n+t)=\sum_k c^ke^{-i\omega_k(t_n+t)}v_k$,
+where~$\omega_k$ is the eigenvalue of~$H$ corresponding to the eigenvector~$v_k$.   Its projection lies on the circle of
+radius~$|c_k|$ centred on the origin.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics{semii.1}
-  \caption{A step of the semi-implicit formula, projected onto the
-  complex plane spanned by the eigenvector~$v_k$ of~$H$.  The
-  computed solution~$s_{n+1}$ lies on the same circle as the
-  exact solution~$s(h)=\exp(-ihH)s_n$, but it rotates with angular frequency lower
-  than~$\omega_k$.  See text for details.}
+  \caption{The numerical solution of Schr\"odinger's equation over
+  a single time step~$h$, given by the ideal semi-implicit formula
+  of Equation~\cref{eq:i}.  The trajectory of the discretised wave
+  function~$s$ has been projected onto the complex plane spanned
+  by the eigenvector~$v_k$ of the Hamiltonian operator.  The computed
+  solution~$s_{n+1}$ follows the same circle as the exact
+  solution~$s(t)=\exp(-iH(t-t_n))s_n$, but it rotates with a lower angular
+  frequency than the eigenvalue~$\omega_k$.}
   \label{fig:iii}
 \end{figure}
 
-Suppose that the point~$s_{n+1}$ also lies on this circle.
-Then the projection of~$f_{n+\frac12}=-\frac{i}2H(s_n+s_{n+1})$ is parallel to the
-chord from~$s_n$ to~$s_{n+1}$.  The midpoint of the chord can be
-brought towards and away from the origin by moving~$s_{n+1}$ around
-the circle, so there is some position for
-which~$|s_{n+1}-s_n|=h|f_{n+\frac12}|$, so that~$s_{n+1}$
-satisfies Equation~\cref{eq:i}.  The only error introduced by discretisation
-is that~$c_k$ rotates with an angular frequency less
-than~$\omega_k$, bounded by~$\pi/h$ as~$\omega_k$ becomes
-large.
+Suppose that the point~$s_{n+1}$ also lies on this circle, forming
+a chord with~$s_n$.  In the projection shown, the point~$s_{n+\frac12}$
+is the midpoint of the chord.  The
+vector~$f_{n+\frac12}=-\frac{i}2H(s_n+s_{n+1})$ points along the
+chord.  Its magnitude is determined by how closely the chord passes
+the origin, a distance that can be reduced at the same time
+that~$|s_{n+1}-s_n|$ is increased by moving~$s_{n+1}$ further around
+the circle.  There is always some position for
+which~$|s_{n+1}-s_n|=h|f_{n+\frac12}|$, satisfying Equation~\cref{eq:i}.
+The only error introduced by discretisation is that~$c_k$ rotates
+with an angular frequency less than~$\omega_k$, bounded by~$\pi/h$
+as~$\omega_k$ becomes large.
 
-In practice, the iterations of~Equation~\cref{eq:vi} must be used
-instead of~Equation~\cref{eq:i}, and this is less stable.  For
-Hamiltonian dynamics with the form of Equation~\cref{eq:iii}, the
+In practice, the iterations of~Equation~\cref{eq:v} must be used
+instead of~Equation~\cref{eq:i}, and this is less stable.  With the
+assumption of Hamiltonian dynamics, the
 iteration rule becomes
 \begin{equation}
 s_{n+1}^{(j+1)}=s_n+hf_{n+\frac12}^{(j)}\qquad f_{n+\frac12}^{(j+1)}
-	=-{i\over2}Hs_n-{i\over2}Hs_{n+1}^{(j)}
+	=-{i\over2}Hs_n-{i\over2}Hs_{n+1}^{(j)}\label{eq:x}
 \end{equation}
 or
 \begin{equation}
@@ -244,8 +250,8 @@ with solution
 s_{n+1}^{(j)}=U^{(j)}s_n
 	=\left(1+2\sum_{i=1}^j\left({-ihH\over 2}\right)^j\right)s_n.
 \end{equation}
-The time step matrix~$U^{(j)}$ for~$j$ iterations has the the same
-eigenvectors~$v_k$ as the hamiltonian matrix~$H$.  Each of its
+The time step matrix~$U^{(j)}$ has the the same
+eigenvectors~$v_k$ as the Hamiltonian matrix~$H$.  Each of its
 eigenvalues~$u_k^{(j)}$ is the sum of a geometric series
 in~$-ih\omega_k/2$, which agrees to second order in~$h\omega_k$ with
 the eigenvalue~$e^{-ih\omega_k}$ of the exact time step
@@ -255,37 +261,42 @@ plotted in \cref{fig:ii}, for the first four iterations.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.7\textwidth]{wev.eps}
-  \caption{Relation between eigenvectors~$\omega_k$ of~$H$ and~$u_k^{(j)}$ of~$U^{(j)}$.  The lightest line is for~$j=1$, and the heavier ones are for~$j=2$, 3, 4.  The exact time evolution operator~$U$ has unimodular eigenvalues.}
+  \caption{The eigenvalue~$\omega_k$ of the Hamiltonian operator is compared to the size of the eigenvalue~$u_k^{(j)}$ of the time step operator~$U^{(j)}$ for $j$~iterations of the semi-implicit formula of Equation~\cref{eq:x}.  The exact time step operator has unimodular eigenvalues.  The lightest line shows~$j=1$ and the heavier ones show~$j=2$, 3, and 4.  The symbol~$h$ represents the time step, not Planck's constant.}
   \label{fig:ii}
 \end{figure}
 
 The geometric series for~$U^{(j)}$ will converge if and only if the
-angular frequencies~$\omega_k$ are bounded by the reciprocal time
-step~$\frac2h$, a kind of Nyquist condition.  If the spectral
-hamiltonian matrix has an eigenvalue~$\omega_k\gg \frac2h$, then~$U^{(j)}$
-will enlarge the component of~$v_k$ in~$s_n$ by a factor close
-to~$2(h\omega_k/2)^j$ over the time step~$h$.  This component is
-thus a parasitic solution growing at the
-rate~$\frac{\ln2}h+\frac{j}{h}\ln\left(\frac{h\omega_k}2\right)$.
+eigenvalues~$\omega_k$ are bounded by the reciprocal time
+step~$\frac2h$, a kind of Nyquist condition.  If the spectral {\bf or discrete}
+Hamiltonian matrix has a large eigenvalue~$\omega_k\gg \frac2h$, then~$U^{(j)}$
+will grow the component of~$v_k$ in~$s_n$ by a factor close
+to~$2(h\omega_k/2)^j$ over the time step~$h$.  This component becomes a parasitic solution growing at the
+rate
+\begin{equation}
+\lambda_k=\frac{\ln2}h+\frac{j}{h}\ln\left(\frac{h\omega_k}2\right),\label{eq:xi}
+\end{equation}
+so the semi-implicit formula is unstable unless the~$\omega_k$ are bounded by~$\frac2{h}$.
+
 
 The semi-implicit method is rarely used to solve the linear
 Equation~\cref{eq:iii}, and more often used to solve a nonlinear
 Gross-Pitaevskii~equation of the form
 \begin{equation}
 	{\partial\psi\over\partial t}=-i(\nabla^2+V+g|\psi|^2)\psi.
+	label{eq:xii}
 \end{equation}
 However, following the usual approach to the stability of integation formulae \cite{1996-Trefethen-finite}, the mapping from~$\psi$ to $\partial\psi\over\partial t$ can be linearised at each time step, as
 \begin{equation}
 	\left.{\partial\psi\over\partial t}\right|_{\psi=\psi(t)+\delta\psi}
 		\approx -i(\nabla^2+V+g|\psi(t)|^2)\psi(t) - i\hat H'(\psi(t))\delta\psi,
 \end{equation}
-where~$\hat H'(\psi(t))$ is an effective hamiltonian operator for
-the field~$\delta\psi$.  This linearisation has been studied
-extensively, and the dynamics generated by the hamiltonian~$\hat
-H'$ are Bogoliubov sound waves \cite{aop-70-67}.  When this equation
-is discretised with the semi-implicit formula, the stability condition
-is that the Bogoliubov sound wave modes on a spatial grid of
-spacing~$l$ have frequencies bounded by~$2/h$.  For a sufficiently
+where~$\hat H'(\psi(t))$ is an effective Hamiltonian operator for
+the field {\bf wave function?}~$\delta\psi$.  This linearisation has been studied
+extensively: the dynamics generated by the Hamiltonian~$\hat
+H'$ are Bogoliubov sound waves \cite{aop-70-67}.  The stability condition when this equation
+is discretised with the semi-implicit formula
+is that the Bogoliubov sound wave modes on a grid of
+step~$l$ have frequencies bounded by~$2/h$.  For a sufficiently
 fine grid, the high-frequency Bogoliubov modes have the same
 frequencies as the eigenvectors of~$H$ \cite{2002-Pethick-Bose}.
 Most simulations use grids fine enough for this to be the case, and
@@ -320,7 +331,7 @@ which demonstrate the growth of the parasitic solutions.
 \begin{figure}[htbp]
   \centering
   \label{fig:a}\includegraphics[width=\textwidth]{pev.eps}
-  \caption{Growth of parasitic eigenvectors.  Dotted line shows the stability limit $\omega=2/h$, dashed line shows the predicted growth rate~$\frac{i}{h}\ln(\frac{h\omega}2)$.}
+  \caption{The growth of parasitic solutions when the dynamics of a quantum Kerr oscillator are computed with 4 iterations of the semi-implicit formula of Equation~\cref{eq:x}.  The coefficients~$s_n$ of the Hamiltonian eigenvectors should have constant sizes, shown by the parallel curves at~$t=0$ and~0.09.  The computed values are shown by the rulings between those lines.  Their sizes are constant for small~$n$, to the right of the dotted line at the stability limit~$\omega_n=2/h$.  Above the limit, the coefficients grow exponentially.  The growth rates predicted by Equation~\cref{eq:xi} are shown by the dashed line.}
   \label{fig:i}
 \end{figure}
 
@@ -364,7 +375,7 @@ to rigorously determine the stability of the discretised dynamics.
 Running those dynamics, and looking out for parasitic solutions,
 is a fast and simple alternative.
 
-\section{Conclusion}
+\section{Discussion}
 
 The semi-implicit formula discussed here is only one of the formulae
 that can be used to integrate ordinary differential equations, and
@@ -436,6 +447,16 @@ inadvertently representing high energy states, or to modify the
 Hamiltonian dynamics to prevent them from causing stiffness.  Details
 for one such representation, using Gaussian wave packets, will be
 given in a future paper.
+
+\section{Conclusion}
+
+For a wave function that follows Schr\"odinger's equation, the stability of the iterated semi-implicit formula is determined by the largest eigenvalue~$\omega$ of the Hamiltonian.  The formula is stable if~$\omega<\frac2{h}$, where~$h$ is the time step.  Otherwise, the eigenvector corresponding to~$\omega$ is a parasitic solution, whose rate of growth is stated in Equation~\cref{eq:xi} for the case~$\omega\gg\frac2{h}$, and can be read from from \cref{fig:ii} in general.
+
+\Cref{fig:ii} suggests the performance of the formula when~$\omega\approx\frac2{h}$.  The discrete time step operator~$U^{(j)}$ differs significantly from the exact operator~$U$ for~$\omega>\frac1{h}$.  If the high-frequency dynamics are physically significant, a time step should be chosen well inside the limit of stability.
+
+When the dynamics include a nonlinear term, as in Equation~\cref{eq:xii}, stability is determined by the largest eigenvalue of the linearised Hamiltonian about the solution.  In the common case of a Gross-Pitaevskii~equation, with grid spacing small compared to the healing length, the nonlinear term will have no effect on stability.
+
+The stability limit is a kind of Nyquist condition, which makes it especially easy to reason about stability.  Physically, it is utterly reasonable for a simulation to require a time step on the characteristic time scale of the dynamics being simulated.
 
 \section*{Acknowledgments}
 I would like to acknowledge the support of Swinburne University of Technology.  Thanks to Run Yan Teh for useful suggestions.
